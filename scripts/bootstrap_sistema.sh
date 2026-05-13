@@ -276,6 +276,66 @@ except:
     [ -f "${TMP_WF:-}" ] && rm -f "$TMP_WF"
 done
 
+# ── PASO 4.5: Auto-cablear IDs de sub-workflows en WF01 ──────────────────────
+head "PASO 4.5: Auto-cableando sub-workflows en Master Scheduler"
+
+WF01_ID="${WORKFLOW_IDS[01_MASTER_SCHEDULER]:-}"
+WF02_ID="${WORKFLOW_IDS[02_AI_CONTENT_GENERATOR]:-}"
+WF04_ID="${WORKFLOW_IDS[04_BLOGGER_PUBLISHER]:-}"
+
+# Buscar IDs si no están en el mapa (segunda pasada por nombre)
+if [ -z "$WF01_ID" ] || [ -z "$WF02_ID" ] || [ -z "$WF04_ID" ]; then
+    ALL_WF=$(curl -s -H "X-N8N-API-KEY: ${N8N_API_KEY}" "${N8N_URL}/api/v1/workflows" 2>/dev/null || echo '{"data":[]}')
+    [ -z "$WF01_ID" ] && WF01_ID=$(echo "$ALL_WF" | python3 -c "import sys,json; d=json.load(sys.stdin); [print(w['id']) for w in d.get('data',[]) if '01_MASTER' in w.get('name','')]; " 2>/dev/null | head -1)
+    [ -z "$WF02_ID" ] && WF02_ID=$(echo "$ALL_WF" | python3 -c "import sys,json; d=json.load(sys.stdin); [print(w['id']) for w in d.get('data',[]) if '02_AI' in w.get('name','')]; " 2>/dev/null | head -1)
+    [ -z "$WF04_ID" ] && WF04_ID=$(echo "$ALL_WF" | python3 -c "import sys,json; d=json.load(sys.stdin); [print(w['id']) for w in d.get('data',[]) if '04_BLOGGER' in w.get('name','')]; " 2>/dev/null | head -1)
+fi
+
+if [ -n "$WF01_ID" ] && [ -n "$WF02_ID" ] && [ -n "$WF04_ID" ]; then
+    info "Cableando WF01 con WF02=${WF02_ID} y WF04=${WF04_ID}..."
+    # Obtener el JSON completo de WF01
+    WF01_JSON=$(curl -s -H "X-N8N-API-KEY: ${N8N_API_KEY}" "${N8N_URL}/api/v1/workflows/${WF01_ID}" 2>/dev/null || echo '{}')
+    # Reemplazar los IDs placeholder por los IDs reales
+    WF01_PATCHED=$(echo "$WF01_JSON" | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+content = json.dumps(d)
+# Reemplazar ID hardcodeado de WF02
+content = content.replace('4T1IUWfkNEEgwCNQ', '${WF02_ID}')
+content = content.replace('WORKFLOW_02_ID', '${WF02_ID}')
+# Reemplazar ID hardcodeado de WF04
+content = content.replace('VK7N11rme5vFICLb', '${WF04_ID}')
+content = content.replace('WORKFLOW_04_ID', '${WF04_ID}')
+# Actualizar los nodos de executeWorkflow con los IDs correctos
+d2 = json.loads(content)
+for node in d2.get('nodes', []):
+    if node.get('type') == 'n8n-nodes-base.executeWorkflow':
+        wf_id_obj = node.get('parameters', {}).get('workflowId', {})
+        if isinstance(wf_id_obj, dict):
+            val = wf_id_obj.get('value', '')
+            if '02_AI' in node.get('name', '') or 'AI Content' in node.get('name', ''):
+                node['parameters']['workflowId']['value'] = '${WF02_ID}'
+            elif '04' in node.get('name', '') or 'Publisher' in node.get('name', '') or 'Blogger' in node.get('name', ''):
+                node['parameters']['workflowId']['value'] = '${WF04_ID}'
+print(json.dumps(d2))
+" 2>/dev/null || echo "")
+
+    if [ -n "$WF01_PATCHED" ]; then
+        PATCH_RESULT=$(curl -s -X PUT \
+            -H "X-N8N-API-KEY: ${N8N_API_KEY}" \
+            -H "Content-Type: application/json" \
+            "${N8N_URL}/api/v1/workflows/${WF01_ID}" \
+            -d "$WF01_PATCHED" 2>/dev/null || echo '{}')
+        ok "WF01 auto-cableado: WF02=${WF02_ID}, WF04=${WF04_ID}"
+    else
+        err "No se pudo parchear WF01 (actualizar manualmente)"
+    fi
+else
+    err "No se encontraron todos los IDs para auto-cablear WF01"
+    info "IDs encontrados: WF01=${WF01_ID:-MISSING} WF02=${WF02_ID:-MISSING} WF04=${WF04_ID:-MISSING}"
+    info "Cablear manualmente en n8n: abre WF01 → nodo Execute WF02 → poner ID de 02_AI_CONTENT_GENERATOR"
+fi
+
 # ── PASO 5: Activar workflows en orden correcto ───────────────────────────────
 head "PASO 5: Activando workflows"
 
@@ -369,11 +429,21 @@ echo "╠═══════════════════════�
 echo "║  TELEGRAM_CHAT_ID : ${CHAT_ID:0:20}$(printf '%*s' $((20-${#CHAT_ID})) '')        ║"
 echo "║  Workflows activos: ${ACTIVE_WF}                                         ║"
 echo "╠══════════════════════════════════════════════════════════╣"
-echo "║  LO QUE FALTA HACER (5 minutos):                        ║"
-echo "║  1. Abrir n8n → buscar 01_MASTER_SCHEDULER              ║"
-echo "║  2. En el nodo Execute Sub-Workflow (02), poner ID de 02 ║"
-echo "║  3. En el nodo Execute Sub-Workflow (04), poner ID de 04 ║"
-echo "║  4. Completar BLOGS_SITES_CONFIG con tus BLOGGER_IDs     ║"
+echo "║  LO QUE FALTA HACER (CRÍTICO):                          ║"
+echo "║                                                          ║"
+echo "║  1. CARGAR BACKLOG (363 artículos ya listos):           ║"
+echo "║     Abre: sheets.google.com                             ║"
+echo "║     Copia de: BACKLOG_MASIVO_CONTENT_PIPELINE           ║"
+echo "║     Pega en: CONTENT_PIPELINE (Sheet principal)         ║"
+echo "║     ID backup: 18Frct3tCREHa2IPDwoRxYqYx8kcX0PKubEgSU  ║"
+echo "║                                                          ║"
+echo "║  2. VERIFICAR CREDENCIALES en n8n:                      ║"
+echo "║     - Google Sheets account (OAuth2)                    ║"
+echo "║     - Google Blogger OAuth2                             ║"
+echo "║     - DeepSeek API (Header Auth con Bearer token)       ║"
+echo "║                                                          ║"
+echo "║  3. CSS BLOGGER: pegar blogger_css_fix.html en          ║"
+echo "║     Diseño → Gadget HTML/JS de cada blog                ║"
 echo "╚══════════════════════════════════════════════════════════╝"
 echo ""
 echo "Ver n8n: http://161.97.184.148:5678"
