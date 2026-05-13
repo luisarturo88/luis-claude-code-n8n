@@ -1,0 +1,161 @@
+{
+  "name": "05_LOCK_WATCHDOG",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "id": "cron-watchdog",
+      "name": "Every 30 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "CONTENT_PIPELINE",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "read-sheet",
+      "name": "Read CONTENT_PIPELINE",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [460, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const LOCK_TIMEOUT_MINUTES = 35;\nconst now = new Date();\nconst zombies = [];\n\nfor (const item of $input.all()) {\n  const row = item.json;\n  const isLocked = String(row.LOCK).toUpperCase() === 'TRUE';\n  if (!isLocked) continue;\n  \n  const stuckStatuses = ['QUEUED', 'CONTENT_READY', 'PUBLISHING'];\n  if (!stuckStatuses.includes(row.STATUS)) continue;\n  \n  if (!row.LOCK_TIMESTAMP) {\n    // Lock with no timestamp — definitely zombie\n    zombies.push({ json: row, _zombie: true });\n    continue;\n  }\n  \n  const lockTime = new Date(row.LOCK_TIMESTAMP);\n  if (isNaN(lockTime.getTime())) {\n    zombies.push({ json: row, _zombie: true });\n    continue;\n  }\n  \n  const ageMinutes = (now - lockTime) / 60000;\n  if (ageMinutes > LOCK_TIMEOUT_MINUTES) {\n    zombies.push({ json: { ...row, _age_minutes: Math.round(ageMinutes) } });\n  }\n}\n\nif (zombies.length === 0) {\n  return [{ json: { _no_zombies: true, checked_at: now.toISOString() } }];\n}\n\nreturn zombies;"
+      },
+      "id": "detect-zombies",
+      "name": "Detect Zombie Locks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "skip-no-zombies",
+              "leftValue": "={{ $json._no_zombies }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "notTrue"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "has-zombies",
+      "name": "Has Zombies?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "CONTENT_PIPELINE",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ROW_NUMBER": "={{ $json.ROW_NUMBER }}",
+            "STATUS": "PENDING",
+            "LOCK": "FALSE",
+            "LOCK_TIMESTAMP": "",
+            "ERROR_MESSAGE": "=WATCHDOG: Lock released after {{ $json._age_minutes || 'unknown' }} min. Prev status: {{ $json.STATUS }}"
+          },
+          "matchingColumns": ["ROW_NUMBER"],
+          "schema": [
+            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LOCK", "displayName": "LOCK", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LOCK_TIMESTAMP", "displayName": "LOCK_TIMESTAMP", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "ERROR_MESSAGE", "displayName": "ERROR_MESSAGE", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+          ]
+        },
+        "options": {}
+      },
+      "id": "release-locks",
+      "name": "Release Zombie Locks",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1120, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every 30 Minutes": {
+      "main": [
+        [{"node": "Read CONTENT_PIPELINE", "type": "main", "index": 0}]
+      ]
+    },
+    "Read CONTENT_PIPELINE": {
+      "main": [
+        [{"node": "Detect Zombie Locks", "type": "main", "index": 0}]
+      ]
+    },
+    "Detect Zombie Locks": {
+      "main": [
+        [{"node": "Has Zombies?", "type": "main", "index": 0}]
+      ]
+    },
+    "Has Zombies?": {
+      "main": [
+        [{"node": "Release Zombie Locks", "type": "main", "index": 0}]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 120
+  },
+  "meta": {
+    "instanceId": "production"
+  }
+}

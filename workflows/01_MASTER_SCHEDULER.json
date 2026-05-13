@@ -1,0 +1,390 @@
+{
+  "name": "01_MASTER_SCHEDULER",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 20
+            }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Every 20 Minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "CONTENT_PIPELINE",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "read-pipeline",
+      "name": "Read CONTENT_PIPELINE",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [460, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "status-pending",
+              "leftValue": "={{ $json.STATUS }}",
+              "rightValue": "PENDING",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            },
+            {
+              "id": "lock-false",
+              "leftValue": "={{ $json.LOCK }}",
+              "rightValue": "TRUE",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "filter-pending",
+      "name": "Filter PENDING + Unlocked",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "ROW_NUMBER",
+              "order": "ascending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "sort-rows",
+      "name": "Sort by Row",
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "operation": "limit",
+        "maxItems": 1
+      },
+      "id": "take-first",
+      "name": "Take First Row Only",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "CONTENT_PIPELINE",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ROW_NUMBER": "={{ $json.ROW_NUMBER }}",
+            "STATUS": "QUEUED",
+            "LOCK": "TRUE",
+            "LOCK_TIMESTAMP": "={{ new Date().toISOString() }}"
+          },
+          "matchingColumns": ["ROW_NUMBER"],
+          "schema": [
+            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LOCK", "displayName": "LOCK", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LOCK_TIMESTAMP", "displayName": "LOCK_TIMESTAMP", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+          ]
+        },
+        "options": {}
+      },
+      "id": "acquire-lock",
+      "name": "Acquire Lock (QUEUED)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1340, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "={{ $('Take First Row Only').item.json['WORKFLOW_02_ID'] || '4T1IUWfkNEEgwCNQ' }}",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "fields": {
+          "values": [
+            {"name": "ROW_NUMBER", "stringValue": "={{ $('Take First Row Only').item.json.ROW_NUMBER }}"},
+            {"name": "TITLE", "stringValue": "={{ $('Take First Row Only').item.json.TITLE }}"},
+            {"name": "NICHE", "stringValue": "={{ $('Take First Row Only').item.json.NICHE }}"},
+            {"name": "KEYWORDS", "stringValue": "={{ $('Take First Row Only').item.json.KEYWORDS }}"},
+            {"name": "LANGUAGE", "stringValue": "={{ $('Take First Row Only').item.json.LANGUAGE || 'es' }}"},
+            {"name": "BLOG_ID", "stringValue": "={{ $('Take First Row Only').item.json.BLOG_ID }}"}
+          ]
+        }
+      },
+      "id": "call-ai-generator",
+      "name": "02 AI Content Generator",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "has-html",
+              "leftValue": "={{ $json.HTML_CONTENT }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-content",
+      "name": "Content Generated?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1780, 300]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "VK7N11rme5vFICLb",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        },
+        "fields": {
+          "values": [
+            {"name": "ROW_NUMBER", "stringValue": "={{ $('Take First Row Only').item.json.ROW_NUMBER }}"},
+            {"name": "TITLE", "stringValue": "={{ $('Take First Row Only').item.json.TITLE }}"},
+            {"name": "BLOG_ID", "stringValue": "={{ $('Take First Row Only').item.json.BLOG_ID }}"},
+            {"name": "HTML_CONTENT", "stringValue": "={{ $json.HTML_CONTENT }}"},
+            {"name": "NICHE", "stringValue": "={{ $('Take First Row Only').item.json.NICHE }}"}
+          ]
+        }
+      },
+      "id": "call-publisher",
+      "name": "04 Blogger Publisher",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [2000, 220]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "CONTENT_PIPELINE",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ROW_NUMBER": "={{ $('Take First Row Only').item.json.ROW_NUMBER }}",
+            "STATUS": "FAILED",
+            "LOCK": "FALSE",
+            "ERROR_MESSAGE": "AI generation returned empty content",
+            "LOCK_TIMESTAMP": ""
+          },
+          "matchingColumns": ["ROW_NUMBER"],
+          "schema": [
+            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LOCK", "displayName": "LOCK", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "ERROR_MESSAGE", "displayName": "ERROR_MESSAGE", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LOCK_TIMESTAMP", "displayName": "LOCK_TIMESTAMP", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+          ]
+        },
+        "options": {}
+      },
+      "id": "fail-no-content",
+      "name": "Mark FAILED (no content)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [2000, 400],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $json.error || 'Unknown error in pipeline' }}"
+      },
+      "id": "error-handler",
+      "name": "Error Handler",
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [1560, 500]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "CONTENT_PIPELINE",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ROW_NUMBER": "={{ $('Take First Row Only').item.json.ROW_NUMBER }}",
+            "STATUS": "FAILED",
+            "LOCK": "FALSE",
+            "ERROR_MESSAGE": "={{ $json.error?.message || JSON.stringify($json.error) || 'Pipeline error' }}",
+            "LOCK_TIMESTAMP": ""
+          },
+          "matchingColumns": ["ROW_NUMBER"],
+          "schema": [
+            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LOCK", "displayName": "LOCK", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "ERROR_MESSAGE", "displayName": "ERROR_MESSAGE", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LOCK_TIMESTAMP", "displayName": "LOCK_TIMESTAMP", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+          ]
+        },
+        "options": {}
+      },
+      "id": "fail-on-error",
+      "name": "Mark FAILED (on error)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1560, 620],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every 20 Minutes": {
+      "main": [
+        [{"node": "Read CONTENT_PIPELINE", "type": "main", "index": 0}]
+      ]
+    },
+    "Read CONTENT_PIPELINE": {
+      "main": [
+        [{"node": "Filter PENDING + Unlocked", "type": "main", "index": 0}]
+      ]
+    },
+    "Filter PENDING + Unlocked": {
+      "main": [
+        [{"node": "Sort by Row", "type": "main", "index": 0}]
+      ]
+    },
+    "Sort by Row": {
+      "main": [
+        [{"node": "Take First Row Only", "type": "main", "index": 0}]
+      ]
+    },
+    "Take First Row Only": {
+      "main": [
+        [{"node": "Acquire Lock (QUEUED)", "type": "main", "index": 0}]
+      ]
+    },
+    "Acquire Lock (QUEUED)": {
+      "main": [
+        [{"node": "02 AI Content Generator", "type": "main", "index": 0}]
+      ]
+    },
+    "02 AI Content Generator": {
+      "main": [
+        [{"node": "Content Generated?", "type": "main", "index": 0}]
+      ]
+    },
+    "Content Generated?": {
+      "main": [
+        [{"node": "04 Blogger Publisher", "type": "main", "index": 0}],
+        [{"node": "Mark FAILED (no content)", "type": "main", "index": 0}]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "",
+    "saveExecutionProgress": true,
+    "executionTimeout": 3600
+  },
+  "meta": {
+    "instanceId": "production"
+  }
+}

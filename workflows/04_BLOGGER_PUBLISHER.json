@@ -1,0 +1,346 @@
+{
+  "name": "04_BLOGGER_PUBLISHER",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "workflowInputData"
+      },
+      "id": "trigger",
+      "name": "Workflow Input",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "CONTENT_PIPELINE",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ROW_NUMBER": "={{ $json.ROW_NUMBER }}",
+            "STATUS": "PUBLISHING"
+          },
+          "matchingColumns": ["ROW_NUMBER"],
+          "schema": [
+            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+          ]
+        },
+        "options": {}
+      },
+      "id": "mark-publishing",
+      "name": "Mark PUBLISHING",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [460, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pass through all data from trigger\nreturn { json: $('Workflow Input').item.json };"
+      },
+      "id": "passthrough",
+      "name": "Pass Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.BLOG_ID }}/posts/",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "kind": "blogger#post",
+          "blog": {
+            "id": "={{ $json.BLOG_ID }}"
+          },
+          "title": "={{ $json.TITLE }}",
+          "content": "={{ $json.HTML_CONTENT }}",
+          "labels": ["={{ $json.NICHE }}"]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "blogger-post",
+      "name": "Publish to Blogger",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 300],
+      "credentials": {
+        "googleOAuth2Api": {
+          "name": "Google Blogger OAuth2"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "check-429",
+              "leftValue": "={{ $json.error?.httpCode || $json.statusCode }}",
+              "rightValue": "429",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-rate-limit",
+      "name": "Is 429 Rate Limit?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1120, 400]
+    },
+    {
+      "parameters": {
+        "amount": 90,
+        "unit": "seconds"
+      },
+      "id": "wait-90s",
+      "name": "Wait 90 seconds",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1340, 320],
+      "webhookId": "blogger-retry-wait"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $('Pass Data').item.json.BLOG_ID }}/posts/",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "kind": "blogger#post",
+          "blog": {
+            "id": "={{ $('Pass Data').item.json.BLOG_ID }}"
+          },
+          "title": "={{ $('Pass Data').item.json.TITLE }}",
+          "content": "={{ $('Pass Data').item.json.HTML_CONTENT }}",
+          "labels": ["={{ $('Pass Data').item.json.NICHE }}"]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "blogger-retry",
+      "name": "Retry Blogger Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 320],
+      "credentials": {
+        "googleOAuth2Api": {
+          "name": "Google Blogger OAuth2"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalize success from either first attempt or retry\nconst fromRetry = $('Retry Blogger Post').item?.json;\nconst fromFirst = $('Publish to Blogger').item?.json;\nconst data = (fromRetry?.url || fromRetry?.id) ? fromRetry : fromFirst;\n\nif (!data?.url && !data?.id) {\n  throw new Error('Blogger publish failed: ' + JSON.stringify(data));\n}\n\nreturn {\n  json: {\n    ROW_NUMBER: $('Workflow Input').item.json.ROW_NUMBER,\n    PUBLISHED_URL: data.url || `https://blogger.com/post/${data.id}`,\n    POST_ID: data.id,\n    PUBLISHED_AT: new Date().toISOString()\n  }\n};"
+      },
+      "id": "normalize-result",
+      "name": "Normalize Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1780, 300]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "CONTENT_PIPELINE",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ROW_NUMBER": "={{ $json.ROW_NUMBER }}",
+            "STATUS": "PUBLISHED",
+            "LOCK": "FALSE",
+            "PUBLISHED_URL": "={{ $json.PUBLISHED_URL }}",
+            "POST_ID": "={{ $json.POST_ID }}",
+            "PUBLISHED_AT": "={{ $json.PUBLISHED_AT }}",
+            "LOCK_TIMESTAMP": "",
+            "ERROR_MESSAGE": ""
+          },
+          "matchingColumns": ["ROW_NUMBER"],
+          "schema": [
+            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LOCK", "displayName": "LOCK", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "PUBLISHED_URL", "displayName": "PUBLISHED_URL", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "POST_ID", "displayName": "POST_ID", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "PUBLISHED_AT", "displayName": "PUBLISHED_AT", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LOCK_TIMESTAMP", "displayName": "LOCK_TIMESTAMP", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "ERROR_MESSAGE", "displayName": "ERROR_MESSAGE", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+          ]
+        },
+        "options": {}
+      },
+      "id": "mark-published",
+      "name": "Mark PUBLISHED",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [2000, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "CONTENT_PIPELINE",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ROW_NUMBER": "={{ $('Workflow Input').item.json.ROW_NUMBER }}",
+            "STATUS": "FAILED",
+            "LOCK": "FALSE",
+            "ERROR_MESSAGE": "={{ $json.error?.message || $json.message || JSON.stringify($json) }}",
+            "LOCK_TIMESTAMP": ""
+          },
+          "matchingColumns": ["ROW_NUMBER"],
+          "schema": [
+            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LOCK", "displayName": "LOCK", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "ERROR_MESSAGE", "displayName": "ERROR_MESSAGE", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LOCK_TIMESTAMP", "displayName": "LOCK_TIMESTAMP", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+          ]
+        },
+        "options": {}
+      },
+      "id": "mark-failed-blogger",
+      "name": "Mark FAILED (Blogger)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1340, 520],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Workflow Input": {
+      "main": [
+        [{"node": "Mark PUBLISHING", "type": "main", "index": 0}]
+      ]
+    },
+    "Mark PUBLISHING": {
+      "main": [
+        [{"node": "Pass Data", "type": "main", "index": 0}]
+      ]
+    },
+    "Pass Data": {
+      "main": [
+        [{"node": "Publish to Blogger", "type": "main", "index": 0}]
+      ]
+    },
+    "Publish to Blogger": {
+      "main": [
+        [{"node": "Normalize Result", "type": "main", "index": 0}],
+        [{"node": "Is 429 Rate Limit?", "type": "main", "index": 0}]
+      ]
+    },
+    "Is 429 Rate Limit?": {
+      "main": [
+        [{"node": "Wait 90 seconds", "type": "main", "index": 0}],
+        [{"node": "Mark FAILED (Blogger)", "type": "main", "index": 0}]
+      ]
+    },
+    "Wait 90 seconds": {
+      "main": [
+        [{"node": "Retry Blogger Post", "type": "main", "index": 0}]
+      ]
+    },
+    "Retry Blogger Post": {
+      "main": [
+        [{"node": "Normalize Result", "type": "main", "index": 0}],
+        [{"node": "Mark FAILED (Blogger)", "type": "main", "index": 0}]
+      ]
+    },
+    "Normalize Result": {
+      "main": [
+        [{"node": "Mark PUBLISHED", "type": "main", "index": 0}]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 600
+  },
+  "meta": {
+    "instanceId": "production"
+  }
+}

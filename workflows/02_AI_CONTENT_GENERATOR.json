@@ -1,0 +1,178 @@
+{
+  "name": "02_AI_CONTENT_GENERATOR",
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "workflowInputData"
+      },
+      "id": "trigger",
+      "name": "Workflow Input",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.item.json;\n\nconst niche = item.NICHE || 'general';\nconst title = item.TITLE || 'Artículo sin título';\nconst keywords = item.KEYWORDS || '';\nconst language = item.LANGUAGE || 'es';\nconst langInstruction = language === 'en' ? 'Write the article in English.' : 'Escribe el artículo en español.';\n\nconst systemPrompt = `You are an expert SEO content writer specialized in ${niche}. You write complete, well-structured HTML articles optimized for Google AdSense and organic search. Always respond with ONLY the HTML content, no markdown, no explanations, no code blocks.`;\n\nconst userPrompt = `${langInstruction}\n\nWrite a complete, SEO-optimized article about: \"${title}\"\n\nTarget keywords: ${keywords}\n\nRequirements:\n- Length: 1200-1800 words\n- Structure: H1 title, introduction (2 paragraphs), 4-6 H2 sections with 2-3 paragraphs each, conclusion\n- Include the target keywords naturally throughout\n- Use <strong> tags for important terms\n- Add a compelling meta description in a <meta> tag at the top\n- Include internal linking anchor text suggestions as HTML comments <!-- INTERNAL LINK: [suggested topic] -->\n- Niche-specific: ${niche}\n- Tone: expert, educational, conversational\n- Format: pure HTML (no markdown, no \\`\\`\\`html wrapper)\n\nStart directly with the HTML content.`;\n\nreturn {\n  json: {\n    ...item,\n    systemPrompt,\n    userPrompt\n  }\n};"
+      },
+      "id": "build-prompt",
+      "name": "Build Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "model": "deepseek-chat",
+          "messages": [
+            {
+              "role": "system",
+              "content": "={{ $json.systemPrompt }}"
+            },
+            {
+              "role": "user",
+              "content": "={{ $json.userPrompt }}"
+            }
+          ],
+          "max_tokens": 4096,
+          "temperature": 0.7,
+          "stream": false
+        },
+        "options": {
+          "timeout": 120000,
+          "retry": {
+            "enabled": true,
+            "maxTries": 3,
+            "waitBetweenTries": 5000
+          }
+        }
+      },
+      "id": "deepseek-api",
+      "name": "DeepSeek API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 300],
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "DeepSeek API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.item.json;\nconst prevData = $('Build Prompt').item.json;\n\nlet htmlContent = '';\n\ntry {\n  htmlContent = response.choices[0].message.content || '';\n} catch(e) {\n  throw new Error('DeepSeek response missing choices: ' + JSON.stringify(response));\n}\n\nif (!htmlContent || htmlContent.trim().length < 100) {\n  throw new Error('DeepSeek returned empty or too-short content');\n}\n\n// Strip markdown code fences if DeepSeek wrapped in ```html\nhtmlContent = htmlContent\n  .replace(/^```html\\s*/i, '')\n  .replace(/^```\\s*/i, '')\n  .replace(/```\\s*$/i, '')\n  .trim();\n\nconst tokenUsage = response.usage || {};\n\nreturn {\n  json: {\n    ROW_NUMBER: prevData.ROW_NUMBER,\n    TITLE: prevData.TITLE,\n    BLOG_ID: prevData.BLOG_ID,\n    NICHE: prevData.NICHE,\n    LANGUAGE: prevData.LANGUAGE || 'es',\n    HTML_CONTENT: htmlContent,\n    TOKENS_USED: tokenUsage.total_tokens || 0,\n    GENERATED_AT: new Date().toISOString()\n  }\n};"
+      },
+      "id": "extract-html",
+      "name": "Extract HTML Content",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "CONTENT_PIPELINE",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ROW_NUMBER": "={{ $json.ROW_NUMBER }}",
+            "STATUS": "CONTENT_READY",
+            "HTML_CONTENT": "={{ $json.HTML_CONTENT }}",
+            "TOKENS_USED": "={{ $json.TOKENS_USED }}",
+            "GENERATED_AT": "={{ $json.GENERATED_AT }}"
+          },
+          "matchingColumns": ["ROW_NUMBER"],
+          "schema": [
+            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "HTML_CONTENT", "displayName": "HTML_CONTENT", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "TOKENS_USED", "displayName": "TOKENS_USED", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "GENERATED_AT", "displayName": "GENERATED_AT", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+          ]
+        },
+        "options": {}
+      },
+      "id": "update-content-ready",
+      "name": "Update CONTENT_READY",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1120, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Return HTML_CONTENT to caller workflow\nconst data = $('Extract HTML Content').item.json;\nreturn {\n  json: {\n    HTML_CONTENT: data.HTML_CONTENT,\n    ROW_NUMBER: data.ROW_NUMBER,\n    TITLE: data.TITLE,\n    BLOG_ID: data.BLOG_ID,\n    NICHE: data.NICHE,\n    TOKENS_USED: data.TOKENS_USED\n  }\n};"
+      },
+      "id": "return-output",
+      "name": "Return to Caller",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1340, 300]
+    }
+  ],
+  "connections": {
+    "Workflow Input": {
+      "main": [
+        [{"node": "Build Prompt", "type": "main", "index": 0}]
+      ]
+    },
+    "Build Prompt": {
+      "main": [
+        [{"node": "DeepSeek API", "type": "main", "index": 0}]
+      ]
+    },
+    "DeepSeek API": {
+      "main": [
+        [{"node": "Extract HTML Content", "type": "main", "index": 0}]
+      ]
+    },
+    "Extract HTML Content": {
+      "main": [
+        [{"node": "Update CONTENT_READY", "type": "main", "index": 0}]
+      ]
+    },
+    "Update CONTENT_READY": {
+      "main": [
+        [{"node": "Return to Caller", "type": "main", "index": 0}]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 180
+  },
+  "meta": {
+    "instanceId": "production"
+  }
+}
