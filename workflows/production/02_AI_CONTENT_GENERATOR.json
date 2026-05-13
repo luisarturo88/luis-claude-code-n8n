@@ -18,12 +18,12 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "17f_jVGPmN7zqAFx99NJCygCeCZDizb4wpNsSrPgiSHc",
+          "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug",
           "mode": "id"
         },
         "sheetName": {
           "__rl": true,
-          "value": "Sheet1",
+          "value": "BLOGS_SITES_CONFIG",
           "mode": "name"
         },
         "options": {}
@@ -44,7 +44,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const input = $('Workflow Input').item.json;\nconst niche = input.NICHE || 'general';\nlet cfg = $input.all().find(n => n.json.NICHE_ID === niche)?.json || {\n  NICHE_ID: niche, DISPLAY_NAME: niche, LANGUAGE: input.LANGUAGE || 'es',\n  TONE: 'informativo, experto', AUDIENCE: 'lectores interesados en ' + niche,\n  MIN_WORDS: 1200, MAX_WORDS: 1600, PROMPT_EXTRA: '', AFFILIATE_CATEGORY: 'general'\n};\nconst lang = cfg.LANGUAGE || input.LANGUAGE || 'es';\nconst es = lang === 'es';\nconst monetBlock = es\n? `BLOQUES OBLIGATORIOS en estas posiciones exactas:\n1) Despues del 2do parrafo:\n<div class=\"rec-productos\"><h3>Productos recomendados</h3><ul>\n<li><!-- PROD1_NAME --> - <a href=\"<!-- PROD1_URL -->\" rel=\"nofollow sponsored\" target=\"_blank\">Ver en Amazon</a></li>\n<li><!-- PROD2_NAME --> - <a href=\"<!-- PROD2_URL -->\" rel=\"nofollow sponsored\" target=\"_blank\">Ver en Amazon</a></li>\n<li><!-- PROD3_NAME --> - <a href=\"<!-- PROD3_URL -->\" rel=\"nofollow sponsored\" target=\"_blank\">Ver en Amazon</a></li>\n</ul></div>\n2) Mitad del articulo despues de un H2:\n<div class=\"cta-telegram\"><p>💬 Dudas sobre ${cfg.DISPLAY_NAME}? Unete gratis: <a href=\"<!-- TELEGRAM_URL -->\" target=\"_blank\"><!-- TELEGRAM_NAME --></a></p></div>\n3) Final del articulo:\n<div class=\"cta-final\"><p>📥 Descarga gratis: <a href=\"<!-- LEAD_MAGNET_URL -->\" target=\"_blank\"><!-- LEAD_MAGNET_NAME --></a></p></div>\nEn <!-- PRODX_NAME --> pon nombres de productos REALES del nicho. Deja URLs como placeholders exactos.`\n: `MANDATORY BLOCKS at exact positions:\n1) After 2nd paragraph:\n<div class=\"rec-products\"><h3>Recommended products</h3><ul>\n<li><!-- PROD1_NAME --> - <a href=\"<!-- PROD1_URL -->\" rel=\"nofollow sponsored\" target=\"_blank\">Check on Amazon</a></li>\n<li><!-- PROD2_NAME --> - <a href=\"<!-- PROD2_URL -->\" rel=\"nofollow sponsored\" target=\"_blank\">Check on Amazon</a></li>\n<li><!-- PROD3_NAME --> - <a href=\"<!-- PROD3_URL -->\" rel=\"nofollow sponsored\" target=\"_blank\">Check on Amazon</a></li>\n</ul></div>\n2) Mid-article after H2:\n<div class=\"cta-telegram\"><p>💬 Questions? Join free: <a href=\"<!-- TELEGRAM_URL -->\" target=\"_blank\"><!-- TELEGRAM_NAME --></a></p></div>\n3) End of article:\n<div class=\"cta-final\"><p>📥 Free guide: <a href=\"<!-- LEAD_MAGNET_URL -->\" target=\"_blank\"><!-- LEAD_MAGNET_NAME --></a></p></div>\nFill PRODX_NAME with REAL product names. Keep URL placeholders exactly as shown.`;\nconst sys = es\n  ? `Eres experto SEO y copywriter para ${cfg.DISPLAY_NAME}. Tono: ${cfg.TONE}. Escribe SOLO HTML puro, sin markdown.`\n  : `Expert SEO writer for ${cfg.DISPLAY_NAME}. Tone: ${cfg.TONE}. Output ONLY pure HTML, no markdown.`;\nconst usr = es\n? `Escribe en español.\nArticulo: \"${input.TITLE}\"\nKeywords: ${input.KEYWORDS||''}\nExtension: ${cfg.MIN_WORDS}-${cfg.MAX_WORDS} palabras\nEstructura: <h1> titulo, introduccion 2 parrafos, 4-5 <h2> con 2-3 parrafos, <strong> en terminos clave, conclusion CTA.\n${cfg.PROMPT_EXTRA||''}\n${monetBlock}\nEmpieza directamente con el HTML.`\n: `Write in English.\nArticle: \"${input.TITLE}\"\nKeywords: ${input.KEYWORDS||''}\nLength: ${cfg.MIN_WORDS}-${cfg.MAX_WORDS} words\nStructure: <h1> title, intro 2 paragraphs, 4-5 <h2> with 2-3 paragraphs, <strong> key terms, conclusion CTA.\n${cfg.PROMPT_EXTRA||''}\n${monetBlock}\nStart directly with HTML.`;\nreturn { json: { ...input, nicheConfig: cfg, systemPrompt: sys, userPrompt: usr, language: lang } };"
+        "jsCode": "// VALIDACIÓN ANTI-UNDEFINED: abortar si falta tema o blog\nconst input = $('Workflow Input').item.json;\nif (!input.TEMA_ARTICULO || input.TEMA_ARTICULO === 'undefined' || input.TEMA_ARTICULO.trim() === '') {\n  throw new Error('VALIDATION_FAILED: TEMA_ARTICULO vacío o undefined — abortando generación');\n}\nif (!input.ID_BLOG || input.ID_BLOG === 'undefined') {\n  throw new Error('VALIDATION_FAILED: ID_BLOG vacío — falta configurar BLOGS_SITES_CONFIG');\n}\n\n// Buscar config del blog en BLOGS_SITES_CONFIG (columnas: ID_BLOG, SITIO_URL, NICHO, IDIOMA, BLOGGER_ID)\nconst allConfigs = $('Read NICHE_CONFIG').all().map(i => i.json);\nlet cfg = allConfigs.find(c => c.ID_BLOG === input.ID_BLOG) || allConfigs.find(c => c.NICHO === input.NICHO) || null;\n\n// Config por defecto si no se encuentra el blog\nif (!cfg) {\n  cfg = { ID_BLOG: input.ID_BLOG, NICHO: input.NICHO || 'general', IDIOMA: input.IDIOMA || 'es',\n    SITIO_URL: '', BLOGGER_ID: '', TONE: 'informativo, experto',\n    AUDIENCE: 'lectores interesados en el tema', MIN_WORDS: 1200, MAX_WORDS: 1600, PROMPT_EXTRA: '' };\n}\n\nconst lang = cfg.IDIOMA || input.IDIOMA || 'es';\nconst niche = cfg.NICHO || input.NICHO || 'general';\nconst es = lang === 'es';\nconst displayName = cfg.SITIO_URL ? cfg.SITIO_URL.replace(/https?:\\/\\//, '').split('/')[0] : niche;\n\nconst monetBlock = es\n? `BLOQUES DE MONETIZACIÓN OBLIGATORIOS (insertar exactamente en estas posiciones):\\n\"\n\"1) Después del 2do párrafo:\\n\"\n\"<div class=\\\"rec-productos\\\"><h3>Productos recomendados</h3><ul>\\n\"\n\"<li><!-- PROD1_NAME --> - <a href=\\\"<!-- PROD1_URL -->\\\" rel=\\\"nofollow sponsored\\\" target=\\\"_blank\\\">Ver en Amazon</a></li>\\n\"\n\"<li><!-- PROD2_NAME --> - <a href=\\\"<!-- PROD2_URL -->\\\" rel=\\\"nofollow sponsored\\\" target=\\\"_blank\\\">Ver en Amazon</a></li>\\n\"\n\"<li><!-- PROD3_NAME --> - <a href=\\\"<!-- PROD3_URL -->\\\" rel=\\\"nofollow sponsored\\\" target=\\\"_blank\\\">Ver en Amazon</a></li>\\n\"\n\"</ul></div>\\n\"\n\"2) A la mitad del artículo después de un H2:\\n\"\n\"<div class=\\\"cta-telegram\\\"><p>💬 ¿Dudas? Únete gratis: <a href=\\\"<!-- TELEGRAM_URL -->\\\" target=\\\"_blank\\\"><!-- TELEGRAM_NAME --></a></p></div>\\n\"\n\"3) Al final, antes del cierre:\\n\"\n\"<div class=\\\"cta-final\\\"><p>📥 Descarga gratis: <a href=\\\"<!-- LEAD_MAGNET_URL -->\\\" target=\\\"_blank\\\"><!-- LEAD_MAGNET_NAME --></a></p></div>\\n\"\n\"`\n: `MANDATORY MONETIZATION BLOCKS:\\n\"\n\"1) After 2nd paragraph:\\n\"\n\"<div class=\\\"rec-products\\\"><h3>Recommended products</h3><ul>\\n\"\n\"<li><!-- PROD1_NAME --> - <a href=\\\"<!-- PROD1_URL -->\\\" rel=\\\"nofollow sponsored\\\" target=\\\"_blank\\\">Check on Amazon</a></li>\\n\"\n\"<li><!-- PROD2_NAME --> - <a href=\\\"<!-- PROD2_URL -->\\\" rel=\\\"nofollow sponsored\\\" target=\\\"_blank\\\">Check on Amazon</a></li>\\n\"\n\"<li><!-- PROD3_NAME --> - <a href=\\\"<!-- PROD3_URL -->\\\" rel=\\\"nofollow sponsored\\\" target=\\\"_blank\\\">Check on Amazon</a></li>\\n\"\n\"</ul></div>\\n\"\n\"2) Mid-article after H2:\\n\"\n\"<div class=\\\"cta-telegram\\\"><p>💬 Questions? Join free: <a href=\\\"<!-- TELEGRAM_URL -->\\\" target=\\\"_blank\\\"><!-- TELEGRAM_NAME --></a></p></div>\\n\"\n\"3) End of article:\\n\"\n\"<div class=\\\"cta-final\\\"><p>📥 Free guide: <a href=\\\"<!-- LEAD_MAGNET_URL -->\\\" target=\\\"_blank\\\"><!-- LEAD_MAGNET_NAME --></a></p></div>\\n\"\n\"`;\n\nconst tone = cfg.TONE || 'informativo, experto';\nconst audience = cfg.AUDIENCE || 'lectores del tema';\nconst promptExtra = cfg.PROMPT_EXTRA || '';\nconst minWords = cfg.MIN_WORDS || 1200;\nconst maxWords = cfg.MAX_WORDS || 1800;\n\nconst sys = es\n  ? `Eres experto SEO y escritor de contenido sobre ${niche}. Tono: ${tone}. Audiencia: ${audience}. Escribe SOLO HTML puro sin markdown, sin bloques de código, sin explicaciones.`\n  : `Expert SEO writer for ${niche}. Tone: ${tone}. Audience: ${audience}. Output ONLY pure HTML, no markdown, no code blocks.`;\n\nconst usr = es\n? `Escribe en español un artículo sobre: \"${input.TEMA_ARTICULO}\"\\n\"\n\"Keywords: ${input.KEYWORD || ''}\\n\"\n\"Extensión: ${minWords}-${maxWords} palabras\\n\"\n\"Estructura: <h1> título, introducción 2 párrafos, 4-5 <h2> con 2-3 párrafos cada uno, conclusión con CTA.\\n\"\n\"${promptExtra}\\n\"\n\"${monetBlock}\\n\"\n\"Empieza DIRECTAMENTE con <h1>, sin preámbulos.`\n: `Write in English an article about: \"${input.TEMA_ARTICULO}\"\\n\"\n\"Keywords: ${input.KEYWORD || ''}\\n\"\n\"Length: ${minWords}-${maxWords} words\\n\"\n\"Structure: <h1> title, intro 2 paragraphs, 4-5 <h2> sections, conclusion with CTA.\\n\"\n\"${promptExtra}\\n\"\n\"${monetBlock}\\n\"\n\"Start DIRECTLY with <h1>, no preamble.`;\n\nreturn { json: { ...input, bloggerId: cfg.BLOGGER_ID || '', nicheDisplay: niche, systemPrompt: sys, userPrompt: usr, language: lang } };"
       },
       "id": "build-prompt",
       "name": "Build Prompt + Monetizacion",
@@ -111,7 +111,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const res = $('DeepSeek API').item.json;\nconst prev = $('Build Prompt + Monetizacion').item.json;\nif (!res.choices) throw new Error('DeepSeek sin choices: ' + JSON.stringify(res).substring(0,300));\nlet html = (res.choices[0].message.content || '').trim();\nif (!html || html.length < 200) throw new Error('HTML vacio o muy corto');\nhtml = html.replace(/^```html\\s*/i,'').replace(/^```\\s*/i,'').replace(/\\s*```\\s*$/i,'').trim();\nif (!html.includes('<h') || !html.includes('<p>')) throw new Error('HTML sin estructura valida');\nconst words = html.replace(/<[^>]+>/g,' ').split(/\\s+/).filter(w=>w.length>2).length;\nconst tok = res.usage || {};\nreturn { json: { ROW_NUMBER: prev.ROW_NUMBER, TITLE: prev.TITLE, BLOG_ID: prev.BLOG_ID, NICHE: prev.NICHE, LANGUAGE: prev.language, HTML_CONTENT: html, WORD_COUNT: words, TOKENS_USED: tok.total_tokens||0, TOKENS_INPUT: tok.prompt_tokens||0, TOKENS_OUTPUT: tok.completion_tokens||0, GENERATED_AT: new Date().toISOString(), HAS_MONETIZATION: html.includes('PROD1_NAME')||html.includes('cta-telegram') } };"
+        "jsCode": "const res = $('DeepSeek API').item.json;\nconst prev = $('Build Prompt + Monetizacion').item.json;\nif (!res.choices || !res.choices[0]) {\n  throw new Error('DeepSeek sin choices: ' + JSON.stringify(res).substring(0, 300));\n}\nlet html = (res.choices[0].message.content || '').trim();\nif (!html || html.length < 200) throw new Error('HTML vacío o muy corto');\n// Limpiar markdown fences si DeepSeek los añadió\nhtml = html.replace(/^```html\\s*/i, '').replace(/^```\\s*/i, '').replace(/\\s*```\\s*$/i, '').trim();\nif (!html.includes('<h') || !html.includes('<p>')) throw new Error('HTML sin estructura válida: faltan h o p');\nconst words = html.replace(/<[^>]+>/g, ' ').split(/\\s+/).filter(w => w.length > 2).length;\nconst tok = res.usage || {};\nreturn { json: {\n  ID_UNICO: prev.ID_UNICO,\n  TEMA_ARTICULO: prev.TEMA_ARTICULO,\n  ID_BLOG: prev.ID_BLOG,\n  BLOGGER_ID: prev.bloggerId,\n  NICHO: prev.nicheDisplay,\n  IDIOMA: prev.language,\n  HTML_FINAL: html,\n  WORD_COUNT: words,\n  TOKENS_USED: tok.total_tokens || 0,\n  GENERATED_AT: new Date().toISOString(),\n  HAS_MONETIZATION: html.includes('PROD1_NAME') || html.includes('cta-telegram')\n}};"
       },
       "id": "extract-validate",
       "name": "Extraer y Validar HTML",
@@ -166,19 +166,19 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "ROW_NUMBER": "={{ $json.ROW_NUMBER }}",
+            "ID_UNICO": "={{ $json.ID_UNICO }}",
             "STATUS": "CONTENT_READY",
-            "HTML_CONTENT": "={{ $json.HTML_CONTENT }}",
+            "HTML_FINAL": "={{ $json.HTML_FINAL }}",
             "TOKENS_USED": "={{ $json.TOKENS_USED }}",
             "GENERATED_AT": "={{ $json.GENERATED_AT }}"
           },
           "matchingColumns": [
-            "ROW_NUMBER"
+            "ID_UNICO"
           ],
           "schema": [
             {
-              "id": "ROW_NUMBER",
-              "displayName": "ROW_NUMBER",
+              "id": "ID_UNICO",
+              "displayName": "ID_UNICO",
               "required": false,
               "defaultMatch": true,
               "canBeUsedToMatch": true,
@@ -197,8 +197,8 @@
               "removed": false
             },
             {
-              "id": "HTML_CONTENT",
-              "displayName": "HTML_CONTENT",
+              "id": "HTML_FINAL",
+              "displayName": "HTML_FINAL",
               "required": false,
               "defaultMatch": false,
               "canBeUsedToMatch": false,
@@ -246,7 +246,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const d = $('Extraer y Validar HTML').item.json;\nreturn { json: { HTML_CONTENT: d.HTML_CONTENT, ROW_NUMBER: d.ROW_NUMBER, TITLE: d.TITLE, BLOG_ID: d.BLOG_ID, NICHE: d.NICHE, LANGUAGE: d.LANGUAGE, TOKENS_USED: d.TOKENS_USED, WORD_COUNT: d.WORD_COUNT, HAS_MONETIZATION: d.HAS_MONETIZATION } };"
+        "jsCode": "const d = $('Extraer y Validar HTML').item.json;\nreturn { json: {\n  HTML_FINAL: d.HTML_FINAL,\n  ID_UNICO: d.ID_UNICO,\n  TEMA_ARTICULO: d.TEMA_ARTICULO,\n  ID_BLOG: d.ID_BLOG,\n  BLOGGER_ID: d.BLOGGER_ID,\n  NICHO: d.NICHO,\n  IDIOMA: d.IDIOMA,\n  TOKENS_USED: d.TOKENS_USED,\n  WORD_COUNT: d.WORD_COUNT,\n  HAS_MONETIZATION: d.HAS_MONETIZATION\n}};"
       },
       "id": "return-output",
       "name": "Retornar al Caller",

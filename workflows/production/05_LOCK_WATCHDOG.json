@@ -98,19 +98,19 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "ROW_NUMBER": "={{ $json.ROW_NUMBER }}",
+            "ID_UNICO": "={{ $json.ID_UNICO }}",
             "STATUS": "PENDING",
             "LOCK": "FALSE",
             "LOCK_TIMESTAMP": "",
-            "ERROR_MESSAGE": "=WATCHDOG: Lock released after {{ $json._age_minutes || 'unknown' }} min. Prev status: {{ $json.STATUS }}"
+            "LAST_ERROR": "=WATCHDOG: Lock released after {{ $json._age_minutes || 'unknown' }} min. Prev status: {{ $json.STATUS }}"
           },
-          "matchingColumns": ["ROW_NUMBER"],
+          "matchingColumns": ["ID_UNICO"],
           "schema": [
-            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "ID_UNICO", "displayName": "ID_UNICO", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
             {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
             {"id": "LOCK", "displayName": "LOCK", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
             {"id": "LOCK_TIMESTAMP", "displayName": "LOCK_TIMESTAMP", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "ERROR_MESSAGE", "displayName": "ERROR_MESSAGE", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+            {"id": "LAST_ERROR", "displayName": "LAST_ERROR", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
           ]
         },
         "options": {}

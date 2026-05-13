@@ -86,7 +86,7 @@
             },
             {
               "id": "has-url",
-              "leftValue": "={{ $json.PUBLISHED_URL }}",
+              "leftValue": "={{ $json.URL_FINAL }}",
               "rightValue": "",
               "operator": {
                 "type": "string",
@@ -123,7 +123,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const post = $input.item.json;\nconst niche = post.NICHE || 'general';\nconst lang = post.LANGUAGE || 'es';\nconst es = lang === 'es';\n\n// Emojis por nicho\nconst nicheEmoji = {\n  veterinary: '🐾', hurones: '🦡', bulldogs: '🐕', chinchillas: '🐭',\n  'exotic-pets': '🦜', seguros: '🛡️', finanzas: '💰', legal: '⚖️',\n  'legal-us': '⚖️', insurance: '🛡️', saas: '💻', ia: '🤖',\n  automatizacion: '⚙️', general: '📝'\n};\nconst emoji = nicheEmoji[niche] || '📝';\n\n// Extraer resumen del artículo (primeros 200 chars del texto plano)\nconst htmlContent = post.HTML_CONTENT || '';\nconst plainText = htmlContent\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim()\n  .substring(0, 220)\n  .replace(/[\\[\\]()]/g, '');\nconst excerpt = plainText.length > 200 ? plainText.substring(0, 200) + '...' : plainText;\n\n// Hashtags por nicho\nconst hashtagMap = {\n  veterinary: '#veterinaria #mascotas #salud',\n  hurones: '#hurones #mascotas #animales',\n  bulldogs: '#bulldogs #perros #mascotas',\n  seguros: '#seguros #finanzas #proteccion',\n  finanzas: '#finanzas #dinero #ahorro',\n  insurance: '#insurance #finance #money',\n  'legal-us': '#legal #law #rights',\n  saas: '#saas #software #tecnologia',\n  ia: '#ia #inteligenciaartificial #tecnologia',\n  general: '#contenido #blog'\n};\nconst hashtags = hashtagMap[niche] || '#blog #contenido';\n\nlet message;\nif (es) {\n  message = `${emoji} <b>${post.TITLE}</b>\\n\\n${excerpt}\\n\\n🔗 <a href=\"${post.PUBLISHED_URL}\">Leer artículo completo</a>\\n\\n${hashtags}`;\n} else {\n  message = `${emoji} <b>${post.TITLE}</b>\\n\\n${excerpt}\\n\\n🔗 <a href=\"${post.PUBLISHED_URL}\">Read full article</a>\\n\\n${hashtags}`;\n}\n\nreturn {\n  json: {\n    ROW_NUMBER: post.ROW_NUMBER,\n    message,\n    TELEGRAM_CHAT_ID: $env.TELEGRAM_CHAT_ID || '<!-- CONFIGURA_TELEGRAM_CHAT_ID_EN_STACK_ENV -->',,\n    TITLE: post.TITLE,\n    PUBLISHED_URL: post.PUBLISHED_URL\n  }\n};"
+        "jsCode": "const post = $input.item.json;\nconst niche = post.NICHO || 'general';\nconst lang = post.IDIOMA || 'es';\nconst es = lang === 'es';\n\n// Emojis por nicho\nconst nicheEmoji = {\n  veterinary: '🐾', hurones: '🦡', bulldogs: '🐕', chinchillas: '🐭',\n  'exotic-pets': '🦜', seguros: '🛡️', finanzas: '💰', legal: '⚖️',\n  'legal-us': '⚖️', insurance: '🛡️', saas: '💻', ia: '🤖',\n  automatizacion: '⚙️', general: '📝'\n};\nconst emoji = nicheEmoji[niche] || '📝';\n\n// Extraer resumen del artículo (primeros 200 chars del texto plano)\nconst htmlContent = post.HTML_FINAL || '';\nconst plainText = htmlContent\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim()\n  .substring(0, 220)\n  .replace(/[\\[\\]()]/g, '');\nconst excerpt = plainText.length > 200 ? plainText.substring(0, 200) + '...' : plainText;\n\n// Hashtags por nicho\nconst hashtagMap = {\n  veterinary: '#veterinaria #mascotas #salud',\n  hurones: '#hurones #mascotas #animales',\n  bulldogs: '#bulldogs #perros #mascotas',\n  seguros: '#seguros #finanzas #proteccion',\n  finanzas: '#finanzas #dinero #ahorro',\n  insurance: '#insurance #finance #money',\n  'legal-us': '#legal #law #rights',\n  saas: '#saas #software #tecnologia',\n  ia: '#ia #inteligenciaartificial #tecnologia',\n  general: '#contenido #blog'\n};\nconst hashtags = hashtagMap[niche] || '#blog #contenido';\n\nlet message;\nif (es) {\n  message = `${emoji} <b>${post.TEMA_ARTICULO}</b>\\n\\n${excerpt}\\n\\n🔗 <a href=\"${post.URL_FINAL}\">Leer artículo completo</a>\\n\\n${hashtags}`;\n} else {\n  message = `${emoji} <b>${post.TEMA_ARTICULO}</b>\\n\\n${excerpt}\\n\\n🔗 <a href=\"${post.URL_FINAL}\">Read full article</a>\\n\\n${hashtags}`;\n}\n\nreturn {\n  json: {\n    ID_UNICO: post.ID_UNICO,\n    message,\n    TELEGRAM_CHAT_ID: $env.TELEGRAM_CHAT_ID || '<!-- CONFIGURA_TELEGRAM_CHAT_ID_EN_STACK_ENV -->',,\n    TITLE: post.TEMA_ARTICULO,\n    PUBLISHED_URL: post.URL_FINAL\n  }\n};"
       },
       "id": "build-message",
       "name": "Construir Mensaje Telegram",
@@ -174,16 +174,16 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "ROW_NUMBER": "={{ $('Construir Mensaje Telegram').item.json.ROW_NUMBER }}",
+            "ID_UNICO": "={{ $('Construir Mensaje Telegram').item.json.ID_UNICO }}",
             "TELEGRAM_SENT": "TRUE"
           },
           "matchingColumns": [
-            "ROW_NUMBER"
+            "ID_UNICO"
           ],
           "schema": [
             {
-              "id": "ROW_NUMBER",
-              "displayName": "ROW_NUMBER",
+              "id": "ID_UNICO",
+              "displayName": "ID_UNICO",
               "required": false,
               "defaultMatch": true,
               "canBeUsedToMatch": true,
@@ -235,16 +235,16 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "ROW_NUMBER": "={{ $('Construir Mensaje Telegram').item.json.ROW_NUMBER }}",
-            "ERROR_MESSAGE": "Telegram error: post publicado pero sin distribuir"
+            "ID_UNICO": "={{ $('Construir Mensaje Telegram').item.json.ID_UNICO }}",
+            "LAST_ERROR": "Telegram error: post publicado pero sin distribuir"
           },
           "matchingColumns": [
-            "ROW_NUMBER"
+            "ID_UNICO"
           ],
           "schema": [
             {
-              "id": "ROW_NUMBER",
-              "displayName": "ROW_NUMBER",
+              "id": "ID_UNICO",
+              "displayName": "ID_UNICO",
               "required": false,
               "defaultMatch": true,
               "canBeUsedToMatch": true,
@@ -253,8 +253,8 @@
               "removed": false
             },
             {
-              "id": "ERROR_MESSAGE",
-              "displayName": "ERROR_MESSAGE",
+              "id": "LAST_ERROR",
+              "displayName": "LAST_ERROR",
               "required": false,
               "defaultMatch": false,
               "canBeUsedToMatch": false,

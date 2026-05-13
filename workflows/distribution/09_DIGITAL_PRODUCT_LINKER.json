@@ -56,7 +56,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const post = $input.item.json;\nconst niche = (post.NICHE || '').toLowerCase();\n\n// Digital product catalog by niche\nconst catalog = {\n  'veterinary': {\n    name: 'Guía Veterinaria Completa',\n    desc: 'Todo lo que necesitas saber para cuidar a tu mascota',\n    url: 'https://hotmart.com/DIGITAL_VET_001'\n  },\n  'hurones': {\n    name: 'Manual del Hurón Perfecto',\n    desc: 'Guía completa de cuidados, salud y comportamiento',\n    url: 'https://hotmart.com/DIGITAL_HUR_001'\n  },\n  'seguros': {\n    name: 'Guía de Seguros para Latinoamérica',\n    desc: 'Compara y elige el mejor seguro para tu familia',\n    url: 'https://hotmart.com/DIGITAL_SEG_001'\n  },\n  'finanzas': {\n    name: 'Finanzas Personales: De 0 a Libertad',\n    desc: 'El sistema de ahorro e inversión que sí funciona',\n    url: 'https://hotmart.com/DIGITAL_FIN_001'\n  },\n  'insurance': {\n    name: \"Insurance Buyer's Complete Guide\",\n    desc: 'Everything you need to know before buying any insurance',\n    url: 'https://hotmart.com/DIGITAL_INS_001'\n  },\n  'legal-us': {\n    name: 'Know Your Rights: US Legal Guide',\n    desc: 'Protect yourself with essential legal knowledge',\n    url: 'https://hotmart.com/DIGITAL_LEG_001'\n  }\n};\n\nconst product = catalog[niche] || {\n  name: 'Guía Premium del Tema',\n  desc: 'Contenido exclusivo y profundo para dominar el tema',\n  url: 'https://hotmart.com/DIGITAL_GEN_001'\n};\n\nconst ctaHtml = `<div class=\"digital-product-cta\" style=\"background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 24px; margin: 30px 0; color: white; text-align: center;\">\n  <h3 style=\"margin: 0 0 12px; font-size: 1.4em; color: white;\">📚 Guía Digital: ${product.name}</h3>\n  <p style=\"margin: 0 0 16px; opacity: 0.9; font-size: 0.95em;\">${product.desc}</p>\n  <a href=\"${product.url}\" target=\"_blank\" rel=\"nofollow\" style=\"display: inline-block; background: white; color: #667eea; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 1em;\">Obtener Guía →</a>\n</div>`;\n\nlet html = post.HTML_CONTENT || '';\n\n// Try to insert before </article>, otherwise append\nif (html.includes('</article>')) {\n  html = html.replace('</article>', ctaHtml + '</article>');\n} else {\n  html = html + ctaHtml;\n}\n\nreturn {\n  json: {\n    ROW_NUMBER: post.ROW_NUMBER,\n    POST_ID: post.POST_ID,\n    BLOG_ID: post.BLOG_ID,\n    TITLE: post.TITLE,\n    HTML_CONTENT_UPDATED: html\n  }\n};"
+        "jsCode": "const post = $input.item.json;\nconst niche = (post.NICHO || '').toLowerCase();\n\n// Digital product catalog by niche\nconst catalog = {\n  'veterinary': {\n    name: 'Guía Veterinaria Completa',\n    desc: 'Todo lo que necesitas saber para cuidar a tu mascota',\n    url: 'https://hotmart.com/DIGITAL_VET_001'\n  },\n  'hurones': {\n    name: 'Manual del Hurón Perfecto',\n    desc: 'Guía completa de cuidados, salud y comportamiento',\n    url: 'https://hotmart.com/DIGITAL_HUR_001'\n  },\n  'seguros': {\n    name: 'Guía de Seguros para Latinoamérica',\n    desc: 'Compara y elige el mejor seguro para tu familia',\n    url: 'https://hotmart.com/DIGITAL_SEG_001'\n  },\n  'finanzas': {\n    name: 'Finanzas Personales: De 0 a Libertad',\n    desc: 'El sistema de ahorro e inversión que sí funciona',\n    url: 'https://hotmart.com/DIGITAL_FIN_001'\n  },\n  'insurance': {\n    name: \"Insurance Buyer's Complete Guide\",\n    desc: 'Everything you need to know before buying any insurance',\n    url: 'https://hotmart.com/DIGITAL_INS_001'\n  },\n  'legal-us': {\n    name: 'Know Your Rights: US Legal Guide',\n    desc: 'Protect yourself with essential legal knowledge',\n    url: 'https://hotmart.com/DIGITAL_LEG_001'\n  }\n};\n\nconst product = catalog[niche] || {\n  name: 'Guía Premium del Tema',\n  desc: 'Contenido exclusivo y profundo para dominar el tema',\n  url: 'https://hotmart.com/DIGITAL_GEN_001'\n};\n\nconst ctaHtml = `<div class=\"digital-product-cta\" style=\"background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 24px; margin: 30px 0; color: white; text-align: center;\">\n  <h3 style=\"margin: 0 0 12px; font-size: 1.4em; color: white;\">📚 Guía Digital: ${product.name}</h3>\n  <p style=\"margin: 0 0 16px; opacity: 0.9; font-size: 0.95em;\">${product.desc}</p>\n  <a href=\"${product.url}\" target=\"_blank\" rel=\"nofollow\" style=\"display: inline-block; background: white; color: #667eea; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 1em;\">Obtener Guía →</a>\n</div>`;\n\nlet html = post.HTML_FINAL || '';\n\n// Try to insert before </article>, otherwise append\nif (html.includes('</article>')) {\n  html = html.replace('</article>', ctaHtml + '</article>');\n} else {\n  html = html + ctaHtml;\n}\n\nreturn {\n  json: {\n    ID_UNICO: post.ID_UNICO,\n    POST_ID: post.POST_ID,\n    BLOG_ID: post.ID_BLOG,\n    TITLE: post.TEMA_ARTICULO,\n    HTML_CONTENT_UPDATED: html\n  }\n};"
       },
       "id": "inject-digital-product",
       "name": "Inyectar Producto Digital",
@@ -67,7 +67,7 @@
     {
       "parameters": {
         "method": "PATCH",
-        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.BLOG_ID }}/posts/{{ $json.POST_ID }}",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.ID_BLOG }}/posts/{{ $json.POST_ID }}",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "googleOAuth2Api",
         "sendHeaders": true,
@@ -75,7 +75,7 @@
         "sendBody": true,
         "contentType": "json",
         "body": {
-          "content": "={{ $json.HTML_CONTENT_UPDATED }}"
+          "content": "={{ $json.HTML_FINAL_UPDATED }}"
         },
         "options": { "timeout": 30000 }
       },
@@ -95,12 +95,12 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "ROW_NUMBER": "={{ $('Inyectar Producto Digital').item.json.ROW_NUMBER }}",
+            "ID_UNICO": "={{ $('Inyectar Producto Digital').item.json.ID_UNICO }}",
             "SOCIAL_DISTRIBUTED": "TRUE"
           },
-          "matchingColumns": ["ROW_NUMBER"],
+          "matchingColumns": ["ID_UNICO"],
           "schema": [
-            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "ID_UNICO", "displayName": "ID_UNICO", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
             {"id": "SOCIAL_DISTRIBUTED", "displayName": "SOCIAL_DISTRIBUTED", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
           ]
         },

@@ -27,12 +27,12 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "ROW_NUMBER": "={{ $json.ROW_NUMBER }}",
+            "ID_UNICO": "={{ $json.ID_UNICO }}",
             "STATUS": "PUBLISHING"
           },
-          "matchingColumns": ["ROW_NUMBER"],
+          "matchingColumns": ["ID_UNICO"],
           "schema": [
-            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "ID_UNICO", "displayName": "ID_UNICO", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
             {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
           ]
         },
@@ -62,7 +62,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.BLOG_ID }}/posts/",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.ID_BLOG }}/posts/",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "googleOAuth2Api",
         "sendHeaders": true,
@@ -79,11 +79,11 @@
         "body": {
           "kind": "blogger#post",
           "blog": {
-            "id": "={{ $json.BLOG_ID }}"
+            "id": "={{ $json.ID_BLOG }}"
           },
-          "title": "={{ $json.TITLE }}",
-          "content": "={{ $json.HTML_CONTENT }}",
-          "labels": ["={{ $json.NICHE }}"]
+          "title": "={{ $json.TEMA_ARTICULO }}",
+          "content": "={{ $json.HTML_FINAL }}",
+          "labels": ["={{ $json.NICHO }}"]
         },
         "options": {
           "timeout": 30000
@@ -145,7 +145,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $('Pass Data').item.json.BLOG_ID }}/posts/",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $('Pass Data').item.json.ID_BLOG }}/posts/",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "googleOAuth2Api",
         "sendHeaders": true,
@@ -162,11 +162,11 @@
         "body": {
           "kind": "blogger#post",
           "blog": {
-            "id": "={{ $('Pass Data').item.json.BLOG_ID }}"
+            "id": "={{ $('Pass Data').item.json.ID_BLOG }}"
           },
-          "title": "={{ $('Pass Data').item.json.TITLE }}",
-          "content": "={{ $('Pass Data').item.json.HTML_CONTENT }}",
-          "labels": ["={{ $('Pass Data').item.json.NICHE }}"]
+          "title": "={{ $('Pass Data').item.json.TEMA_ARTICULO }}",
+          "content": "={{ $('Pass Data').item.json.HTML_FINAL }}",
+          "labels": ["={{ $('Pass Data').item.json.NICHO }}"]
         },
         "options": {
           "timeout": 30000
@@ -186,7 +186,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Normalize success from either first attempt or retry\nconst fromRetry = $('Retry Blogger Post').item?.json;\nconst fromFirst = $('Publish to Blogger').item?.json;\nconst data = (fromRetry?.url || fromRetry?.id) ? fromRetry : fromFirst;\n\nif (!data?.url && !data?.id) {\n  throw new Error('Blogger publish failed: ' + JSON.stringify(data));\n}\n\nreturn {\n  json: {\n    ROW_NUMBER: $('Workflow Input').item.json.ROW_NUMBER,\n    PUBLISHED_URL: data.url || `https://blogger.com/post/${data.id}`,\n    POST_ID: data.id,\n    PUBLISHED_AT: new Date().toISOString()\n  }\n};"
+        "jsCode": "// Normalize success from either first attempt or retry\nconst fromRetry = $('Retry Blogger Post').item?.json;\nconst fromFirst = $('Publish to Blogger').item?.json;\nconst data = (fromRetry?.url || fromRetry?.id) ? fromRetry : fromFirst;\n\nif (!data?.url && !data?.id) {\n  throw new Error('Blogger publish failed: ' + JSON.stringify(data));\n}\n\nreturn {\n  json: {\n    ID_UNICO: $('Workflow Input').item.json.ID_UNICO,\n    PUBLISHED_URL: data.url || `https://blogger.com/post/${data.id}`,\n    POST_ID: data.id,\n    PUBLISHED_AT: new Date().toISOString()\n  }\n};"
       },
       "id": "normalize-result",
       "name": "Normalize Result",
@@ -210,25 +210,25 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "ROW_NUMBER": "={{ $json.ROW_NUMBER }}",
+            "ID_UNICO": "={{ $json.ID_UNICO }}",
             "STATUS": "PUBLISHED",
             "LOCK": "FALSE",
-            "PUBLISHED_URL": "={{ $json.PUBLISHED_URL }}",
+            "URL_FINAL": "={{ $json.URL_FINAL }}",
             "POST_ID": "={{ $json.POST_ID }}",
             "PUBLISHED_AT": "={{ $json.PUBLISHED_AT }}",
             "LOCK_TIMESTAMP": "",
-            "ERROR_MESSAGE": ""
+            "LAST_ERROR": ""
           },
-          "matchingColumns": ["ROW_NUMBER"],
+          "matchingColumns": ["ID_UNICO"],
           "schema": [
-            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "ID_UNICO", "displayName": "ID_UNICO", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
             {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
             {"id": "LOCK", "displayName": "LOCK", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "PUBLISHED_URL", "displayName": "PUBLISHED_URL", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "URL_FINAL", "displayName": "URL_FINAL", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
             {"id": "POST_ID", "displayName": "POST_ID", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
             {"id": "PUBLISHED_AT", "displayName": "PUBLISHED_AT", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
             {"id": "LOCK_TIMESTAMP", "displayName": "LOCK_TIMESTAMP", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "ERROR_MESSAGE", "displayName": "ERROR_MESSAGE", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+            {"id": "LAST_ERROR", "displayName": "LAST_ERROR", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
           ]
         },
         "options": {}
@@ -260,18 +260,18 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "ROW_NUMBER": "={{ $('Workflow Input').item.json.ROW_NUMBER }}",
+            "ID_UNICO": "={{ $('Workflow Input').item.json.ID_UNICO }}",
             "STATUS": "FAILED",
             "LOCK": "FALSE",
-            "ERROR_MESSAGE": "={{ $json.error?.message || $json.message || JSON.stringify($json) }}",
+            "LAST_ERROR": "={{ $json.error?.message || $json.message || JSON.stringify($json) }}",
             "LOCK_TIMESTAMP": ""
           },
-          "matchingColumns": ["ROW_NUMBER"],
+          "matchingColumns": ["ID_UNICO"],
           "schema": [
-            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "ID_UNICO", "displayName": "ID_UNICO", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
             {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
             {"id": "LOCK", "displayName": "LOCK", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "ERROR_MESSAGE", "displayName": "ERROR_MESSAGE", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LAST_ERROR", "displayName": "LAST_ERROR", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
             {"id": "LOCK_TIMESTAMP", "displayName": "LOCK_TIMESTAMP", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
           ]
         },

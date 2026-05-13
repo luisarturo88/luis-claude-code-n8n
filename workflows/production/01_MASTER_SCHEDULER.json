@@ -86,7 +86,7 @@
         "sortFieldsUi": {
           "sortField": [
             {
-              "fieldName": "ROW_NUMBER",
+              "fieldName": "ID_UNICO",
               "order": "ascending"
             }
           ]
@@ -126,14 +126,14 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "ROW_NUMBER": "={{ $json.ROW_NUMBER }}",
+            "ID_UNICO": "={{ $json.ID_UNICO }}",
             "STATUS": "QUEUED",
             "LOCK": "TRUE",
             "LOCK_TIMESTAMP": "={{ new Date().toISOString() }}"
           },
-          "matchingColumns": ["ROW_NUMBER"],
+          "matchingColumns": ["ID_UNICO"],
           "schema": [
-            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "ID_UNICO", "displayName": "ID_UNICO", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
             {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
             {"id": "LOCK", "displayName": "LOCK", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
             {"id": "LOCK_TIMESTAMP", "displayName": "LOCK_TIMESTAMP", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
@@ -164,12 +164,12 @@
         },
         "fields": {
           "values": [
-            {"name": "ROW_NUMBER", "stringValue": "={{ $('Take First Row Only').item.json.ROW_NUMBER }}"},
-            {"name": "TITLE", "stringValue": "={{ $('Take First Row Only').item.json.TITLE }}"},
-            {"name": "NICHE", "stringValue": "={{ $('Take First Row Only').item.json.NICHE }}"},
-            {"name": "KEYWORDS", "stringValue": "={{ $('Take First Row Only').item.json.KEYWORDS }}"},
-            {"name": "LANGUAGE", "stringValue": "={{ $('Take First Row Only').item.json.LANGUAGE || 'es' }}"},
-            {"name": "BLOG_ID", "stringValue": "={{ $('Take First Row Only').item.json.BLOG_ID }}"}
+            {"name": "ID_UNICO", "stringValue": "={{ $('Take First Row Only').item.json.ID_UNICO }}"},
+            {"name": "TEMA_ARTICULO", "stringValue": "={{ $('Take First Row Only').item.json.TEMA_ARTICULO }}"},
+            {"name": "NICHO", "stringValue": "={{ $('Take First Row Only').item.json.NICHO }}"},
+            {"name": "KEYWORD", "stringValue": "={{ $('Take First Row Only').item.json.KEYWORD }}"},
+            {"name": "IDIOMA", "stringValue": "={{ $('Take First Row Only').item.json.IDIOMA || 'es' }}"},
+            {"name": "ID_BLOG", "stringValue": "={{ $('Take First Row Only').item.json.ID_BLOG }}"}
           ]
         }
       },
@@ -190,7 +190,7 @@
           "conditions": [
             {
               "id": "has-html",
-              "leftValue": "={{ $json.HTML_CONTENT }}",
+              "leftValue": "={{ $json.HTML_FINAL }}",
               "rightValue": "",
               "operator": {
                 "type": "string",
@@ -220,11 +220,11 @@
         },
         "fields": {
           "values": [
-            {"name": "ROW_NUMBER", "stringValue": "={{ $('Take First Row Only').item.json.ROW_NUMBER }}"},
-            {"name": "TITLE", "stringValue": "={{ $('Take First Row Only').item.json.TITLE }}"},
-            {"name": "BLOG_ID", "stringValue": "={{ $('Take First Row Only').item.json.BLOG_ID }}"},
-            {"name": "HTML_CONTENT", "stringValue": "={{ $json.HTML_CONTENT }}"},
-            {"name": "NICHE", "stringValue": "={{ $('Take First Row Only').item.json.NICHE }}"}
+            {"name": "ID_UNICO", "stringValue": "={{ $('Take First Row Only').item.json.ID_UNICO }}"},
+            {"name": "TEMA_ARTICULO", "stringValue": "={{ $('Take First Row Only').item.json.TEMA_ARTICULO }}"},
+            {"name": "ID_BLOG", "stringValue": "={{ $('Take First Row Only').item.json.ID_BLOG }}"},
+            {"name": "HTML_FINAL", "stringValue": "={{ $json.HTML_FINAL }}"},
+            {"name": "NICHO", "stringValue": "={{ $('Take First Row Only').item.json.NICHO }}"}
           ]
         }
       },
@@ -250,18 +250,18 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "ROW_NUMBER": "={{ $('Take First Row Only').item.json.ROW_NUMBER }}",
+            "ID_UNICO": "={{ $('Take First Row Only').item.json.ID_UNICO }}",
             "STATUS": "FAILED",
             "LOCK": "FALSE",
-            "ERROR_MESSAGE": "AI generation returned empty content",
+            "LAST_ERROR": "AI generation returned empty content",
             "LOCK_TIMESTAMP": ""
           },
-          "matchingColumns": ["ROW_NUMBER"],
+          "matchingColumns": ["ID_UNICO"],
           "schema": [
-            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "ID_UNICO", "displayName": "ID_UNICO", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
             {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
             {"id": "LOCK", "displayName": "LOCK", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "ERROR_MESSAGE", "displayName": "ERROR_MESSAGE", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LAST_ERROR", "displayName": "LAST_ERROR", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
             {"id": "LOCK_TIMESTAMP", "displayName": "LOCK_TIMESTAMP", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
           ]
         },
@@ -304,18 +304,18 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "ROW_NUMBER": "={{ $('Take First Row Only').item.json.ROW_NUMBER }}",
+            "ID_UNICO": "={{ $('Take First Row Only').item.json.ID_UNICO }}",
             "STATUS": "FAILED",
             "LOCK": "FALSE",
-            "ERROR_MESSAGE": "={{ $json.error?.message || JSON.stringify($json.error) || 'Pipeline error' }}",
+            "LAST_ERROR": "={{ $json.error?.message || JSON.stringify($json.error) || 'Pipeline error' }}",
             "LOCK_TIMESTAMP": ""
           },
-          "matchingColumns": ["ROW_NUMBER"],
+          "matchingColumns": ["ID_UNICO"],
           "schema": [
-            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "ID_UNICO", "displayName": "ID_UNICO", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
             {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
             {"id": "LOCK", "displayName": "LOCK", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "ERROR_MESSAGE", "displayName": "ERROR_MESSAGE", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LAST_ERROR", "displayName": "LAST_ERROR", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
             {"id": "LOCK_TIMESTAMP", "displayName": "LOCK_TIMESTAMP", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
           ]
         },

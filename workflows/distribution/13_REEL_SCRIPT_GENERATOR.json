@@ -56,7 +56,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const post = $input.item.json;\nconst lang = post.LANGUAGE || 'es';\nconst langText = lang === 'en' ? 'English' : 'Español';\nconst title = post.TITLE || '';\nconst niche = post.NICHE || '';\n\nconst promptContent = `Eres un experto en contenido para redes sociales. Basándote en este artículo titulado '${title}' del nicho '${niche}', crea un guión para un reel/short de 60 segundos. Estructura EXACTA:\\n\\n🎬 HOOK (0-5s): [frase impactante que engancha]\\n\\n📌 PUNTO 1 (5-20s): [dato o tip más importante]\\n\\n📌 PUNTO 2 (20-35s): [segundo dato o tip]\\n\\n📌 PUNTO 3 (35-50s): [tercer dato o tip]\\n\\n🔗 CTA (50-60s): [llamada a la acción con link en bio]\\n\\n#hashtag1 #hashtag2 #hashtag3 #hashtag4 #hashtag5\\n\\nIdioma: ${langText}. Máximo 120 palabras total. Solo el guión, sin explicaciones.`;\n\nreturn {\n  json: {\n    ROW_NUMBER: post.ROW_NUMBER,\n    TITLE: title,\n    NICHE: niche,\n    LANGUAGE: lang,\n    PUBLISHED_URL: post.PUBLISHED_URL || '',\n    GENERATED_AT: new Date().toISOString(),\n    PROMPT_CONTENT: promptContent,\n    REQUEST_BODY: JSON.stringify({\n      model: 'deepseek-chat',\n      max_tokens: 800,\n      temperature: 0.7,\n      messages: [{ role: 'user', content: promptContent }]\n    })\n  }\n};"
+        "jsCode": "const post = $input.item.json;\nconst lang = post.IDIOMA || 'es';\nconst langText = lang === 'en' ? 'English' : 'Español';\nconst title = post.TEMA_ARTICULO || '';\nconst niche = post.NICHO || '';\n\nconst promptContent = `Eres un experto en contenido para redes sociales. Basándote en este artículo titulado '${title}' del nicho '${niche}', crea un guión para un reel/short de 60 segundos. Estructura EXACTA:\\n\\n🎬 HOOK (0-5s): [frase impactante que engancha]\\n\\n📌 PUNTO 1 (5-20s): [dato o tip más importante]\\n\\n📌 PUNTO 2 (20-35s): [segundo dato o tip]\\n\\n📌 PUNTO 3 (35-50s): [tercer dato o tip]\\n\\n🔗 CTA (50-60s): [llamada a la acción con link en bio]\\n\\n#hashtag1 #hashtag2 #hashtag3 #hashtag4 #hashtag5\\n\\nIdioma: ${langText}. Máximo 120 palabras total. Solo el guión, sin explicaciones.`;\n\nreturn {\n  json: {\n    ID_UNICO: post.ID_UNICO,\n    TITLE: title,\n    NICHE: niche,\n    LANGUAGE: lang,\n    PUBLISHED_URL: post.URL_FINAL || '',\n    GENERATED_AT: new Date().toISOString(),\n    PROMPT_CONTENT: promptContent,\n    REQUEST_BODY: JSON.stringify({\n      model: 'deepseek-chat',\n      max_tokens: 800,\n      temperature: 0.7,\n      messages: [{ role: 'user', content: promptContent }]\n    })\n  }\n};"
       },
       "id": "build-prompt",
       "name": "Construir Prompt DeepSeek",
@@ -92,7 +92,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const response = $input.item.json;\nconst promptNode = $('Construir Prompt DeepSeek').item.json;\n\nlet reelScript = '';\ntry {\n  reelScript = response.choices[0].message.content || '';\n} catch(e) {\n  reelScript = 'ERROR: No se pudo extraer el guión';\n}\n\nreturn {\n  json: {\n    ROW_NUMBER: promptNode.ROW_NUMBER,\n    TITLE: promptNode.TITLE,\n    NICHE: promptNode.NICHE,\n    LANGUAGE: promptNode.LANGUAGE,\n    REEL_SCRIPT: reelScript,\n    PUBLISHED_URL: promptNode.PUBLISHED_URL,\n    GENERATED_AT: promptNode.GENERATED_AT\n  }\n};"
+        "jsCode": "const response = $input.item.json;\nconst promptNode = $('Construir Prompt DeepSeek').item.json;\n\nlet reelScript = '';\ntry {\n  reelScript = response.choices[0].message.content || '';\n} catch(e) {\n  reelScript = 'ERROR: No se pudo extraer el guión';\n}\n\nreturn {\n  json: {\n    ID_UNICO: promptNode.ID_UNICO,\n    TITLE: promptNode.TEMA_ARTICULO,\n    NICHE: promptNode.NICHO,\n    LANGUAGE: promptNode.IDIOMA,\n    REEL_SCRIPT: reelScript,\n    PUBLISHED_URL: promptNode.URL_FINAL,\n    GENERATED_AT: promptNode.GENERATED_AT\n  }\n};"
       },
       "id": "extract-script",
       "name": "Extraer Guión del Response",
@@ -108,22 +108,22 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "ROW_NUMBER": "={{ $json.ROW_NUMBER }}",
-            "TITLE": "={{ $json.TITLE }}",
-            "NICHE": "={{ $json.NICHE }}",
-            "LANGUAGE": "={{ $json.LANGUAGE }}",
+            "ID_UNICO": "={{ $json.ID_UNICO }}",
+            "TEMA_ARTICULO": "={{ $json.TEMA_ARTICULO }}",
+            "NICHO": "={{ $json.NICHO }}",
+            "IDIOMA": "={{ $json.IDIOMA }}",
             "REEL_SCRIPT": "={{ $json.REEL_SCRIPT }}",
-            "PUBLISHED_URL": "={{ $json.PUBLISHED_URL }}",
+            "URL_FINAL": "={{ $json.URL_FINAL }}",
             "GENERATED_AT": "={{ $json.GENERATED_AT }}"
           },
           "matchingColumns": [],
           "schema": [
-            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "TITLE", "displayName": "TITLE", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "NICHE", "displayName": "NICHE", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "LANGUAGE", "displayName": "LANGUAGE", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "ID_UNICO", "displayName": "ID_UNICO", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "TEMA_ARTICULO", "displayName": "TEMA_ARTICULO", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "NICHO", "displayName": "NICHO", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "IDIOMA", "displayName": "IDIOMA", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
             {"id": "REEL_SCRIPT", "displayName": "REEL_SCRIPT", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "PUBLISHED_URL", "displayName": "PUBLISHED_URL", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "URL_FINAL", "displayName": "URL_FINAL", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
             {"id": "GENERATED_AT", "displayName": "GENERATED_AT", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
           ]
         },
@@ -144,12 +144,12 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "ROW_NUMBER": "={{ $('Extraer Guión del Response').item.json.ROW_NUMBER }}",
+            "ID_UNICO": "={{ $('Extraer Guión del Response').item.json.ID_UNICO }}",
             "REEL_GENERATED": "TRUE"
           },
-          "matchingColumns": ["ROW_NUMBER"],
+          "matchingColumns": ["ID_UNICO"],
           "schema": [
-            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "ID_UNICO", "displayName": "ID_UNICO", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
             {"id": "REEL_GENERATED", "displayName": "REEL_GENERATED", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
           ]
         },
