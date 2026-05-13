@@ -1,0 +1,127 @@
+{
+  "name": "09_DIGITAL_PRODUCT_LINKER",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "minutes", "minutesInterval": 35 }] }
+      },
+      "id": "cron-trigger",
+      "name": "Cada 35 Minutos",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
+        "options": {}
+      },
+      "id": "read-pipeline",
+      "name": "Read CONTENT_PIPELINE",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [460, 300],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "typeValidation": "loose" },
+          "conditions": [
+            { "id": "is-published", "leftValue": "={{ $json.STATUS }}", "rightValue": "PUBLISHED", "operator": { "type": "string", "operation": "equals" } },
+            { "id": "affiliate-injected", "leftValue": "={{ $json.AFFILIATE_INJECTED }}", "rightValue": "TRUE", "operator": { "type": "string", "operation": "equals" } },
+            { "id": "not-social-distributed", "leftValue": "={{ $json.SOCIAL_DISTRIBUTED }}", "rightValue": "TRUE", "operator": { "type": "string", "operation": "notEquals" } }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "filter-needs-digital",
+      "name": "Filtrar: PUBLISHED + AFFILIATE + sin SOCIAL_DISTRIBUTED",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "operation": "limit",
+        "maxItems": 5
+      },
+      "id": "take-five",
+      "name": "Tomar 5 a la vez",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const post = $input.item.json;\nconst niche = (post.NICHE || '').toLowerCase();\n\n// Digital product catalog by niche\nconst catalog = {\n  'veterinary': {\n    name: 'Guía Veterinaria Completa',\n    desc: 'Todo lo que necesitas saber para cuidar a tu mascota',\n    url: 'https://hotmart.com/DIGITAL_VET_001'\n  },\n  'hurones': {\n    name: 'Manual del Hurón Perfecto',\n    desc: 'Guía completa de cuidados, salud y comportamiento',\n    url: 'https://hotmart.com/DIGITAL_HUR_001'\n  },\n  'seguros': {\n    name: 'Guía de Seguros para Latinoamérica',\n    desc: 'Compara y elige el mejor seguro para tu familia',\n    url: 'https://hotmart.com/DIGITAL_SEG_001'\n  },\n  'finanzas': {\n    name: 'Finanzas Personales: De 0 a Libertad',\n    desc: 'El sistema de ahorro e inversión que sí funciona',\n    url: 'https://hotmart.com/DIGITAL_FIN_001'\n  },\n  'insurance': {\n    name: \"Insurance Buyer's Complete Guide\",\n    desc: 'Everything you need to know before buying any insurance',\n    url: 'https://hotmart.com/DIGITAL_INS_001'\n  },\n  'legal-us': {\n    name: 'Know Your Rights: US Legal Guide',\n    desc: 'Protect yourself with essential legal knowledge',\n    url: 'https://hotmart.com/DIGITAL_LEG_001'\n  }\n};\n\nconst product = catalog[niche] || {\n  name: 'Guía Premium del Tema',\n  desc: 'Contenido exclusivo y profundo para dominar el tema',\n  url: 'https://hotmart.com/DIGITAL_GEN_001'\n};\n\nconst ctaHtml = `<div class=\"digital-product-cta\" style=\"background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; padding: 24px; margin: 30px 0; color: white; text-align: center;\">\n  <h3 style=\"margin: 0 0 12px; font-size: 1.4em; color: white;\">📚 Guía Digital: ${product.name}</h3>\n  <p style=\"margin: 0 0 16px; opacity: 0.9; font-size: 0.95em;\">${product.desc}</p>\n  <a href=\"${product.url}\" target=\"_blank\" rel=\"nofollow\" style=\"display: inline-block; background: white; color: #667eea; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 1em;\">Obtener Guía →</a>\n</div>`;\n\nlet html = post.HTML_CONTENT || '';\n\n// Try to insert before </article>, otherwise append\nif (html.includes('</article>')) {\n  html = html.replace('</article>', ctaHtml + '</article>');\n} else {\n  html = html + ctaHtml;\n}\n\nreturn {\n  json: {\n    ROW_NUMBER: post.ROW_NUMBER,\n    POST_ID: post.POST_ID,\n    BLOG_ID: post.BLOG_ID,\n    TITLE: post.TITLE,\n    HTML_CONTENT_UPDATED: html\n  }\n};"
+      },
+      "id": "inject-digital-product",
+      "name": "Inyectar Producto Digital",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.BLOG_ID }}/posts/{{ $json.POST_ID }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "Content-Type", "value": "application/json" }] },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "content": "={{ $json.HTML_CONTENT_UPDATED }}"
+        },
+        "options": { "timeout": 30000 }
+      },
+      "id": "patch-blogger",
+      "name": "Actualizar Post en Blogger",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 300],
+      "credentials": { "googleOAuth2Api": { "name": "Google Blogger OAuth2" } },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ROW_NUMBER": "={{ $('Inyectar Producto Digital').item.json.ROW_NUMBER }}",
+            "SOCIAL_DISTRIBUTED": "TRUE"
+          },
+          "matchingColumns": ["ROW_NUMBER"],
+          "schema": [
+            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "SOCIAL_DISTRIBUTED", "displayName": "SOCIAL_DISTRIBUTED", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+          ]
+        },
+        "options": {}
+      },
+      "id": "mark-social-distributed",
+      "name": "Marcar SOCIAL_DISTRIBUTED=TRUE",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1560, 300],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+    }
+  ],
+  "connections": {
+    "Cada 35 Minutos": { "main": [[{"node": "Read CONTENT_PIPELINE", "type": "main", "index": 0}]] },
+    "Read CONTENT_PIPELINE": { "main": [[{"node": "Filtrar: PUBLISHED + AFFILIATE + sin SOCIAL_DISTRIBUTED", "type": "main", "index": 0}]] },
+    "Filtrar: PUBLISHED + AFFILIATE + sin SOCIAL_DISTRIBUTED": { "main": [[{"node": "Tomar 5 a la vez", "type": "main", "index": 0}]] },
+    "Tomar 5 a la vez": { "main": [[{"node": "Inyectar Producto Digital", "type": "main", "index": 0}]] },
+    "Inyectar Producto Digital": { "main": [[{"node": "Actualizar Post en Blogger", "type": "main", "index": 0}]] },
+    "Actualizar Post en Blogger": { "main": [[{"node": "Marcar SOCIAL_DISTRIBUTED=TRUE", "type": "main", "index": 0}]] }
+  },
+  "settings": { "executionOrder": "v1", "saveManualExecutions": true, "callerPolicy": "workflowsFromSameOwner", "executionTimeout": 300 },
+  "meta": { "instanceId": "production" }
+}

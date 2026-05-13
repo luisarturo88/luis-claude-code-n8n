@@ -1,0 +1,178 @@
+{
+  "name": "13_REEL_SCRIPT_GENERATOR",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "hours", "hoursInterval": 2 }] }
+      },
+      "id": "cron-trigger",
+      "name": "Cada 2 Horas",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
+        "options": {}
+      },
+      "id": "read-pipeline",
+      "name": "Read CONTENT_PIPELINE",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [460, 300],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "typeValidation": "loose" },
+          "conditions": [
+            { "id": "is-published", "leftValue": "={{ $json.STATUS }}", "rightValue": "PUBLISHED", "operator": { "type": "string", "operation": "equals" } },
+            { "id": "affiliate-injected", "leftValue": "={{ $json.AFFILIATE_INJECTED }}", "rightValue": "TRUE", "operator": { "type": "string", "operation": "equals" } },
+            { "id": "reel-not-generated", "leftValue": "={{ $json.REEL_GENERATED }}", "rightValue": "TRUE", "operator": { "type": "string", "operation": "notEquals" } }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "filter-needs-reel",
+      "name": "Filtrar: PUBLISHED + AFFILIATE + sin REEL_GENERATED",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "operation": "limit",
+        "maxItems": 3
+      },
+      "id": "take-three",
+      "name": "Tomar 3 a la vez",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const post = $input.item.json;\nconst lang = post.LANGUAGE || 'es';\nconst langText = lang === 'en' ? 'English' : 'Español';\nconst title = post.TITLE || '';\nconst niche = post.NICHE || '';\n\nconst promptContent = `Eres un experto en contenido para redes sociales. Basándote en este artículo titulado '${title}' del nicho '${niche}', crea un guión para un reel/short de 60 segundos. Estructura EXACTA:\\n\\n🎬 HOOK (0-5s): [frase impactante que engancha]\\n\\n📌 PUNTO 1 (5-20s): [dato o tip más importante]\\n\\n📌 PUNTO 2 (20-35s): [segundo dato o tip]\\n\\n📌 PUNTO 3 (35-50s): [tercer dato o tip]\\n\\n🔗 CTA (50-60s): [llamada a la acción con link en bio]\\n\\n#hashtag1 #hashtag2 #hashtag3 #hashtag4 #hashtag5\\n\\nIdioma: ${langText}. Máximo 120 palabras total. Solo el guión, sin explicaciones.`;\n\nreturn {\n  json: {\n    ROW_NUMBER: post.ROW_NUMBER,\n    TITLE: title,\n    NICHE: niche,\n    LANGUAGE: lang,\n    PUBLISHED_URL: post.PUBLISHED_URL || '',\n    GENERATED_AT: new Date().toISOString(),\n    PROMPT_CONTENT: promptContent,\n    REQUEST_BODY: JSON.stringify({\n      model: 'deepseek-chat',\n      max_tokens: 800,\n      temperature: 0.7,\n      messages: [{ role: 'user', content: promptContent }]\n    })\n  }\n};"
+      },
+      "id": "build-prompt",
+      "name": "Construir Prompt DeepSeek",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deeproute.ai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{$env.DEEPSEEK_API_KEY}}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.REQUEST_BODY }}",
+        "options": { "timeout": 60000 }
+      },
+      "id": "call-deepseek",
+      "name": "Llamar DeepSeek API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 300],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.item.json;\nconst promptNode = $('Construir Prompt DeepSeek').item.json;\n\nlet reelScript = '';\ntry {\n  reelScript = response.choices[0].message.content || '';\n} catch(e) {\n  reelScript = 'ERROR: No se pudo extraer el guión';\n}\n\nreturn {\n  json: {\n    ROW_NUMBER: promptNode.ROW_NUMBER,\n    TITLE: promptNode.TITLE,\n    NICHE: promptNode.NICHE,\n    LANGUAGE: promptNode.LANGUAGE,\n    REEL_SCRIPT: reelScript,\n    PUBLISHED_URL: promptNode.PUBLISHED_URL,\n    GENERATED_AT: promptNode.GENERATED_AT\n  }\n};"
+      },
+      "id": "extract-script",
+      "name": "Extraer Guión del Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "REEL_SCRIPTS", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ROW_NUMBER": "={{ $json.ROW_NUMBER }}",
+            "TITLE": "={{ $json.TITLE }}",
+            "NICHE": "={{ $json.NICHE }}",
+            "LANGUAGE": "={{ $json.LANGUAGE }}",
+            "REEL_SCRIPT": "={{ $json.REEL_SCRIPT }}",
+            "PUBLISHED_URL": "={{ $json.PUBLISHED_URL }}",
+            "GENERATED_AT": "={{ $json.GENERATED_AT }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "TITLE", "displayName": "TITLE", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "NICHE", "displayName": "NICHE", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LANGUAGE", "displayName": "LANGUAGE", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "REEL_SCRIPT", "displayName": "REEL_SCRIPT", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "PUBLISHED_URL", "displayName": "PUBLISHED_URL", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "GENERATED_AT", "displayName": "GENERATED_AT", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+          ]
+        },
+        "options": {}
+      },
+      "id": "append-reel-scripts",
+      "name": "Append a REEL_SCRIPTS Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1780, 300],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ROW_NUMBER": "={{ $('Extraer Guión del Response').item.json.ROW_NUMBER }}",
+            "REEL_GENERATED": "TRUE"
+          },
+          "matchingColumns": ["ROW_NUMBER"],
+          "schema": [
+            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "REEL_GENERATED", "displayName": "REEL_GENERATED", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+          ]
+        },
+        "options": {}
+      },
+      "id": "mark-reel-generated",
+      "name": "Marcar REEL_GENERATED=TRUE",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [2000, 300],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+    }
+  ],
+  "connections": {
+    "Cada 2 Horas": { "main": [[{"node": "Read CONTENT_PIPELINE", "type": "main", "index": 0}]] },
+    "Read CONTENT_PIPELINE": { "main": [[{"node": "Filtrar: PUBLISHED + AFFILIATE + sin REEL_GENERATED", "type": "main", "index": 0}]] },
+    "Filtrar: PUBLISHED + AFFILIATE + sin REEL_GENERATED": { "main": [[{"node": "Tomar 3 a la vez", "type": "main", "index": 0}]] },
+    "Tomar 3 a la vez": { "main": [[{"node": "Construir Prompt DeepSeek", "type": "main", "index": 0}]] },
+    "Construir Prompt DeepSeek": { "main": [[{"node": "Llamar DeepSeek API", "type": "main", "index": 0}]] },
+    "Llamar DeepSeek API": { "main": [[{"node": "Extraer Guión del Response", "type": "main", "index": 0}]] },
+    "Extraer Guión del Response": { "main": [[{"node": "Append a REEL_SCRIPTS Sheet", "type": "main", "index": 0}]] },
+    "Append a REEL_SCRIPTS Sheet": { "main": [[{"node": "Marcar REEL_GENERATED=TRUE", "type": "main", "index": 0}]] }
+  },
+  "settings": { "executionOrder": "v1", "saveManualExecutions": true, "callerPolicy": "workflowsFromSameOwner", "executionTimeout": 300 },
+  "meta": { "instanceId": "production" }
+}

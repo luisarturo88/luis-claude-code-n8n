@@ -1,0 +1,175 @@
+{
+  "name": "15_INTERLINK_BUILDER",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "hours", "hoursInterval": 4 }] }
+      },
+      "id": "cron-trigger",
+      "name": "Cada 4 Horas",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
+        "options": {}
+      },
+      "id": "read-pipeline",
+      "name": "Read CONTENT_PIPELINE",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [460, 300],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "typeValidation": "loose" },
+          "conditions": [
+            { "id": "is-published", "leftValue": "={{ $json.STATUS }}", "rightValue": "PUBLISHED", "operator": { "type": "string", "operation": "equals" } },
+            { "id": "interlinks-not-added", "leftValue": "={{ $json.INTERLINKS_ADDED }}", "rightValue": "TRUE", "operator": { "type": "string", "operation": "notEquals" } }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "filter-needs-interlinks",
+      "name": "Filtrar: PUBLISHED sin INTERLINKS_ADDED",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "operation": "limit",
+        "maxItems": 5
+      },
+      "id": "take-five",
+      "name": "Tomar 5 a la vez",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all posts from the full pipeline read (for related post lookup)\nconst allItems = $('Read CONTENT_PIPELINE').all().map(i => i.json);\nconst currentPost = $input.item.json;\nconst lang = currentPost.LANGUAGE || 'es';\n\n// Find related published posts in the same niche, excluding current\nconst relatedPosts = allItems.filter(p =>\n  p.NICHE === currentPost.NICHE &&\n  String(p.STATUS).toUpperCase() === 'PUBLISHED' &&\n  p.PUBLISHED_URL &&\n  String(p.ROW_NUMBER) !== String(currentPost.ROW_NUMBER)\n).slice(0, 3);\n\nlet html = currentPost.HTML_CONTENT || '';\nconst hasRelated = relatedPosts.length > 0;\n\nif (hasRelated) {\n  // Build related links list items\n  const listItems = relatedPosts.map(p =>\n    `<li style=\"margin-bottom: 10px;\"><a href=\"${p.PUBLISHED_URL}\" style=\"color: #2196F3; text-decoration: none; font-weight: 500;\">${p.TITLE}</a></li>`\n  ).join('\\n         ');\n\n  const heading = lang === 'en'\n    ? 'Related articles you might like:'\n    : 'Artículos relacionados que te pueden interesar:';\n\n  const relatedBlock = `<div class=\"related-articles\" style=\"background: #f8f9fa; border-left: 4px solid #2196F3; padding: 20px; margin: 30px 0; border-radius: 0 8px 8px 0;\">\n  <h3 style=\"margin: 0 0 15px; color: #1a1a2e; font-size: 1.1em;\">${heading}</h3>\n  <ul style=\"list-style: none; padding: 0; margin: 0;\">\n         ${listItems}\n  </ul>\n</div>`;\n\n  // Append related block to end of content\n  html = html + relatedBlock;\n\n  // Try inline link injection if content is long enough (>500 words approx)\n  const wordCount = html.replace(/<[^>]+>/g, ' ').split(/\\s+/).filter(w => w.length > 0).length;\n  if (wordCount > 500 && relatedPosts.length > 0) {\n    const targetPost = relatedPosts[0];\n    const targetTitle = targetPost.TITLE || '';\n    const targetUrl = targetPost.PUBLISHED_URL;\n    if (targetTitle && targetUrl) {\n      // Try to find title text in body content (outside existing tags)\n      const escapedTitle = targetTitle.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n      const pattern = new RegExp('(?<!<[^>]*)\\\\b(' + escapedTitle + ')\\\\b(?![^<]*>)', 'i');\n      if (pattern.test(html)) {\n        html = html.replace(pattern, `<a href=\"${targetUrl}\" style=\"color: #2196F3;\">$1</a>`);\n      }\n    }\n  }\n}\n\nreturn {\n  json: {\n    ROW_NUMBER: currentPost.ROW_NUMBER,\n    POST_ID: currentPost.POST_ID,\n    BLOG_ID: currentPost.BLOG_ID,\n    TITLE: currentPost.TITLE,\n    HTML_CONTENT_WITH_INTERLINKS: html,\n    has_related: hasRelated\n  }\n};"
+      },
+      "id": "build-interlinks",
+      "name": "Construir Interlinks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "typeValidation": "loose" },
+          "conditions": [
+            { "id": "has-related", "leftValue": "={{ $json.has_related }}", "rightValue": true, "operator": { "type": "boolean", "operation": "true" } }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-has-related",
+      "name": "¿Tiene posts relacionados?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.BLOG_ID }}/posts/{{ $json.POST_ID }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "Content-Type", "value": "application/json" }] },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "content": "={{ $json.HTML_CONTENT_WITH_INTERLINKS }}"
+        },
+        "options": { "timeout": 30000 }
+      },
+      "id": "patch-blogger-with-links",
+      "name": "Actualizar Post con Interlinks",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 200],
+      "credentials": { "googleOAuth2Api": { "name": "Google Blogger OAuth2" } },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ROW_NUMBER": "={{ $('Construir Interlinks').item.json.ROW_NUMBER }}",
+            "INTERLINKS_ADDED": "TRUE"
+          },
+          "matchingColumns": ["ROW_NUMBER"],
+          "schema": [
+            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "INTERLINKS_ADDED", "displayName": "INTERLINKS_ADDED", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+          ]
+        },
+        "options": {}
+      },
+      "id": "mark-interlinks-added-with",
+      "name": "Marcar INTERLINKS_ADDED=TRUE (con links)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1780, 200],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ROW_NUMBER": "={{ $json.ROW_NUMBER }}",
+            "INTERLINKS_ADDED": "TRUE"
+          },
+          "matchingColumns": ["ROW_NUMBER"],
+          "schema": [
+            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "INTERLINKS_ADDED", "displayName": "INTERLINKS_ADDED", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+          ]
+        },
+        "options": {}
+      },
+      "id": "mark-interlinks-added-without",
+      "name": "Marcar INTERLINKS_ADDED=TRUE (sin links)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1560, 420],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+    }
+  ],
+  "connections": {
+    "Cada 4 Horas": { "main": [[{"node": "Read CONTENT_PIPELINE", "type": "main", "index": 0}]] },
+    "Read CONTENT_PIPELINE": { "main": [[{"node": "Filtrar: PUBLISHED sin INTERLINKS_ADDED", "type": "main", "index": 0}]] },
+    "Filtrar: PUBLISHED sin INTERLINKS_ADDED": { "main": [[{"node": "Tomar 5 a la vez", "type": "main", "index": 0}]] },
+    "Tomar 5 a la vez": { "main": [[{"node": "Construir Interlinks", "type": "main", "index": 0}]] },
+    "Construir Interlinks": { "main": [[{"node": "¿Tiene posts relacionados?", "type": "main", "index": 0}]] },
+    "¿Tiene posts relacionados?": {
+      "main": [
+        [{"node": "Actualizar Post con Interlinks", "type": "main", "index": 0}],
+        [{"node": "Marcar INTERLINKS_ADDED=TRUE (sin links)", "type": "main", "index": 0}]
+      ]
+    },
+    "Actualizar Post con Interlinks": { "main": [[{"node": "Marcar INTERLINKS_ADDED=TRUE (con links)", "type": "main", "index": 0}]] }
+  },
+  "settings": { "executionOrder": "v1", "saveManualExecutions": true, "callerPolicy": "workflowsFromSameOwner", "executionTimeout": 300 },
+  "meta": { "instanceId": "production" }
+}
