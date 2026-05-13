@@ -1,0 +1,5 @@
+ROW_NUMBER,STATUS,LOCK,LOCK_TIMESTAMP,TITLE,NICHE,KEYWORDS,BLOG_ID,LANGUAGE,PRIORITY,HTML_CONTENT,TOKENS_USED,GENERATED_AT,PUBLISHED_URL,POST_ID,PUBLISHED_AT,AFFILIATE_INJECTED,SOCIAL_DISTRIBUTED,INTERLINKS_ADDED,ERROR_MESSAGE,RETRY_COUNT
+2,PENDING,FALSE,,Síntomas de parvo en cachorros: guía completa,veterinary,"parvovirus perros, síntomas parvo, tratamiento parvo",TU_BLOG_ID_AQUI,es,3,,,,,,,,,,, 0
+3,PENDING,FALSE,,Mejores seguros de auto 2025: comparativa completa,seguros,"mejor seguro auto, seguro coche barato, comparar seguros",TU_BLOG_ID_AQUI,es,1,,,,,,,,,,, 0
+4,PENDING,FALSE,,What is employer liability insurance: complete guide,insurance,"employer liability insurance, employer insurance, business insurance",TU_BLOG_ID_INGLES_AQUI,en,1,,,,,,,,,,, 0
+5,PENDING,FALSE,,Cuidados del hurón bebé: alimentación y salud,hurones,"hurón bebé, cuidados huron, alimentar huron",TU_BLOG_ID_AQUI,es,3,,,,,,,,,,, 0

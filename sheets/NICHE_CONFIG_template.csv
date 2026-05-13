@@ -1,0 +1,10 @@
+NICHE_ID,DISPLAY_NAME,LANGUAGE,TONE,AUDIENCE,MIN_WORDS,MAX_WORDS,PROMPT_EXTRA,AFFILIATE_CATEGORY,RPM_ESTIMATE,ACTIVE
+veterinary,Medicina Veterinaria,es,"experto, educativo, cercano",dueños de mascotas preocupados,1200,1800,"Incluye siempre: síntomas específicos, cuándo ir al vet urgente, y prevención. Usa terminología médica explicada en términos simples.",pet-supplies,3.50,TRUE
+hurones,Cuidado de Hurones,es,"amigable, especializado",dueños de hurones principiantes y avanzados,1000,1500,"Enfócate en comportamiento, alimentación específica, y problemas de salud comunes en hurones.",small-animal-supplies,4.00,TRUE
+bulldogs,Cría y Cuidado de Bulldogs,es,"experto en razas, práctico",criadores y dueños de bulldogs,1200,1600,"Incluye tips de grooming, problemas respiratorios típicos de la raza, y alimentación.",dog-supplies,3.80,TRUE
+finanzas,Finanzas Personales,es,"profesional, accesible",adultos de clase media buscando mejorar finanzas,1200,1800,"Incluye ejemplos numéricos concretos, comparativas, y pasos accionables.",financial-products,8.00,TRUE
+seguros,Seguros y Protección,es,"experto, confiable",personas buscando proteger sus activos,1200,1800,"Siempre compara 2-3 opciones, incluye costos aproximados y qué cubre cada uno.",insurance,12.00,TRUE
+insurance,Insurance Guides,en,"authoritative, clear",US adults looking for insurance coverage,1400,2000,"Include specific dollar amounts, coverage limits, and actionable comparison advice. Target US market.",insurance-us,35.00,TRUE
+legal-us,Legal Guides,en,"professional, trustworthy",US adults with legal questions,1400,2000,"Include specific laws, jurisdictions, when to hire a lawyer. Disclaimer: not legal advice.",legal-services,45.00,TRUE
+saas,SaaS y Herramientas,es,"técnico, práctico",profesionales y emprendedores digitales,1000,1500,"Incluye pricing, pros/cons, y comparativas directas. Menciona alternativas gratuitas.",software-services,9.00,TRUE
+ia,Inteligencia Artificial,es,"visionario, accesible","emprendedores, profesionales curiosos sobre IA",1000,1500,"Incluye casos de uso reales, herramientas específicas con URLs, y cómo empezar hoy mismo.",ai-tools,10.00,TRUE
