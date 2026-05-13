@@ -3,154 +3,71 @@
   "nodes": [
     {
       "parameters": {
-        "rule": {
-          "interval": [
-            {
-              "field": "hours",
-              "hoursInterval": 6
-            }
-          ]
-        }
+        "rule": { "interval": [{ "field": "hours", "hoursInterval": 6 }] }
       },
       "id": "cron-trigger",
       "name": "Cada 6 Horas",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [
-        240,
-        300
-      ]
+      "position": [240, 300]
     },
     {
       "parameters": {
-        "documentId": {
-          "__rl": true,
-          "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug",
-          "mode": "id"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "BLOGS_SITES_CONFIG",
-          "mode": "name"
-        },
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "BLOGS_SITES_CONFIG", "mode": "name" },
         "options": {}
       },
-      "id": "read-niches",
-      "name": "Read NICHE_CONFIG",
+      "id": "read-blogs",
+      "name": "Read BLOGS_SITES_CONFIG",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [
-        460,
-        300
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "name": "Google Sheets account"
-        }
-      }
+      "position": [460, 220],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
     },
     {
       "parameters": {
-        "documentId": {
-          "__rl": true,
-          "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug",
-          "mode": "id"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "CONTENT_PIPELINE",
-          "mode": "name"
-        },
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
         "options": {}
       },
       "id": "read-existing",
-      "name": "Read Titulos Existentes",
+      "name": "Read CONTENT_PIPELINE",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [
-        460,
-        460
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "name": "Google Sheets account"
-        }
-      }
+      "position": [460, 400],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
     },
     {
       "parameters": {
-        "conditions": {
-          "options": {
-            "caseSensitive": false,
-            "typeValidation": "loose"
-          },
-          "conditions": [
-            {
-              "id": "is-active",
-              "leftValue": "={{ $json.ACTIVE }}",
-              "rightValue": "TRUE",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "id": "filter-active-niches",
-      "name": "Filtrar Nichos Activos",
-      "type": "n8n-nodes-base.filter",
-      "typeVersion": 2.2,
-      "position": [
-        680,
-        300
-      ]
-    },
-    {
-      "parameters": {
-        "jsCode": "// Combinar nichos activos con títulos existentes para anti-canibalización\nconst activeNiches = $('Filtrar Nichos Activos').all().map(i => i.json);\nconst existingRows = $('Read Titulos Existentes').all().map(i => i.json);\n\n// Crear set de títulos existentes (normalizado)\nconst existingTitles = new Set(\n  existingRows\n    .filter(r => r.TITLE)\n    .map(r => r.TITLE.toLowerCase().trim())\n);\n\n// Contar PENDING por nicho\nconst pendingByNiche = {};\nexistingRows.filter(r => r.STATUS === 'PENDING').forEach(r => {\n  pendingByNiche[r.NICHO] = (pendingByNiche[r.NICHO] || 0) + 1;\n});\n\n// Filtrar nichos que necesitan más títulos (< 20 pending)\nconst nichesNeedingTitles = activeNiches.filter(n =>\n  (pendingByNiche[n.NICHO_ID] || 0) < 20\n);\n\nif (nichesNeedingTitles.length === 0) {\n  return [{ json: { _skip: true, reason: 'Todos los nichos tienen suficientes pending' } }];\n}\n\n// Obtener el último ID_UNICO para inserción correcta\nconst lastRowNumber = existingRows.reduce((max, r) => {\n  const n = parseInt(r.ID_UNICO || '1');\n  return n > max ? n : max;\n}, 1);\n\nreturn nichesNeedingTitles.map(niche => ({\n  json: {\n    niche: niche.NICHO_ID,\n    displayName: niche.DISPLAY_NAME,\n    language: niche.IDIOMA || 'es',\n    blogId: niche.ID_BLOG || '<!-- BLOG_ID -->',\n    affiliateCategory: niche.AFFILIATE_CATEGORY || 'general',\n    existingTitles: Array.from(existingTitles),\n    lastRowNumber,\n    pendingCount: pendingByNiche[niche.NICHO_ID] || 0\n  }\n}));"
+        "jsCode": "// BLOGS_SITES_CONFIG real schema: ID_BLOG, SITIO_URL, NICHO, IDIOMA, BLOGGER_ID, WP_AUTH_ID\nconst allBlogs = $('Read BLOGS_SITES_CONFIG').all().map(i => i.json);\nconst existingRows = $('Read CONTENT_PIPELINE').all().map(i => i.json);\n\n// Titles existing (anti-canibalización por TEMA_ARTICULO)\nconst existingTitles = new Set(\n  existingRows.filter(r => r.TEMA_ARTICULO).map(r => r.TEMA_ARTICULO.toLowerCase().trim())\n);\n\n// Pending count by ID_BLOG\nconst pendingByBlog = {};\nexistingRows.filter(r => r.STATUS === 'PENDING').forEach(r => {\n  pendingByBlog[r.ID_BLOG] = (pendingByBlog[r.ID_BLOG] || 0) + 1;\n});\n\n// Get last ID_UNICO number for unique ID generation\nconst now = new Date();\nconst dateStr = now.toISOString().slice(0,10).replace(/-/g,'');\nconst lastIdx = existingRows.length + 1;\n\n// Only process blogs that have < 15 PENDING articles\nconst blogsNeedingTitles = allBlogs.filter(b => b.ID_BLOG && (pendingByBlog[b.ID_BLOG] || 0) < 15);\n\nif (blogsNeedingTitles.length === 0) {\n  return [{ json: { _skip: true, reason: 'Todos los blogs tienen suficientes artículos pendientes' } }];\n}\n\n// Process max 5 blogs per run to avoid rate limits\nconst blogsToProcess = blogsNeedingTitles.slice(0, 5);\n\nreturn blogsToProcess.map((blog, idx) => ({\n  json: {\n    blogId: blog.ID_BLOG,\n    sitioUrl: blog.SITIO_URL || '',\n    nicho: blog.NICHO || 'general',\n    idioma: blog.IDIOMA || 'es',\n    bloggerId: blog.BLOGGER_ID || '',\n    existingTitles: Array.from(existingTitles).slice(0, 50),\n    startIndex: lastIdx + (idx * 30),\n    dateStr,\n    pendingCount: pendingByBlog[blog.ID_BLOG] || 0\n  }\n}));"
       },
       "id": "prepare-generation",
-      "name": "Preparar Generación por Nicho",
+      "name": "Preparar por Blog",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        900,
-        380
-      ]
+      "position": [680, 310]
     },
     {
       "parameters": {
         "conditions": {
-          "options": {
-            "caseSensitive": false,
-            "typeValidation": "loose"
-          },
+          "options": { "caseSensitive": false, "typeValidation": "loose" },
           "conditions": [
             {
               "id": "not-skip",
               "leftValue": "={{ $json._skip }}",
               "rightValue": true,
-              "operator": {
-                "type": "boolean",
-                "operation": "notTrue"
-              }
+              "operator": { "type": "boolean", "operation": "notTrue" }
             }
           ],
           "combinator": "and"
         },
         "options": {}
       },
-      "id": "skip-if-full",
+      "id": "skip-filter",
       "name": "¿Necesita Títulos?",
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
-      "position": [
-        1120,
-        380
-      ]
+      "position": [900, 310]
     },
     {
       "parameters": {
@@ -159,14 +76,8 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $credentials.httpHeaderAuth.value }}"
-            },
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
+            { "name": "Authorization", "value": "=Bearer {{ $credentials.httpHeaderAuth.value }}" },
+            { "name": "Content-Type", "value": "application/json" }
           ]
         },
         "sendBody": true,
@@ -176,180 +87,93 @@
           "messages": [
             {
               "role": "system",
-              "content": "Eres un experto en SEO. Generas títulos únicos de artículos para blogs. Respondes SOLO con JSON válido, sin markdown, sin explicaciones."
+              "content": "Eres experto SEO. Generas títulos de artículos únicos. Respondes SOLO con JSON válido, sin markdown."
             },
             {
               "role": "user",
-              "content": "=Genera 25 títulos SEO únicos para el nicho: {{ $json.displayName }} ({{ $json.niche }}).\nIdioma: {{ $json.language }}\nRequisitos:\n- Intención informacional (cómo, qué, por qué, cuándo, cuáles)\n- Long-tail específico, no genérico\n- Sin repetir estos temas existentes: {{ $json.existingTitles.slice(0,30).join(' | ') }}\n- Incluye keywords naturales del nicho\n\nResponde SOLO con este JSON:\n{\"titles\": [{\"title\": \"...\", \"keywords\": \"kw1, kw2, kw3\", \"priority\": 1}]}\n\nPrioridad: 1=alto RPM/volumen, 2=medio, 3=informacional largo plazo."
+              "content": "=Genera 20 títulos SEO únicos para el blog: {{ $json.sitioUrl || $json.nicho }}\nNicho: {{ $json.nicho }}\nIdioma: {{ $json.idioma }}\n\nRequisitos:\n- Intención informacional (cómo, qué, por qué, cuándo, mejores, guía)\n- Long-tail específico, búsquedas reales\n- Sin repetir estos temas ya existentes: {{ $json.existingTitles.slice(0,20).join(' | ') }}\n- Incluye keywords naturales del nicho\n- Mezcla: 2 pilares (PRIORITY=1) + 18 clusters (PRIORITY=2)\n\nResponde SOLO con este JSON (sin markdown):\n{\"titles\": [{\"title\": \"...\", \"keywords\": \"kw1, kw2\", \"priority\": 1}]}"
             }
           ],
-          "max_tokens": 2000,
-          "temperature": 0.8,
+          "max_tokens": 2500,
+          "temperature": 0.75,
           "stream": false
         },
-        "options": {
-          "timeout": 60000
-        }
+        "options": { "timeout": 60000 }
       },
-      "id": "generate-titles",
-      "name": "Generar Títulos con DeepSeek",
+      "id": "deepseek-titles",
+      "name": "Generar Títulos DeepSeek",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [
-        1340,
-        380
-      ],
-      "credentials": {
-        "httpHeaderAuth": {
-          "name": "DeepSeek API"
-        }
-      }
+      "position": [1120, 310],
+      "credentials": { "httpHeaderAuth": { "name": "DeepSeek API" } },
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
-        "jsCode": "const res = $('Generar Títulos con DeepSeek').item.json;\nconst prev = $('Preparar Generación por Nicho').item.json;\n\nlet titlesData;\ntry {\n  const content = res.choices[0].message.content;\n  // Limpiar posibles markdown fences\n  const clean = content.replace(/^```json\\s*/i,'').replace(/^```\\s*/i,'').replace(/\\s*```\\s*$/i,'').trim();\n  titlesData = JSON.parse(clean);\n} catch(e) {\n  throw new Error('DeepSeek no retornó JSON válido: ' + JSON.stringify(res).substring(0,200));\n}\n\nconst titles = titlesData.titles || [];\nif (titles.length === 0) throw new Error('DeepSeek retornó lista de títulos vacía');\n\nconst existingSet = new Set(prev.existingTitles);\nlet rowNum = prev.lastRowNumber + 1;\n\n// Construir filas para Google Sheets\nconst rows = [];\nfor (const t of titles) {\n  if (!t.title || existingSet.has(t.title.toLowerCase().trim())) continue;\n  rows.push([\n    rowNum,           // ID_UNICO\n    'PENDING',        // STATUS\n    'FALSE',          // LOCK\n    '',               // LOCK_TIMESTAMP\n    t.title,          // TITLE\n    prev.niche,       // NICHE\n    t.keywords || '', // KEYWORDS\n    prev.blogId,      // BLOG_ID\n    prev.language,    // LANGUAGE\n    t.priority || 3,  // PRIORITY\n    '', '', '', '', '', '', // HTML_CONTENT, TOKENS_USED, GENERATED_AT, PUBLISHED_URL, POST_ID, PUBLISHED_AT\n    'FALSE', 'FALSE', 'FALSE', // AFFILIATE_INJECTED, SOCIAL_DISTRIBUTED, INTERLINKS_ADDED\n    '', '0'           // ERROR_MESSAGE, RETRY_COUNT\n  ]);\n  rowNum++;\n}\n\nif (rows.length === 0) throw new Error('Todos los títulos generados ya existen en el pipeline');\n\nreturn rows.map(row => ({ json: { _row: row, _niche: prev.niche, _count: rows.length } }));"
+        "jsCode": "const res = $('Generar Títulos DeepSeek').item.json;\nconst prev = $('Preparar por Blog').item.json;\n\nif (!res.choices || !res.choices[0]) {\n  throw new Error('DeepSeek sin respuesta: ' + JSON.stringify(res).substring(0,200));\n}\n\nlet titlesData;\ntry {\n  const content = res.choices[0].message.content;\n  const clean = content.replace(/^```json\\s*/i,'').replace(/^```\\s*/i,'').replace(/\\s*```\\s*$/i,'').trim();\n  titlesData = JSON.parse(clean);\n} catch(e) {\n  throw new Error('JSON inválido de DeepSeek: ' + e.message);\n}\n\nconst titles = titlesData.titles || [];\nif (titles.length === 0) throw new Error('DeepSeek retornó lista vacía');\n\nconst existingSet = new Set(prev.existingTitles.map(t => t.toLowerCase().trim()));\nconst now = new Date().toISOString();\nconst dateStr = prev.dateStr;\n\nconst rows = [];\nfor (const t of titles) {\n  const titleLower = (t.title||'').toLowerCase().trim();\n  if (!t.title || existingSet.has(titleLower)) continue;\n  existingSet.add(titleLower);\n  const uid = `TF${dateStr}-${prev.blogId.substring(0,6).replace(/[^a-z0-9]/gi,'')}-${Date.now().toString(36).slice(-4)}-${Math.random().toString(36).slice(2,5)}`;\n  rows.push({\n    ID_UNICO: uid,\n    STATUS: 'PENDING',\n    LOCK: 'FALSE',\n    ID_BLOG: prev.blogId,\n    KEYWORD: t.keywords || t.title.split(' ').slice(0,4).join(' '),\n    TEMA_ARTICULO: t.title,\n    ID_PARENT_SILO: '',\n    PRIORITY: String(t.priority || 2),\n    RETRY_COUNT: '0'\n  });\n}\n\nif (rows.length === 0) throw new Error('Todos los títulos ya existen');\n\nreturn rows.map(r => ({ json: r }));"
       },
       "id": "parse-titles",
-      "name": "Parsear y Deduplicar Títulos",
+      "name": "Parsear Títulos",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        1560,
-        380
-      ]
+      "position": [1340, 310]
     },
     {
       "parameters": {
         "operation": "append",
-        "documentId": {
-          "__rl": true,
-          "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug",
-          "mode": "id"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "CONTENT_PIPELINE",
-          "mode": "name"
-        },
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
         "columns": {
-          "mappingMode": "autoMapInputData",
-          "value": {},
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID_UNICO": "={{ $json.ID_UNICO }}",
+            "STATUS": "={{ $json.STATUS }}",
+            "LOCK": "={{ $json.LOCK }}",
+            "ID_BLOG": "={{ $json.ID_BLOG }}",
+            "KEYWORD": "={{ $json.KEYWORD }}",
+            "TEMA_ARTICULO": "={{ $json.TEMA_ARTICULO }}",
+            "ID_PARENT_SILO": "={{ $json.ID_PARENT_SILO }}",
+            "PRIORITY": "={{ $json.PRIORITY }}",
+            "RETRY_COUNT": "={{ $json.RETRY_COUNT }}"
+          },
           "matchingColumns": [],
-          "schema": []
+          "schema": [
+            {"id": "ID_UNICO", "displayName": "ID_UNICO", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LOCK", "displayName": "LOCK", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "ID_BLOG", "displayName": "ID_BLOG", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "KEYWORD", "displayName": "KEYWORD", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "TEMA_ARTICULO", "displayName": "TEMA_ARTICULO", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "ID_PARENT_SILO", "displayName": "ID_PARENT_SILO", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "PRIORITY", "displayName": "PRIORITY", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "RETRY_COUNT", "displayName": "RETRY_COUNT", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+          ]
         },
-        "options": {
-          "cellFormat": "USER_ENTERED"
-        }
+        "options": { "cellFormat": "USER_ENTERED" }
       },
-      "id": "append-to-sheet",
+      "id": "append-pipeline",
       "name": "Insertar en CONTENT_PIPELINE",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [
-        1780,
-        380
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "name": "Google Sheets account"
-        }
-      }
+      "position": [1560, 310],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
     }
   ],
   "connections": {
     "Cada 6 Horas": {
       "main": [
         [
-          {
-            "node": "Read NICHE_CONFIG",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Read Titulos Existentes",
-            "type": "main",
-            "index": 0
-          }
+          { "node": "Read BLOGS_SITES_CONFIG", "type": "main", "index": 0 },
+          { "node": "Read CONTENT_PIPELINE", "type": "main", "index": 0 }
         ]
       ]
     },
-    "Read NICHE_CONFIG": {
-      "main": [
-        [
-          {
-            "node": "Filtrar Nichos Activos",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Filtrar Nichos Activos": {
-      "main": [
-        [
-          {
-            "node": "Preparar Generación por Nicho",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Read Titulos Existentes": {
-      "main": [
-        [
-          {
-            "node": "Preparar Generación por Nicho",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Preparar Generación por Nicho": {
-      "main": [
-        [
-          {
-            "node": "¿Necesita Títulos?",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "¿Necesita Títulos?": {
-      "main": [
-        [
-          {
-            "node": "Generar Títulos con DeepSeek",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Generar Títulos con DeepSeek": {
-      "main": [
-        [
-          {
-            "node": "Parsear y Deduplicar Títulos",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Parsear y Deduplicar Títulos": {
-      "main": [
-        [
-          {
-            "node": "Insertar en CONTENT_PIPELINE",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    }
+    "Read BLOGS_SITES_CONFIG": { "main": [[{ "node": "Preparar por Blog", "type": "main", "index": 0 }]] },
+    "Read CONTENT_PIPELINE": { "main": [[{ "node": "Preparar por Blog", "type": "main", "index": 0 }]] },
+    "Preparar por Blog": { "main": [[{ "node": "¿Necesita Títulos?", "type": "main", "index": 0 }]] },
+    "¿Necesita Títulos?": { "main": [[{ "node": "Generar Títulos DeepSeek", "type": "main", "index": 0 }]] },
+    "Generar Títulos DeepSeek": { "main": [[{ "node": "Parsear Títulos", "type": "main", "index": 0 }]] },
+    "Parsear Títulos": { "main": [[{ "node": "Insertar en CONTENT_PIPELINE", "type": "main", "index": 0 }]] }
   },
   "settings": {
     "executionOrder": "v1",
@@ -357,7 +181,5 @@
     "callerPolicy": "workflowsFromSameOwner",
     "executionTimeout": 600
   },
-  "meta": {
-    "instanceId": "production"
-  }
+  "meta": { "instanceId": "production" }
 }

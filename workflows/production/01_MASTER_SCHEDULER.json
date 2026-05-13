@@ -86,6 +86,10 @@
         "sortFieldsUi": {
           "sortField": [
             {
+              "fieldName": "PRIORITY",
+              "order": "ascending"
+            },
+            {
               "fieldName": "ID_UNICO",
               "order": "ascending"
             }
@@ -223,8 +227,10 @@
             {"name": "ID_UNICO", "stringValue": "={{ $('Take First Row Only').item.json.ID_UNICO }}"},
             {"name": "TEMA_ARTICULO", "stringValue": "={{ $('Take First Row Only').item.json.TEMA_ARTICULO }}"},
             {"name": "ID_BLOG", "stringValue": "={{ $('Take First Row Only').item.json.ID_BLOG }}"},
+            {"name": "BLOGGER_ID", "stringValue": "={{ $json.BLOGGER_ID }}"},
             {"name": "HTML_FINAL", "stringValue": "={{ $json.HTML_FINAL }}"},
-            {"name": "NICHO", "stringValue": "={{ $('Take First Row Only').item.json.NICHO }}"}
+            {"name": "NICHO", "stringValue": "={{ $json.NICHO || $('Take First Row Only').item.json.NICHO }}"},
+            {"name": "IDIOMA", "stringValue": "={{ $json.IDIOMA || $('Take First Row Only').item.json.IDIOMA || 'es' }}"}
           ]
         }
       },
