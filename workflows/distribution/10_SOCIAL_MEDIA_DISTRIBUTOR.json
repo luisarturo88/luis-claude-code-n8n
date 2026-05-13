@@ -11,7 +11,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const d = $input.item.json;\n// Extraer texto limpio del HTML (primeros 600 chars)\nconst excerpt = (d.HTML_FINAL || '')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim()\n  .slice(0, 600);\nconst lang = d.IDIOMA || 'es';\nconst es = lang === 'es';\nreturn { json: {\n  ID_UNICO: d.ID_UNICO,\n  TEMA_ARTICULO: d.TEMA_ARTICULO,\n  URL_FINAL: d.URL_FINAL,\n  NICHO: d.NICHO || '',\n  IDIOMA: lang,\n  EXCERPT: excerpt,\n  systemPrompt: es\n    ? 'Eres experto en marketing de contenido y redes sociales. Respondes SOLO con JSON válido, sin markdown, sin comentarios.'\n    : 'You are a social media marketing expert. Respond ONLY with valid JSON, no markdown, no comments.',\n  userPrompt: es\n    ? `Genera posts para redes sociales para este artículo:\\nTítulo: \"${d.TEMA_ARTICULO}\"\\nURL: ${d.URL_FINAL}\\nNicho: ${d.NICHO || 'general'}\\nResumen: ${excerpt.slice(0, 300)}\\n\\nResponde SOLO con este JSON:\\n{\"facebook\": \"post con emojis, 200-280 chars, CTA, 5 hashtags\", \"twitter\": \"tweet ≤270 chars con CTA y 3 hashtags\", \"pinterest_title\": \"título SEO ≤100 chars\", \"pinterest_desc\": \"descripción 200-280 chars con hashtags\", \"instagram\": \"caption con emojis, 200-280 chars, 10 hashtags\", \"threads\": \"post conversacional ≤250 chars\"}`\n    : `Generate social media posts for:\\nTitle: \"${d.TEMA_ARTICULO}\"\\nURL: ${d.URL_FINAL}\\nNiche: ${d.NICHO || 'general'}\\nSummary: ${excerpt.slice(0, 300)}\\n\\nRespond ONLY with this JSON:\\n{\"facebook\": \"post with emojis, 200-280 chars, CTA, 5 hashtags\", \"twitter\": \"tweet ≤270 chars with CTA and 3 hashtags\", \"pinterest_title\": \"SEO title ≤100 chars\", \"pinterest_desc\": \"description 200-280 chars with hashtags\", \"instagram\": \"caption with emojis, 200-280 chars, 10 hashtags\", \"threads\": \"conversational post ≤250 chars\"}`\n}};"
+        "jsCode": "const d = $input.item.json;\n// Extraer texto limpio del HTML (primeros 600 chars)\nconst excerpt = (d.HTML_FINAL || '')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim()\n  .slice(0, 600);\nconst lang = d.IDIOMA || 'es';\nconst es = lang === 'es';\nreturn { json: {\n  ID_UNICO: d.ID_UNICO,\n  TEMA_ARTICULO: d.TEMA_ARTICULO,\n  URL_FINAL: d.URL_FINAL,\n  NICHO: d.NICHO || '',\n  IDIOMA: lang,\n  EXCERPT: excerpt,\n  systemPrompt: es\n    ? 'Eres experto en marketing de contenido y redes sociales. Respondes SOLO con JSON válido, sin markdown, sin comentarios.'\n    : 'You are a social media marketing expert. Respond ONLY with valid JSON, no markdown, no comments.',\n  userPrompt: es\n    ? `Genera posts para redes sociales para este artículo:\\nTítulo: \"${d.TEMA_ARTICULO}\"\\nURL: ${d.URL_FINAL}\\nNicho: ${d.NICHO || 'general'}\\nResumen: ${excerpt.slice(0, 300)}\\n\\nResponde SOLO con este JSON:\\n{\"facebook\": \"post con emojis, 200-280 chars, CTA, 5 hashtags\", \"twitter\": \"tweet ≤270 chars con CTA y 3 hashtags\", \"instagram\": \"caption con emojis, 200-280 chars, 10 hashtags\", \"threads\": \"post conversacional ≤250 chars\"}`\n    : `Generate social media posts for:\\nTitle: \"${d.TEMA_ARTICULO}\"\\nURL: ${d.URL_FINAL}\\nNiche: ${d.NICHO || 'general'}\\nSummary: ${excerpt.slice(0, 300)}\\n\\nRespond ONLY with this JSON:\\n{\"facebook\": \"post with emojis, 200-280 chars, CTA, 5 hashtags\", \"twitter\": \"tweet ≤270 chars with CTA and 3 hashtags\", \"instagram\": \"caption with emojis, 200-280 chars, 10 hashtags\", \"threads\": \"conversational post ≤250 chars\"}`\n}};"
       },
       "id": "prepare-prompt",
       "name": "Preparar Prompt Social",
@@ -54,7 +54,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const res = $('DeepSeek Generar Social').item.json;\nconst prev = $('Preparar Prompt Social').item.json;\nif (!res.choices || !res.choices[0]) {\n  throw new Error('DeepSeek sin respuesta social: ' + JSON.stringify(res).slice(0,200));\n}\nlet social;\ntry {\n  const raw = res.choices[0].message.content;\n  const clean = raw.replace(/^```json\\s*/i,'').replace(/^```\\s*/i,'').replace(/\\s*```$/i,'').trim();\n  social = JSON.parse(clean);\n} catch(e) {\n  throw new Error('JSON inválido de DeepSeek social: ' + e.message);\n}\n// Añadir URL al texto si no está presente\nconst url = prev.URL_FINAL || '';\nconst addUrl = (text) => text && !text.includes(url.slice(0,20)) ? text + '\\n' + url : text;\nreturn { json: {\n  ID_UNICO:          prev.ID_UNICO,\n  TEMA_ARTICULO:     prev.TEMA_ARTICULO,\n  URL_FINAL:         prev.URL_FINAL,\n  NICHO:             prev.NICHO,\n  FACEBOOK_POST:     addUrl(social.facebook  || ''),\n  TWITTER_POST:      addUrl(social.twitter   || '').slice(0, 280),\n  PINTEREST_TITLE:   social.pinterest_title  || prev.TEMA_ARTICULO,\n  PINTEREST_DESC:    addUrl(social.pinterest_desc || ''),\n  INSTAGRAM_CAPTION: social.instagram        || '',\n  THREADS_POST:      addUrl(social.threads   || '').slice(0, 500),\n  GENERATED_AT:      new Date().toISOString()\n}};"
+        "jsCode": "const res = $('DeepSeek Generar Social').item.json;\nconst prev = $('Preparar Prompt Social').item.json;\nif (!res.choices || !res.choices[0]) {\n  throw new Error('DeepSeek sin respuesta social: ' + JSON.stringify(res).slice(0,200));\n}\nlet social;\ntry {\n  const raw = res.choices[0].message.content;\n  const clean = raw.replace(/^```json\\s*/i,'').replace(/^```\\s*/i,'').replace(/\\s*```$/i,'').trim();\n  social = JSON.parse(clean);\n} catch(e) {\n  throw new Error('JSON inválido de DeepSeek social: ' + e.message);\n}\n// Añadir URL al texto si no está presente\nconst url = prev.URL_FINAL || '';\nconst addUrl = (text) => text && !text.includes(url.slice(0,20)) ? text + '\\n' + url : text;\nreturn { json: {\n  ID_UNICO:          prev.ID_UNICO,\n  TEMA_ARTICULO:     prev.TEMA_ARTICULO,\n  URL_FINAL:         prev.URL_FINAL,\n  NICHO:             prev.NICHO,\n  FACEBOOK_POST:     addUrl(social.facebook  || ''),\n  TWITTER_POST:      addUrl(social.twitter   || '').slice(0, 280),\n  INSTAGRAM_CAPTION: social.instagram        || '',\n  THREADS_POST:      addUrl(social.threads   || '').slice(0, 500),\n  GENERATED_AT:      new Date().toISOString()\n}};"
       },
       "id": "parse-social",
       "name": "Parsear Contenido Social",
@@ -64,7 +64,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Si DeepSeek falló, usar contenido básico generado localmente\nconst prev = $('Preparar Prompt Social').item.json;\nconst url = prev.URL_FINAL || '';\nconst title = prev.TEMA_ARTICULO || '';\nconst niche = prev.NICHO || '';\nreturn { json: {\n  ID_UNICO:          prev.ID_UNICO,\n  TEMA_ARTICULO:     title,\n  URL_FINAL:         url,\n  NICHO:             niche,\n  FACEBOOK_POST:     `📝 ${title}\\n\\n${prev.EXCERPT ? prev.EXCERPT.slice(0,180) : ''}...\\n\\n🔗 ${url}\\n\\n#${niche}`,\n  TWITTER_POST:      `${title.slice(0,200)} 🔗 ${url}`.slice(0,280),\n  PINTEREST_TITLE:   title.slice(0,100),\n  PINTEREST_DESC:    `${title}. ${prev.EXCERPT ? prev.EXCERPT.slice(0,200) : ''} ${url}`,\n  INSTAGRAM_CAPTION: `${title}\\n\\n${prev.EXCERPT ? prev.EXCERPT.slice(0,180) : ''}\\n\\n#${niche}`,\n  THREADS_POST:      `${title.slice(0,200)} → ${url}`.slice(0,500),\n  GENERATED_AT:      new Date().toISOString(),\n  IS_FALLBACK:       true\n}};"
+        "jsCode": "// Si DeepSeek falló, usar contenido básico generado localmente\nconst prev = $('Preparar Prompt Social').item.json;\nconst url = prev.URL_FINAL || '';\nconst title = prev.TEMA_ARTICULO || '';\nconst niche = prev.NICHO || '';\nreturn { json: {\n  ID_UNICO:          prev.ID_UNICO,\n  TEMA_ARTICULO:     title,\n  URL_FINAL:         url,\n  NICHO:             niche,\n  FACEBOOK_POST:     `📝 ${title}\\n\\n${prev.EXCERPT ? prev.EXCERPT.slice(0,180) : ''}...\\n\\n🔗 ${url}\\n\\n#${niche}`,\n  TWITTER_POST:      `${title.slice(0,200)} 🔗 ${url}`.slice(0,280),\n  INSTAGRAM_CAPTION: `${title}\\n\\n${prev.EXCERPT ? prev.EXCERPT.slice(0,180) : ''}\\n\\n#${niche}`,\n  THREADS_POST:      `${title.slice(0,200)} → ${url}`.slice(0,500),\n  GENERATED_AT:      new Date().toISOString(),\n  IS_FALLBACK:       true\n}};"
       },
       "id": "fallback-content",
       "name": "Contenido Fallback (sin DeepSeek)",
@@ -75,7 +75,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "=https://graph.facebook.com/v19.0/61551687668859/feed",
+        "url": "=https://graph.facebook.com/v19.0/123140980889664/feed",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -103,13 +103,6 @@
       "parameters": {
         "method": "POST",
         "url": "https://api.twitter.com/2/tweets",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $credentials.httpHeaderAuth.value }}" },
-            { "name": "Content-Type",  "value": "application/json" }
-          ]
-        },
         "sendBody": true,
         "contentType": "json",
         "body": { "text": "={{ $json.TWITTER_POST }}" },
@@ -120,40 +113,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [1120, 300],
-      "credentials": { "httpHeaderAuth": { "name": "Twitter Bearer Token" } },
-      "onError": "continueErrorOutput"
-    },
-    {
-      "parameters": {
-        "method": "POST",
-        "url": "https://api.pinterest.com/v5/pins",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $credentials.httpHeaderAuth.value }}" },
-            { "name": "Content-Type",  "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "json",
-        "body": {
-          "title":       "={{ $json.PINTEREST_TITLE }}",
-          "description": "={{ $json.PINTEREST_DESC }}",
-          "link":        "={{ $json.URL_FINAL }}",
-          "board_id":    "={{ $credentials.httpHeaderAuth.additionalParameters }}",
-          "media_source": {
-            "source_type": "image_url",
-            "url": "https://via.placeholder.com/800x600.png?text=Blog"
-          }
-        },
-        "options": { "timeout": 20000 }
-      },
-      "id": "post-pinterest",
-      "name": "Publicar en Pinterest",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [1120, 420],
-      "credentials": { "httpHeaderAuth": { "name": "Pinterest Access Token" } },
+      "credentials": { "oAuth1Api": { "name": "Twitter OAuth1" } },
       "onError": "continueErrorOutput"
     },
     {
@@ -169,8 +129,6 @@
             "URL_FINAL":         "={{ $json.URL_FINAL }}",
             "FACEBOOK_POST":     "={{ $json.FACEBOOK_POST }}",
             "TWITTER_POST":      "={{ $json.TWITTER_POST }}",
-            "PINTEREST_TITLE":   "={{ $json.PINTEREST_TITLE }}",
-            "PINTEREST_DESC":    "={{ $json.PINTEREST_DESC }}",
             "INSTAGRAM_CAPTION": "={{ $json.INSTAGRAM_CAPTION }}",
             "THREADS_POST":      "={{ $json.THREADS_POST }}",
             "GENERATED_AT":      "={{ $json.GENERATED_AT }}"
@@ -182,8 +140,6 @@
             {"id": "URL_FINAL",         "displayName": "URL_FINAL",         "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
             {"id": "FACEBOOK_POST",     "displayName": "FACEBOOK_POST",     "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
             {"id": "TWITTER_POST",      "displayName": "TWITTER_POST",      "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "PINTEREST_TITLE",   "displayName": "PINTEREST_TITLE",   "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "PINTEREST_DESC",    "displayName": "PINTEREST_DESC",    "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
             {"id": "INSTAGRAM_CAPTION", "displayName": "INSTAGRAM_CAPTION", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
             {"id": "THREADS_POST",      "displayName": "THREADS_POST",      "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
             {"id": "GENERATED_AT",      "displayName": "GENERATED_AT",      "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
@@ -215,24 +171,19 @@
     "Parsear Contenido Social": {
       "main": [[
         {"node": "Publicar en Facebook",  "type": "main", "index": 0},
-        {"node": "Publicar en Twitter/X", "type": "main", "index": 0},
-        {"node": "Publicar en Pinterest", "type": "main", "index": 0}
+        {"node": "Publicar en Twitter/X", "type": "main", "index": 0}
       ]]
     },
     "Contenido Fallback (sin DeepSeek)": {
       "main": [[
         {"node": "Publicar en Facebook",  "type": "main", "index": 0},
-        {"node": "Publicar en Twitter/X", "type": "main", "index": 0},
-        {"node": "Publicar en Pinterest", "type": "main", "index": 0}
+        {"node": "Publicar en Twitter/X", "type": "main", "index": 0}
       ]]
     },
     "Publicar en Facebook": {
       "main": [[{"node": "Guardar en SOCIAL_QUEUE", "type": "main", "index": 0}]]
     },
     "Publicar en Twitter/X": {
-      "main": [[{"node": "Guardar en SOCIAL_QUEUE", "type": "main", "index": 0}]]
-    },
-    "Publicar en Pinterest": {
       "main": [[{"node": "Guardar en SOCIAL_QUEUE", "type": "main", "index": 0}]]
     }
   },
