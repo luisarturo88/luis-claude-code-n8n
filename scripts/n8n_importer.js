@@ -304,9 +304,43 @@ async function main() {
     if (!ok) console.log(`    ${JSON.stringify(actRes.body).slice(0,200)}`);
   }
 
-  // 7. Estado final
+  // 7. KICKSTART — disparar WF25 y WF01 para producción inmediata
+  console.log('\n── KICKSTART DE PRODUCCIÓN ──');
+  await new Promise(r => setTimeout(r, 3000));
+
+  const kickAllWf = await getAllWorkflows();
+  const wf25kick  = kickAllWf.find(w => w.name.includes('25_TITLE') && w.active);
+  const wf01kick  = kickAllWf.find(w => w.name.includes('01_MASTER') && w.active);
+
+  // Disparar WF25 (Title Factory) para poblar CONTENT_PIPELINE si está vacío
+  if (wf25kick) {
+    const r25 = await apiCall('POST', `/api/v1/workflows/${wf25kick.id}/run`, {});
+    if (r25.ok || r25.status === 200) {
+      console.log(`  ✓ WF25 disparado — generando títulos en CONTENT_PIPELINE...`);
+      console.log('  → Esperando 50 segundos para que DeepSeek complete...');
+      await new Promise(r => setTimeout(r, 50000));
+      console.log('  ✓ Espera completada');
+    } else {
+      console.log(`  ⚠ WF25 no se pudo disparar: HTTP ${r25.status} — ${JSON.stringify(r25.body).slice(0,150)}`);
+    }
+  } else {
+    console.log('  ⚠ WF25 no activo — pipeline podría estar vacío');
+  }
+
+  // Disparar WF01 manualmente para primer artículo inmediato
+  if (wf01kick) {
+    const r01 = await apiCall('POST', `/api/v1/workflows/${wf01kick.id}/run`, {});
+    if (r01.ok || r01.status === 200) {
+      console.log(`  ✓ WF01 disparado — primera publicación en curso...`);
+    } else {
+      console.log(`  ⚠ WF01: HTTP ${r01.status} — ${JSON.stringify(r01.body).slice(0,150)}`);
+      console.log('  → El cron de 20 min tomará el relevo automáticamente');
+    }
+  }
+
+  // 8. Estado final
   console.log('\n── ESTADO FINAL ──');
-  await new Promise(r => setTimeout(r, 1500));
+  await new Promise(r => setTimeout(r, 2000));
 
   const finalRes = await apiCall('GET', '/api/v1/workflows?active=true&limit=50');
   const activeWfs = finalRes.body.data || [];
