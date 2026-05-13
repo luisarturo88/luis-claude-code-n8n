@@ -2,9 +2,7 @@
   "name": "02_AI_CONTENT_GENERATOR",
   "nodes": [
     {
-      "parameters": {
-        "inputSource": "workflowInputData"
-      },
+      "parameters": { "inputSource": "workflowInputData" },
       "id": "trigger",
       "name": "Workflow Input",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
@@ -13,27 +11,36 @@
     },
     {
       "parameters": {
-        "jsCode": "const item = $input.item.json;\n\nconst niche = item.NICHE || 'general';\nconst title = item.TITLE || 'Artículo sin título';\nconst keywords = item.KEYWORDS || '';\nconst language = item.LANGUAGE || 'es';\nconst langInstruction = language === 'en' ? 'Write the article in English.' : 'Escribe el artículo en español.';\n\nconst systemPrompt = `You are an expert SEO content writer specialized in ${niche}. You write complete, well-structured HTML articles optimized for Google AdSense and organic search. Always respond with ONLY the HTML content, no markdown, no explanations, no code blocks.`;\n\nconst userPrompt = `${langInstruction}\n\nWrite a complete, SEO-optimized article about: \"${title}\"\n\nTarget keywords: ${keywords}\n\nRequirements:\n- Length: 1200-1800 words\n- Structure: H1 title, introduction (2 paragraphs), 4-6 H2 sections with 2-3 paragraphs each, conclusion\n- Include the target keywords naturally throughout\n- Use <strong> tags for important terms\n- Add a compelling meta description in a <meta> tag at the top\n- Include internal linking anchor text suggestions as HTML comments <!-- INTERNAL LINK: [suggested topic] -->\n- Niche-specific: ${niche}\n- Tone: expert, educational, conversational\n- Format: pure HTML (no markdown, no \\`\\`\\`html wrapper)\n\nStart directly with the HTML content.`;\n\nreturn {\n  json: {\n    ...item,\n    systemPrompt,\n    userPrompt\n  }\n};"
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "NICHE_CONFIG", "mode": "name" },
+        "options": {}
+      },
+      "id": "read-niche-config",
+      "name": "Read NICHE_CONFIG",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [460, 300],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "const input = $('Workflow Input').item.json;\nconst niche = input.NICHE || 'general';\nlet cfg = $input.all().find(n => n.json.NICHE_ID === niche)?.json || {\n  NICHE_ID: niche, DISPLAY_NAME: niche, LANGUAGE: input.LANGUAGE || 'es',\n  TONE: 'informativo, experto', AUDIENCE: 'lectores interesados en ' + niche,\n  MIN_WORDS: 1200, MAX_WORDS: 1600, PROMPT_EXTRA: '', AFFILIATE_CATEGORY: 'general'\n};\nconst lang = cfg.LANGUAGE || input.LANGUAGE || 'es';\nconst es = lang === 'es';\nconst monetBlock = es\n? `BLOQUES OBLIGATORIOS en estas posiciones exactas:\n1) Despues del 2do parrafo:\n<div class=\"rec-productos\"><h3>Productos recomendados</h3><ul>\n<li><!-- PROD1_NAME --> - <a href=\"<!-- PROD1_URL -->\" rel=\"nofollow sponsored\" target=\"_blank\">Ver en Amazon</a></li>\n<li><!-- PROD2_NAME --> - <a href=\"<!-- PROD2_URL -->\" rel=\"nofollow sponsored\" target=\"_blank\">Ver en Amazon</a></li>\n<li><!-- PROD3_NAME --> - <a href=\"<!-- PROD3_URL -->\" rel=\"nofollow sponsored\" target=\"_blank\">Ver en Amazon</a></li>\n</ul></div>\n2) Mitad del articulo despues de un H2:\n<div class=\"cta-telegram\"><p>💬 Dudas sobre ${cfg.DISPLAY_NAME}? Unete gratis: <a href=\"<!-- TELEGRAM_URL -->\" target=\"_blank\"><!-- TELEGRAM_NAME --></a></p></div>\n3) Final del articulo:\n<div class=\"cta-final\"><p>📥 Descarga gratis: <a href=\"<!-- LEAD_MAGNET_URL -->\" target=\"_blank\"><!-- LEAD_MAGNET_NAME --></a></p></div>\nEn <!-- PRODX_NAME --> pon nombres de productos REALES del nicho. Deja URLs como placeholders exactos.`\n: `MANDATORY BLOCKS at exact positions:\n1) After 2nd paragraph:\n<div class=\"rec-products\"><h3>Recommended products</h3><ul>\n<li><!-- PROD1_NAME --> - <a href=\"<!-- PROD1_URL -->\" rel=\"nofollow sponsored\" target=\"_blank\">Check on Amazon</a></li>\n<li><!-- PROD2_NAME --> - <a href=\"<!-- PROD2_URL -->\" rel=\"nofollow sponsored\" target=\"_blank\">Check on Amazon</a></li>\n<li><!-- PROD3_NAME --> - <a href=\"<!-- PROD3_URL -->\" rel=\"nofollow sponsored\" target=\"_blank\">Check on Amazon</a></li>\n</ul></div>\n2) Mid-article after H2:\n<div class=\"cta-telegram\"><p>💬 Questions? Join free: <a href=\"<!-- TELEGRAM_URL -->\" target=\"_blank\"><!-- TELEGRAM_NAME --></a></p></div>\n3) End of article:\n<div class=\"cta-final\"><p>📥 Free guide: <a href=\"<!-- LEAD_MAGNET_URL -->\" target=\"_blank\"><!-- LEAD_MAGNET_NAME --></a></p></div>\nFill PRODX_NAME with REAL product names. Keep URL placeholders exactly as shown.`;\nconst sys = es\n  ? `Eres experto SEO y copywriter para ${cfg.DISPLAY_NAME}. Tono: ${cfg.TONE}. Escribe SOLO HTML puro, sin markdown.`\n  : `Expert SEO writer for ${cfg.DISPLAY_NAME}. Tone: ${cfg.TONE}. Output ONLY pure HTML, no markdown.`;\nconst usr = es\n? `Escribe en español.\nArticulo: \"${input.TITLE}\"\nKeywords: ${input.KEYWORDS||''}\nExtension: ${cfg.MIN_WORDS}-${cfg.MAX_WORDS} palabras\nEstructura: <h1> titulo, introduccion 2 parrafos, 4-5 <h2> con 2-3 parrafos, <strong> en terminos clave, conclusion CTA.\n${cfg.PROMPT_EXTRA||''}\n${monetBlock}\nEmpieza directamente con el HTML.`\n: `Write in English.\nArticle: \"${input.TITLE}\"\nKeywords: ${input.KEYWORDS||''}\nLength: ${cfg.MIN_WORDS}-${cfg.MAX_WORDS} words\nStructure: <h1> title, intro 2 paragraphs, 4-5 <h2> with 2-3 paragraphs, <strong> key terms, conclusion CTA.\n${cfg.PROMPT_EXTRA||''}\n${monetBlock}\nStart directly with HTML.`;\nreturn { json: { ...input, nicheConfig: cfg, systemPrompt: sys, userPrompt: usr, language: lang } };"
       },
       "id": "build-prompt",
-      "name": "Build Prompt",
+      "name": "Build Prompt + Monetizacion",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [460, 300]
+      "position": [680, 300]
     },
     {
       "parameters": {
         "method": "POST",
         "url": "https://api.deepseek.com/v1/chat/completions",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "httpHeaderAuth",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
+            { "name": "Authorization", "value": "=Bearer {{ $credentials.httpHeaderAuth.value }}" },
+            { "name": "Content-Type", "value": "application/json" }
           ]
         },
         "sendBody": true,
@@ -41,62 +48,57 @@
         "body": {
           "model": "deepseek-chat",
           "messages": [
-            {
-              "role": "system",
-              "content": "={{ $json.systemPrompt }}"
-            },
-            {
-              "role": "user",
-              "content": "={{ $json.userPrompt }}"
-            }
+            { "role": "system", "content": "={{ $json.systemPrompt }}" },
+            { "role": "user", "content": "={{ $json.userPrompt }}" }
           ],
-          "max_tokens": 4096,
-          "temperature": 0.7,
+          "max_tokens": 3500,
+          "temperature": 0.65,
           "stream": false
         },
-        "options": {
-          "timeout": 120000,
-          "retry": {
-            "enabled": true,
-            "maxTries": 3,
-            "waitBetweenTries": 5000
-          }
-        }
+        "options": { "timeout": 120000 }
       },
       "id": "deepseek-api",
       "name": "DeepSeek API",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [680, 300],
-      "credentials": {
-        "httpHeaderAuth": {
-          "name": "DeepSeek API"
-        }
-      }
+      "position": [900, 300],
+      "credentials": { "httpHeaderAuth": { "name": "DeepSeek API" } },
+      "onError": "continueErrorOutput"
     },
     {
       "parameters": {
-        "jsCode": "const response = $input.item.json;\nconst prevData = $('Build Prompt').item.json;\n\nlet htmlContent = '';\n\ntry {\n  htmlContent = response.choices[0].message.content || '';\n} catch(e) {\n  throw new Error('DeepSeek response missing choices: ' + JSON.stringify(response));\n}\n\nif (!htmlContent || htmlContent.trim().length < 100) {\n  throw new Error('DeepSeek returned empty or too-short content');\n}\n\n// Strip markdown code fences if DeepSeek wrapped in ```html\nhtmlContent = htmlContent\n  .replace(/^```html\\s*/i, '')\n  .replace(/^```\\s*/i, '')\n  .replace(/```\\s*$/i, '')\n  .trim();\n\nconst tokenUsage = response.usage || {};\n\nreturn {\n  json: {\n    ROW_NUMBER: prevData.ROW_NUMBER,\n    TITLE: prevData.TITLE,\n    BLOG_ID: prevData.BLOG_ID,\n    NICHE: prevData.NICHE,\n    LANGUAGE: prevData.LANGUAGE || 'es',\n    HTML_CONTENT: htmlContent,\n    TOKENS_USED: tokenUsage.total_tokens || 0,\n    GENERATED_AT: new Date().toISOString()\n  }\n};"
+        "jsCode": "const res = $('DeepSeek API').item.json;\nconst prev = $('Build Prompt + Monetizacion').item.json;\nif (!res.choices) throw new Error('DeepSeek sin choices: ' + JSON.stringify(res).substring(0,300));\nlet html = (res.choices[0].message.content || '').trim();\nif (!html || html.length < 200) throw new Error('HTML vacio o muy corto');\nhtml = html.replace(/^```html\\s*/i,'').replace(/^```\\s*/i,'').replace(/\\s*```\\s*$/i,'').trim();\nif (!html.includes('<h') || !html.includes('<p>')) throw new Error('HTML sin estructura valida');\nconst words = html.replace(/<[^>]+>/g,' ').split(/\\s+/).filter(w=>w.length>2).length;\nconst tok = res.usage || {};\nreturn { json: { ROW_NUMBER: prev.ROW_NUMBER, TITLE: prev.TITLE, BLOG_ID: prev.BLOG_ID, NICHE: prev.NICHE, LANGUAGE: prev.language, HTML_CONTENT: html, WORD_COUNT: words, TOKENS_USED: tok.total_tokens||0, TOKENS_INPUT: tok.prompt_tokens||0, TOKENS_OUTPUT: tok.completion_tokens||0, GENERATED_AT: new Date().toISOString(), HAS_MONETIZATION: html.includes('PROD1_NAME')||html.includes('cta-telegram') } };"
       },
-      "id": "extract-html",
-      "name": "Extract HTML Content",
+      "id": "extract-validate",
+      "name": "Extraer y Validar HTML",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [900, 300]
+      "position": [1120, 260]
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $('Build Prompt + Monetizacion').item.json;\nconst retries = parseInt(prev.RETRY_COUNT||'0');\nif (retries >= 2) throw new Error('DeepSeek fallo 3 veces consecutivas');\nreturn { json: { ...prev, RETRY_COUNT: retries + 1 } };"
+      },
+      "id": "handle-api-error",
+      "name": "Manejar Error Reintento",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 420]
+    },
+    {
+      "parameters": { "amount": 10, "unit": "seconds" },
+      "id": "wait-retry",
+      "name": "Esperar 10s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1340, 420],
+      "webhookId": "ds-retry-wait"
     },
     {
       "parameters": {
         "operation": "update",
-        "documentId": {
-          "__rl": true,
-          "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug",
-          "mode": "id"
-        },
-        "sheetName": {
-          "__rl": true,
-          "value": "CONTENT_PIPELINE",
-          "mode": "name"
-        },
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
@@ -117,62 +119,37 @@
         },
         "options": {}
       },
-      "id": "update-content-ready",
+      "id": "update-sheet",
       "name": "Update CONTENT_READY",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [1120, 300],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "name": "Google Sheets account"
-        }
-      }
+      "position": [1340, 260],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
     },
     {
       "parameters": {
-        "jsCode": "// Return HTML_CONTENT to caller workflow\nconst data = $('Extract HTML Content').item.json;\nreturn {\n  json: {\n    HTML_CONTENT: data.HTML_CONTENT,\n    ROW_NUMBER: data.ROW_NUMBER,\n    TITLE: data.TITLE,\n    BLOG_ID: data.BLOG_ID,\n    NICHE: data.NICHE,\n    TOKENS_USED: data.TOKENS_USED\n  }\n};"
+        "jsCode": "const d = $('Extraer y Validar HTML').item.json;\nreturn { json: { HTML_CONTENT: d.HTML_CONTENT, ROW_NUMBER: d.ROW_NUMBER, TITLE: d.TITLE, BLOG_ID: d.BLOG_ID, NICHE: d.NICHE, LANGUAGE: d.LANGUAGE, TOKENS_USED: d.TOKENS_USED, WORD_COUNT: d.WORD_COUNT, HAS_MONETIZATION: d.HAS_MONETIZATION } };"
       },
       "id": "return-output",
-      "name": "Return to Caller",
+      "name": "Retornar al Caller",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1340, 300]
+      "position": [1560, 260]
     }
   ],
   "connections": {
-    "Workflow Input": {
-      "main": [
-        [{"node": "Build Prompt", "type": "main", "index": 0}]
-      ]
-    },
-    "Build Prompt": {
-      "main": [
-        [{"node": "DeepSeek API", "type": "main", "index": 0}]
-      ]
-    },
-    "DeepSeek API": {
-      "main": [
-        [{"node": "Extract HTML Content", "type": "main", "index": 0}]
-      ]
-    },
-    "Extract HTML Content": {
-      "main": [
-        [{"node": "Update CONTENT_READY", "type": "main", "index": 0}]
-      ]
-    },
-    "Update CONTENT_READY": {
-      "main": [
-        [{"node": "Return to Caller", "type": "main", "index": 0}]
-      ]
-    }
+    "Workflow Input": { "main": [[{"node": "Read NICHE_CONFIG", "type": "main", "index": 0}]] },
+    "Read NICHE_CONFIG": { "main": [[{"node": "Build Prompt + Monetizacion", "type": "main", "index": 0}]] },
+    "Build Prompt + Monetizacion": { "main": [[{"node": "DeepSeek API", "type": "main", "index": 0}]] },
+    "DeepSeek API": { "main": [
+      [{"node": "Extraer y Validar HTML", "type": "main", "index": 0}],
+      [{"node": "Manejar Error Reintento", "type": "main", "index": 0}]
+    ]},
+    "Extraer y Validar HTML": { "main": [[{"node": "Update CONTENT_READY", "type": "main", "index": 0}]] },
+    "Update CONTENT_READY": { "main": [[{"node": "Retornar al Caller", "type": "main", "index": 0}]] },
+    "Manejar Error Reintento": { "main": [[{"node": "Esperar 10s", "type": "main", "index": 0}]] },
+    "Esperar 10s": { "main": [[{"node": "DeepSeek API", "type": "main", "index": 0}]] }
   },
-  "settings": {
-    "executionOrder": "v1",
-    "saveManualExecutions": true,
-    "callerPolicy": "workflowsFromSameOwner",
-    "executionTimeout": 180
-  },
-  "meta": {
-    "instanceId": "production"
-  }
+  "settings": { "executionOrder": "v1", "saveManualExecutions": true, "callerPolicy": "workflowsFromSameOwner", "executionTimeout": 300 },
+  "meta": { "instanceId": "production" }
 }

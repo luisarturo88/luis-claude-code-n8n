@@ -1,0 +1,140 @@
+{
+  "name": "06_AFFILIATE_INJECTOR",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "minutes", "minutesInterval": 25 }] }
+      },
+      "id": "cron-trigger",
+      "name": "Cada 25 Minutos",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
+        "options": {}
+      },
+      "id": "read-pipeline",
+      "name": "Read CONTENT_PIPELINE",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [460, 300],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "typeValidation": "loose" },
+          "conditions": [
+            { "id": "is-published", "leftValue": "={{ $json.STATUS }}", "rightValue": "PUBLISHED", "operator": { "type": "string", "operation": "equals" } },
+            { "id": "no-affiliate", "leftValue": "={{ $json.AFFILIATE_INJECTED }}", "rightValue": "TRUE", "operator": { "type": "string", "operation": "notEquals" } }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "filter-needs-affiliate",
+      "name": "Filtrar: PUBLISHED sin afiliados",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "operation": "limit",
+        "maxItems": 5
+      },
+      "id": "take-five",
+      "name": "Tomar 5 a la vez",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "AFFILIATE_LINKS", "mode": "name" },
+        "options": {}
+      },
+      "id": "read-affiliate-links",
+      "name": "Read AFFILIATE_LINKS",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1120, 180],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Para cada post PUBLISHED sin afiliados, inyectar links y productos reales\nconst posts = $('Tomar 5 a la vez').all();\nconst affiliateLinks = $('Read AFFILIATE_LINKS').all().map(i => i.json);\n\nconst results = [];\n\nfor (const postItem of posts) {\n  const post = postItem.json;\n  let html = post.HTML_CONTENT || '';\n  const niche = post.NICHE || '';\n\n  // Filtrar links por nicho\n  const nicheLinks = affiliateLinks.filter(l =>\n    !l.NICHE || l.NICHE === niche || l.NICHE === 'general'\n  );\n\n  // === 1. Reemplazar placeholders de productos ===\n  const products = nicheLinks.filter(l => l.TYPE === 'product').slice(0, 3);\n\n  if (products[0]) {\n    html = html.replace('<!-- PROD1_NAME -->', products[0].PRODUCT_NAME || 'Producto recomendado')\n               .replace('<!-- PROD1_URL -->', products[0].AMAZON_URL || '#');\n  }\n  if (products[1]) {\n    html = html.replace('<!-- PROD2_NAME -->', products[1].PRODUCT_NAME || 'Producto recomendado')\n               .replace('<!-- PROD2_URL -->', products[1].AMAZON_URL || '#');\n  }\n  if (products[2]) {\n    html = html.replace('<!-- PROD3_NAME -->', products[2].PRODUCT_NAME || 'Producto recomendado')\n               .replace('<!-- PROD3_URL -->', products[2].AMAZON_URL || '#');\n  }\n\n  // === 2. Reemplazar placeholders de Telegram y Lead Magnet ===\n  const telegramLink = nicheLinks.find(l => l.TYPE === 'telegram');\n  const leadMagnet = nicheLinks.find(l => l.TYPE === 'lead_magnet');\n\n  if (telegramLink) {\n    html = html.replace('<!-- TELEGRAM_URL -->', telegramLink.AMAZON_URL || '#')\n               .replace('<!-- TELEGRAM_NAME -->', telegramLink.PRODUCT_NAME || 'Nuestra comunidad');\n  }\n  if (leadMagnet) {\n    html = html.replace('<!-- LEAD_MAGNET_URL -->', leadMagnet.AMAZON_URL || '#')\n               .replace('<!-- LEAD_MAGNET_NAME -->', leadMagnet.PRODUCT_NAME || 'Guía gratuita');\n  }\n\n  // === 3. Inyección de keywords en texto libre (máx 2 links adicionales) ===\n  const keywordLinks = nicheLinks.filter(l => l.TYPE === 'keyword' && l.KEYWORD);\n  let injectedCount = 0;\n  for (const kl of keywordLinks) {\n    if (injectedCount >= 2) break;\n    const kw = kl.KEYWORD;\n    const url = kl.AMAZON_URL;\n    if (!url || !kw) continue;\n    // Reemplazar primera ocurrencia de la keyword fuera de tags HTML\n    const pattern = new RegExp(`(?<!<[^>]*)\\\\b(${kw.replace(/[.*+?^${}()|[\\]\\\\]/g,'\\\\$&')})\\\\b(?![^<]*>)`, 'i');\n    if (pattern.test(html)) {\n      html = html.replace(pattern, `<a href=\"${url}\" rel=\"nofollow sponsored\" target=\"_blank\">$1</a>`);\n      injectedCount++;\n    }\n  }\n\n  results.push({\n    json: {\n      ROW_NUMBER: post.ROW_NUMBER,\n      POST_ID: post.POST_ID,\n      BLOG_ID: post.BLOG_ID,\n      HTML_CONTENT_UPDATED: html,\n      TITLE: post.TITLE\n    }\n  });\n}\n\nreturn results;"
+      },
+      "id": "inject-links",
+      "name": "Inyectar Links de Afiliado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 340]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.BLOG_ID }}/posts/{{ $json.POST_ID }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "Content-Type", "value": "application/json" }] },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "content": "={{ $json.HTML_CONTENT_UPDATED }}"
+        },
+        "options": { "timeout": 30000 }
+      },
+      "id": "patch-blogger",
+      "name": "Actualizar Post en Blogger",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 340],
+      "credentials": { "googleOAuth2Api": { "name": "Google Blogger OAuth2" } },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ROW_NUMBER": "={{ $('Inyectar Links de Afiliado').item.json.ROW_NUMBER }}",
+            "AFFILIATE_INJECTED": "TRUE"
+          },
+          "matchingColumns": ["ROW_NUMBER"],
+          "schema": [
+            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "AFFILIATE_INJECTED", "displayName": "AFFILIATE_INJECTED", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+          ]
+        },
+        "options": {}
+      },
+      "id": "mark-injected",
+      "name": "Marcar AFFILIATE_INJECTED=TRUE",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1560, 300],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+    }
+  ],
+  "connections": {
+    "Cada 25 Minutos": { "main": [[{"node": "Read CONTENT_PIPELINE", "type": "main", "index": 0}]] },
+    "Read CONTENT_PIPELINE": { "main": [[{"node": "Filtrar: PUBLISHED sin afiliados", "type": "main", "index": 0}]] },
+    "Filtrar: PUBLISHED sin afiliados": { "main": [[{"node": "Tomar 5 a la vez", "type": "main", "index": 0}]] },
+    "Tomar 5 a la vez": { "main": [[{"node": "Inyectar Links de Afiliado", "type": "main", "index": 0}]] },
+    "Read AFFILIATE_LINKS": { "main": [[{"node": "Inyectar Links de Afiliado", "type": "main", "index": 0}]] },
+    "Inyectar Links de Afiliado": { "main": [[{"node": "Actualizar Post en Blogger", "type": "main", "index": 0}]] },
+    "Actualizar Post en Blogger": { "main": [[{"node": "Marcar AFFILIATE_INJECTED=TRUE", "type": "main", "index": 0}]] }
+  },
+  "settings": { "executionOrder": "v1", "saveManualExecutions": true, "callerPolicy": "workflowsFromSameOwner", "executionTimeout": 300 },
+  "meta": { "instanceId": "production" }
+}

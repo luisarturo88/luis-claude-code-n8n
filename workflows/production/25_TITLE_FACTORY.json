@@ -1,0 +1,167 @@
+{
+  "name": "25_TITLE_FACTORY",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "hours", "hoursInterval": 6 }]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Cada 6 Horas",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "NICHE_CONFIG", "mode": "name" },
+        "options": {}
+      },
+      "id": "read-niches",
+      "name": "Read NICHE_CONFIG",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [460, 300],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
+        "options": {}
+      },
+      "id": "read-existing",
+      "name": "Read Titulos Existentes",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [460, 460],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "typeValidation": "loose" },
+          "conditions": [
+            { "id": "is-active", "leftValue": "={{ $json.ACTIVE }}", "rightValue": "TRUE", "operator": { "type": "string", "operation": "equals" } }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "filter-active-niches",
+      "name": "Filtrar Nichos Activos",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Combinar nichos activos con títulos existentes para anti-canibalización\nconst activeNiches = $('Filtrar Nichos Activos').all().map(i => i.json);\nconst existingRows = $('Read Titulos Existentes').all().map(i => i.json);\n\n// Crear set de títulos existentes (normalizado)\nconst existingTitles = new Set(\n  existingRows\n    .filter(r => r.TITLE)\n    .map(r => r.TITLE.toLowerCase().trim())\n);\n\n// Contar PENDING por nicho\nconst pendingByNiche = {};\nexistingRows.filter(r => r.STATUS === 'PENDING').forEach(r => {\n  pendingByNiche[r.NICHE] = (pendingByNiche[r.NICHE] || 0) + 1;\n});\n\n// Filtrar nichos que necesitan más títulos (< 20 pending)\nconst nichesNeedingTitles = activeNiches.filter(n =>\n  (pendingByNiche[n.NICHE_ID] || 0) < 20\n);\n\nif (nichesNeedingTitles.length === 0) {\n  return [{ json: { _skip: true, reason: 'Todos los nichos tienen suficientes pending' } }];\n}\n\n// Obtener el último ROW_NUMBER para inserción correcta\nconst lastRowNumber = existingRows.reduce((max, r) => {\n  const n = parseInt(r.ROW_NUMBER || '1');\n  return n > max ? n : max;\n}, 1);\n\nreturn nichesNeedingTitles.map(niche => ({\n  json: {\n    niche: niche.NICHE_ID,\n    displayName: niche.DISPLAY_NAME,\n    language: niche.LANGUAGE || 'es',\n    blogId: niche.BLOG_ID || '<!-- BLOG_ID -->',\n    affiliateCategory: niche.AFFILIATE_CATEGORY || 'general',\n    existingTitles: Array.from(existingTitles),\n    lastRowNumber,\n    pendingCount: pendingByNiche[niche.NICHE_ID] || 0\n  }\n}));"
+      },
+      "id": "prepare-generation",
+      "name": "Preparar Generación por Nicho",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 380]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "typeValidation": "loose" },
+          "conditions": [
+            { "id": "not-skip", "leftValue": "={{ $json._skip }}", "rightValue": true, "operator": { "type": "boolean", "operation": "notTrue" } }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "skip-if-full",
+      "name": "¿Necesita Títulos?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [1120, 380]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $credentials.httpHeaderAuth.value }}" },
+            { "name": "Content-Type", "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "body": {
+          "model": "deepseek-chat",
+          "messages": [
+            {
+              "role": "system",
+              "content": "Eres un experto en SEO. Generas títulos únicos de artículos para blogs. Respondes SOLO con JSON válido, sin markdown, sin explicaciones."
+            },
+            {
+              "role": "user",
+              "content": "=Genera 25 títulos SEO únicos para el nicho: {{ $json.displayName }} ({{ $json.niche }}).\nIdioma: {{ $json.language }}\nRequisitos:\n- Intención informacional (cómo, qué, por qué, cuándo, cuáles)\n- Long-tail específico, no genérico\n- Sin repetir estos temas existentes: {{ $json.existingTitles.slice(0,30).join(' | ') }}\n- Incluye keywords naturales del nicho\n\nResponde SOLO con este JSON:\n{\"titles\": [{\"title\": \"...\", \"keywords\": \"kw1, kw2, kw3\", \"priority\": 1}]}\n\nPrioridad: 1=alto RPM/volumen, 2=medio, 3=informacional largo plazo."
+            }
+          ],
+          "max_tokens": 2000,
+          "temperature": 0.8,
+          "stream": false
+        },
+        "options": { "timeout": 60000 }
+      },
+      "id": "generate-titles",
+      "name": "Generar Títulos con DeepSeek",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 380],
+      "credentials": { "httpHeaderAuth": { "name": "DeepSeek API" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "const res = $('Generar Títulos con DeepSeek').item.json;\nconst prev = $('Preparar Generación por Nicho').item.json;\n\nlet titlesData;\ntry {\n  const content = res.choices[0].message.content;\n  // Limpiar posibles markdown fences\n  const clean = content.replace(/^```json\\s*/i,'').replace(/^```\\s*/i,'').replace(/\\s*```\\s*$/i,'').trim();\n  titlesData = JSON.parse(clean);\n} catch(e) {\n  throw new Error('DeepSeek no retornó JSON válido: ' + JSON.stringify(res).substring(0,200));\n}\n\nconst titles = titlesData.titles || [];\nif (titles.length === 0) throw new Error('DeepSeek retornó lista de títulos vacía');\n\nconst existingSet = new Set(prev.existingTitles);\nlet rowNum = prev.lastRowNumber + 1;\n\n// Construir filas para Google Sheets\nconst rows = [];\nfor (const t of titles) {\n  if (!t.title || existingSet.has(t.title.toLowerCase().trim())) continue;\n  rows.push([\n    rowNum,           // ROW_NUMBER\n    'PENDING',        // STATUS\n    'FALSE',          // LOCK\n    '',               // LOCK_TIMESTAMP\n    t.title,          // TITLE\n    prev.niche,       // NICHE\n    t.keywords || '', // KEYWORDS\n    prev.blogId,      // BLOG_ID\n    prev.language,    // LANGUAGE\n    t.priority || 3,  // PRIORITY\n    '', '', '', '', '', '', // HTML_CONTENT, TOKENS_USED, GENERATED_AT, PUBLISHED_URL, POST_ID, PUBLISHED_AT\n    'FALSE', 'FALSE', 'FALSE', // AFFILIATE_INJECTED, SOCIAL_DISTRIBUTED, INTERLINKS_ADDED\n    '', '0'           // ERROR_MESSAGE, RETRY_COUNT\n  ]);\n  rowNum++;\n}\n\nif (rows.length === 0) throw new Error('Todos los títulos generados ya existen en el pipeline');\n\nreturn rows.map(row => ({ json: { _row: row, _niche: prev.niche, _count: rows.length } }));"
+      },
+      "id": "parse-titles",
+      "name": "Parsear y Deduplicar Títulos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 380]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": { "cellFormat": "USER_ENTERED" }
+      },
+      "id": "append-to-sheet",
+      "name": "Insertar en CONTENT_PIPELINE",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1780, 380],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+    }
+  ],
+  "connections": {
+    "Cada 6 Horas": { "main": [[{"node": "Read NICHE_CONFIG", "type": "main", "index": 0}, {"node": "Read Titulos Existentes", "type": "main", "index": 0}]] },
+    "Read NICHE_CONFIG": { "main": [[{"node": "Filtrar Nichos Activos", "type": "main", "index": 0}]] },
+    "Filtrar Nichos Activos": { "main": [[{"node": "Preparar Generación por Nicho", "type": "main", "index": 0}]] },
+    "Read Titulos Existentes": { "main": [[{"node": "Preparar Generación por Nicho", "type": "main", "index": 0}]] },
+    "Preparar Generación por Nicho": { "main": [[{"node": "¿Necesita Títulos?", "type": "main", "index": 0}]] },
+    "¿Necesita Títulos?": { "main": [[{"node": "Generar Títulos con DeepSeek", "type": "main", "index": 0}]] },
+    "Generar Títulos con DeepSeek": { "main": [[{"node": "Parsear y Deduplicar Títulos", "type": "main", "index": 0}]] },
+    "Parsear y Deduplicar Títulos": { "main": [[{"node": "Insertar en CONTENT_PIPELINE", "type": "main", "index": 0}]] }
+  },
+  "settings": { "executionOrder": "v1", "saveManualExecutions": true, "callerPolicy": "workflowsFromSameOwner", "executionTimeout": 600 },
+  "meta": { "instanceId": "production" }
+}

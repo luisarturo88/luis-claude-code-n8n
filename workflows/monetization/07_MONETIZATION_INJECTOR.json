@@ -1,0 +1,148 @@
+{
+  "name": "07_MONETIZATION_INJECTOR",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": { "interval": [{ "field": "minutes", "minutesInterval": 30 }] }
+      },
+      "id": "cron-trigger",
+      "name": "Cada 30 Minutos",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
+        "options": {}
+      },
+      "id": "read-pipeline",
+      "name": "Read CONTENT_PIPELINE",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [460, 300],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "typeValidation": "loose" },
+          "conditions": [
+            { "id": "is-published", "leftValue": "={{ $json.STATUS }}", "rightValue": "PUBLISHED", "operator": { "type": "string", "operation": "equals" } },
+            { "id": "affiliate-done", "leftValue": "={{ $json.AFFILIATE_INJECTED }}", "rightValue": "TRUE", "operator": { "type": "string", "operation": "equals" } },
+            { "id": "not-social", "leftValue": "={{ $json.SOCIAL_DISTRIBUTED }}", "rightValue": "TRUE", "operator": { "type": "string", "operation": "notEquals" } }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "filter-ready",
+      "name": "Filtrar: PUBLISHED + Afiliado OK + No Distribuido",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": { "operation": "limit", "maxItems": 3 },
+      "id": "take-three",
+      "name": "Tomar 3 a la vez",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Inyectar bloques de monetización adicionales según el nicho\nconst post = $input.item.json;\nconst niche = post.NICHE || 'general';\nconst lang = post.LANGUAGE || 'es';\nconst es = lang === 'es';\n\n// Bloques de monetización hardcodeados por nicho\n// EDITAR ESTOS VALORES con tus links reales de Hotmart, Gumroad, WhatsApp\nconst MONETIZATION_BLOCKS = {\n  default_es: {\n    hotmart: `<div class=\"cta-hotmart\" style=\"background:#fff3cd;border-left:4px solid #ffc107;padding:16px;margin:24px 0;border-radius:4px\">\n<strong>📚 Curso recomendado:</strong> Aprende más sobre este tema con nuestro curso completo.\n<br><a href=\"<!-- HOTMART_URL -->\" target=\"_blank\" style=\"color:#e67e22;font-weight:bold\">Ver curso en Hotmart →</a>\n</div>`,\n    whatsapp: `<div class=\"cta-whatsapp\" style=\"background:#e8f5e9;border-left:4px solid #25D366;padding:16px;margin:24px 0;border-radius:4px\">\n<strong>💬 ¿Tienes preguntas?</strong> Escríbenos directamente por WhatsApp.\n<br><a href=\"<!-- WHATSAPP_URL -->\" target=\"_blank\" style=\"color:#25D366;font-weight:bold\">Contactar por WhatsApp →</a>\n</div>`,\n    newsletter: `<div class=\"cta-newsletter\" style=\"background:#e3f2fd;border-left:4px solid #2196F3;padding:16px;margin:24px 0;border-radius:4px\">\n<strong>📧 Recibe artículos gratis:</strong> Suscríbete a nuestra newsletter y recibe contenido exclusivo.\n<br><a href=\"<!-- NEWSLETTER_URL -->\" target=\"_blank\" style=\"color:#1976D2;font-weight:bold\">Suscribirme gratis →</a>\n</div>`\n  },\n  default_en: {\n    hotmart: `<div class=\"cta-product\" style=\"background:#fff3cd;border-left:4px solid #ffc107;padding:16px;margin:24px 0;border-radius:4px\">\n<strong>📚 Recommended course:</strong> Master this topic with our complete guide.\n<br><a href=\"<!-- HOTMART_URL -->\" target=\"_blank\" style=\"color:#e67e22;font-weight:bold\">View course →</a>\n</div>`,\n    whatsapp: `<div class=\"cta-whatsapp\" style=\"background:#e8f5e9;border-left:4px solid #25D366;padding:16px;margin:24px 0;border-radius:4px\">\n<strong>💬 Need help?</strong> Contact us directly.\n<br><a href=\"<!-- WHATSAPP_URL -->\" target=\"_blank\" style=\"color:#25D366;font-weight:bold\">Contact us →</a>\n</div>`,\n    newsletter: `<div class=\"cta-newsletter\" style=\"background:#e3f2fd;border-left:4px solid #2196F3;padding:16px;margin:24px 0;border-radius:4px\">\n<strong>📧 Get free articles:</strong> Subscribe to our newsletter.\n<br><a href=\"<!-- NEWSLETTER_URL -->\" target=\"_blank\" style=\"color:#1976D2;font-weight:bold\">Subscribe free →</a>\n</div>`\n  }\n};\n\nconst blocks = es ? MONETIZATION_BLOCKS.default_es : MONETIZATION_BLOCKS.default_en;\n\n// El HTML del post ya tiene los bloques base de Telegram y productos de Amazon\n// Este workflow añade Hotmart + WhatsApp + Newsletter al final del post\nconst additionalBlocks = `\n${blocks.hotmart}\n${blocks.whatsapp}\n${blocks.newsletter}`;\n\nreturn {\n  json: {\n    ROW_NUMBER: post.ROW_NUMBER,\n    POST_ID: post.POST_ID,\n    BLOG_ID: post.BLOG_ID,\n    PUBLISHED_URL: post.PUBLISHED_URL,\n    ADDITIONAL_BLOCKS: additionalBlocks,\n    TITLE: post.TITLE\n  }\n};"
+      },
+      "id": "build-blocks",
+      "name": "Construir Bloques de Monetización",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.BLOG_ID }}/posts/{{ $json.POST_ID }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "options": { "timeout": 20000 }
+      },
+      "id": "get-post",
+      "name": "Obtener Post Actual de Blogger",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1340, 300],
+      "credentials": { "googleOAuth2Api": { "name": "Google Blogger OAuth2" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "const postData = $input.item.json;\nconst prevData = $('Construir Bloques de Monetización').item.json;\n\n// Añadir los bloques adicionales al final del contenido existente\nconst currentContent = postData.content || '';\nconst updatedContent = currentContent + prevData.ADDITIONAL_BLOCKS;\n\nreturn {\n  json: {\n    ROW_NUMBER: prevData.ROW_NUMBER,\n    POST_ID: prevData.POST_ID,\n    BLOG_ID: prevData.BLOG_ID,\n    UPDATED_CONTENT: updatedContent\n  }\n};"
+      },
+      "id": "merge-content",
+      "name": "Agregar Bloques al Contenido",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 300]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.BLOG_ID }}/posts/{{ $json.POST_ID }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [{ "name": "Content-Type", "value": "application/json" }] },
+        "sendBody": true,
+        "contentType": "json",
+        "body": { "content": "={{ $json.UPDATED_CONTENT }}" },
+        "options": { "timeout": 30000 }
+      },
+      "id": "patch-blogger",
+      "name": "Actualizar Post con Bloques",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1780, 300],
+      "credentials": { "googleOAuth2Api": { "name": "Google Blogger OAuth2" } }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ROW_NUMBER": "={{ $('Agregar Bloques al Contenido').item.json.ROW_NUMBER }}",
+            "SOCIAL_DISTRIBUTED": "TRUE"
+          },
+          "matchingColumns": ["ROW_NUMBER"],
+          "schema": [
+            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "SOCIAL_DISTRIBUTED", "displayName": "SOCIAL_DISTRIBUTED", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+          ]
+        },
+        "options": {}
+      },
+      "id": "mark-done",
+      "name": "Marcar Monetización Completa",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [2000, 300],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+    }
+  ],
+  "connections": {
+    "Cada 30 Minutos": { "main": [[{"node": "Read CONTENT_PIPELINE", "type": "main", "index": 0}]] },
+    "Read CONTENT_PIPELINE": { "main": [[{"node": "Filtrar: PUBLISHED + Afiliado OK + No Distribuido", "type": "main", "index": 0}]] },
+    "Filtrar: PUBLISHED + Afiliado OK + No Distribuido": { "main": [[{"node": "Tomar 3 a la vez", "type": "main", "index": 0}]] },
+    "Tomar 3 a la vez": { "main": [[{"node": "Construir Bloques de Monetización", "type": "main", "index": 0}]] },
+    "Construir Bloques de Monetización": { "main": [[{"node": "Obtener Post Actual de Blogger", "type": "main", "index": 0}]] },
+    "Obtener Post Actual de Blogger": { "main": [[{"node": "Agregar Bloques al Contenido", "type": "main", "index": 0}]] },
+    "Agregar Bloques al Contenido": { "main": [[{"node": "Actualizar Post con Bloques", "type": "main", "index": 0}]] },
+    "Actualizar Post con Bloques": { "main": [[{"node": "Marcar Monetización Completa", "type": "main", "index": 0}]] }
+  },
+  "settings": { "executionOrder": "v1", "saveManualExecutions": true, "callerPolicy": "workflowsFromSameOwner", "executionTimeout": 300 },
+  "meta": { "instanceId": "production" }
+}
