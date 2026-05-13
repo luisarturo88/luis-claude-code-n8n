@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:vmi3096105.contaboserver.net)"
+    ]
+  },
+  "sandbox": {
+    "network": {
+      "allowedDomains": [
+        "vmi3096105.contaboserver.net"
+      ]
+    }
+  }
+}
