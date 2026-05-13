@@ -8,30 +8,50 @@ const http = require('http');
 const fs   = require('fs');
 const path = require('path');
 
-const API_KEY  = process.env.N8N_API_KEY || '';
-const BASE_DIR = process.env.WF_DIR || '/tmp/n8n_bootstrap';
-const BOT_TOKEN = process.env.BOT_TOKEN || '';
-const CHAT_ID   = process.env.CHAT_ID  || '';
+const API_KEY   = process.env.N8N_API_KEY || '';
+const BASE_DIR  = process.env.WF_DIR      || '/tmp/n8n_bootstrap';
+const BOT_TOKEN = process.env.BOT_TOKEN   || '';
+const CHAT_ID   = process.env.CHAT_ID     || '';
 
 if (!API_KEY) { console.error('ERROR: N8N_API_KEY no definida'); process.exit(1); }
 
-// ── HTTP helper ────────────────────────────────────────────────────────────
+// ── Solo los campos que n8n API v1 acepta en POST/PUT ──────────────────────────
+// Cualquier campo extra causa: "request/body must NOT have additional properties"
+function sanitizeForApi(wf) {
+  const clean = {
+    name:        wf.name,
+    nodes:       wf.nodes       || [],
+    connections: wf.connections || {},
+    settings:    wf.settings    || {}
+  };
+  if (wf.staticData && Object.keys(wf.staticData).length > 0) {
+    clean.staticData = wf.staticData;
+  }
+  return clean;
+}
+
+// ── HTTP helper ────────────────────────────────────────────────────────────────
 function apiCall(method, apiPath, bodyObj) {
   return new Promise((resolve) => {
-    const bodyBuf = bodyObj !== undefined ? Buffer.from(JSON.stringify(bodyObj)) : null;
+    const bodyBuf = bodyObj !== undefined
+      ? Buffer.from(JSON.stringify(bodyObj))
+      : null;
     const req = http.request({
       hostname: 'localhost', port: 5678, path: apiPath, method,
       headers: {
         'X-N8N-API-KEY': API_KEY,
-        'Content-Type': 'application/json',
+        'Content-Type':  'application/json',
         ...(bodyBuf ? { 'Content-Length': bodyBuf.length } : {})
       }
     }, (res) => {
       let data = '';
       res.on('data', c => data += c);
       res.on('end', () => {
-        try { resolve({ ok: res.statusCode < 400, status: res.statusCode, body: JSON.parse(data) }); }
-        catch { resolve({ ok: res.statusCode < 400, status: res.statusCode, body: data.slice(0, 300) }); }
+        try {
+          resolve({ ok: res.statusCode < 400, status: res.statusCode, body: JSON.parse(data) });
+        } catch {
+          resolve({ ok: res.statusCode < 400, status: res.statusCode, body: data.slice(0, 400) });
+        }
       });
     });
     req.on('error', e => resolve({ ok: false, status: 0, body: { error: e.message } }));
@@ -40,35 +60,11 @@ function apiCall(method, apiPath, bodyObj) {
   });
 }
 
-function apiFile(method, apiPath, filePath) {
-  return new Promise((resolve) => {
-    const bodyBuf = fs.readFileSync(filePath);
-    const req = http.request({
-      hostname: 'localhost', port: 5678, path: apiPath, method,
-      headers: {
-        'X-N8N-API-KEY': API_KEY,
-        'Content-Type': 'application/json',
-        'Content-Length': bodyBuf.length
-      }
-    }, (res) => {
-      let data = '';
-      res.on('data', c => data += c);
-      res.on('end', () => {
-        try { resolve({ ok: res.statusCode < 400, status: res.statusCode, body: JSON.parse(data) }); }
-        catch { resolve({ ok: res.statusCode < 400, status: res.statusCode, body: data.slice(0, 300) }); }
-      });
-    });
-    req.on('error', e => resolve({ ok: false, status: 0, body: { error: e.message } }));
-    req.write(bodyBuf);
-    req.end();
-  });
-}
-
-// ── Telegram helper ────────────────────────────────────────────────────────
+// ── Telegram helper ────────────────────────────────────────────────────────────
 function telegramSend(text) {
   if (!BOT_TOKEN || !CHAT_ID || CHAT_ID === '0') return Promise.resolve();
   const https = require('https');
-  const body = JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'HTML' });
+  const body  = JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: 'HTML' });
   return new Promise((resolve) => {
     const req = https.request({
       hostname: 'api.telegram.org', port: 443, method: 'POST',
@@ -80,9 +76,15 @@ function telegramSend(text) {
   });
 }
 
-// ── Main ───────────────────────────────────────────────────────────────────
+// ── Listar todos los workflows ─────────────────────────────────────────────────
+async function getAllWorkflows() {
+  const res = await apiCall('GET', '/api/v1/workflows?limit=250');
+  return res.body.data || [];
+}
+
+// ── Main ───────────────────────────────────────────────────────────────────────
 async function main() {
-  const line = '═'.repeat(50);
+  const line = '═'.repeat(52);
   console.log(`\n${line}`);
   console.log('  N8N BOOTSTRAP IMPORTER');
   console.log(`  ${new Date().toISOString()}`);
@@ -95,18 +97,44 @@ async function main() {
     process.exit(1);
   }
   if (!health.ok) {
-    console.error(`✗ n8n no responde (status ${health.status}): ${JSON.stringify(health.body).slice(0,200)}`);
+    console.error(`✗ n8n no responde (${health.status}): ${JSON.stringify(health.body).slice(0,200)}`);
     process.exit(1);
   }
-  console.log('✓ n8n API OK');
+  console.log('✓ n8n API OK\n');
 
   // 2. Obtener workflows existentes
-  const listRes = await apiCall('GET', '/api/v1/workflows?limit=200');
+  const existingList = await getAllWorkflows();
   const existing = {};
-  for (const w of (listRes.body.data || [])) existing[w.name] = w.id;
+  for (const w of existingList) existing[w.name] = w.id;
   console.log(`✓ Workflows existentes: ${Object.keys(existing).length}`);
 
-  // 3. Importar en orden
+  // 3. Eliminar workflows basura
+  const TRASH_PATTERNS = [
+    'TEMP_READ_PIPELINE',
+    'Sheet Reset Row',
+    'TEMP_UPDATE_ROW',
+    '00_DEBUG',
+    '99_SEED',
+    'FIX_BLOG_ID',
+  ];
+  console.log('\n── LIMPIANDO WORKFLOWS BASURA ──');
+  let deleted = 0;
+  for (const w of existingList) {
+    const isTrash = TRASH_PATTERNS.some(p => w.name.includes(p));
+    if (!isTrash) continue;
+    if (w.active) await apiCall('POST', `/api/v1/workflows/${w.id}/deactivate`);
+    const del = await apiCall('DELETE', `/api/v1/workflows/${w.id}`);
+    if (del.ok || del.status === 404) {
+      console.log(`  🗑 ELIMINADO: ${w.name} [${w.id}]`);
+      deleted++;
+      delete existing[w.name];
+    } else {
+      console.log(`  ⚠ No se pudo eliminar ${w.name}: HTTP ${del.status}`);
+    }
+  }
+  if (deleted === 0) console.log('  (ningún workflow basura encontrado)');
+
+  // 4. Importar en orden
   const order = [
     'production/05_LOCK_WATCHDOG.json',
     'production/02_AI_CONTENT_GENERATOR.json',
@@ -125,64 +153,56 @@ async function main() {
 
   for (const rel of order) {
     const filePath = path.join(BASE_DIR, rel);
-    if (!fs.existsSync(filePath)) { console.log(`  SKIP: ${rel}`); continue; }
+    if (!fs.existsSync(filePath)) {
+      console.log(`  SKIP (archivo no existe): ${rel}`);
+      continue;
+    }
 
     let wfObj;
-    try { wfObj = JSON.parse(fs.readFileSync(filePath, 'utf8')); }
-    catch (e) { console.log(`  ERROR leyendo ${rel}: ${e.message}`); continue; }
+    try {
+      wfObj = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    } catch (e) {
+      console.log(`  ERROR leyendo ${rel}: ${e.message}`);
+      continue;
+    }
 
-    const name = wfObj.name;
-    // Limpiar campos que PUT rechaza
-    const cleanWf = { ...wfObj };
-    delete cleanWf.id; delete cleanWf.createdAt; delete cleanWf.updatedAt; delete cleanWf.versionId;
+    const name    = wfObj.name;
+    const payload = sanitizeForApi(wfObj);
 
-    let res;
+    let wfId;
     if (existing[name]) {
-      // Actualizar
-      const cleanBuf = Buffer.from(JSON.stringify(cleanWf));
-      res = await new Promise((resolve) => {
-        const req = http.request({
-          hostname: 'localhost', port: 5678,
-          path: `/api/v1/workflows/${existing[name]}`,
-          method: 'PUT',
-          headers: { 'X-N8N-API-KEY': API_KEY, 'Content-Type': 'application/json', 'Content-Length': cleanBuf.length }
-        }, (r) => {
-          let d = ''; r.on('data', c => d += c);
-          r.on('end', () => { try { resolve({ ok: r.statusCode < 400, body: JSON.parse(d) }); } catch { resolve({ ok: r.statusCode < 400, body: d }); } });
-        });
-        req.on('error', e => resolve({ ok: false, body: { error: e.message } }));
-        req.write(cleanBuf); req.end();
-      });
-      const id = existing[name];
-      ids[name] = id;
-      console.log(`  ✓ UPDATE: ${name} [${id}]`);
-    } else {
-      // Crear nuevo
-      const cleanBuf = Buffer.from(JSON.stringify(cleanWf));
-      res = await new Promise((resolve) => {
-        const req = http.request({
-          hostname: 'localhost', port: 5678,
-          path: '/api/v1/workflows',
-          method: 'POST',
-          headers: { 'X-N8N-API-KEY': API_KEY, 'Content-Type': 'application/json', 'Content-Length': cleanBuf.length }
-        }, (r) => {
-          let d = ''; r.on('data', c => d += c);
-          r.on('end', () => { try { resolve({ ok: r.statusCode < 400, body: JSON.parse(d) }); } catch { resolve({ ok: r.statusCode < 400, body: d }); } });
-        });
-        req.on('error', e => resolve({ ok: false, body: { error: e.message } }));
-        req.write(cleanBuf); req.end();
-      });
-      const id = res.body.id || '?';
-      ids[name] = id;
+      wfId = existing[name];
+      const res = await apiCall('PUT', `/api/v1/workflows/${wfId}`, payload);
       if (res.ok) {
-        console.log(`  ✓ CREATE: ${name} [${id}]`);
+        console.log(`  ✓ UPDATE: ${name} [${wfId}]`);
       } else {
-        console.log(`  ✗ ERROR: ${name} — ${JSON.stringify(res.body).slice(0, 150)}`);
+        console.log(`  ✗ UPDATE FALLÓ: ${name} [${wfId}] HTTP ${res.status}`);
+        console.log(`    ${JSON.stringify(res.body).slice(0, 300)}`);
+        // Fallback: crear nuevo
+        const res2 = await apiCall('POST', '/api/v1/workflows', payload);
+        if (res2.ok) {
+          wfId = res2.body.id;
+          console.log(`  ✓ CREATE (fallback): ${name} [${wfId}]`);
+        } else {
+          console.log(`  ✗ CREATE FALLÓ: ${name} HTTP ${res2.status}: ${JSON.stringify(res2.body).slice(0,200)}`);
+          continue;
+        }
+      }
+    } else {
+      const res = await apiCall('POST', '/api/v1/workflows', payload);
+      if (res.ok) {
+        wfId = res.body.id;
+        console.log(`  ✓ CREATE: ${name} [${wfId}]`);
+      } else {
+        console.log(`  ✗ CREATE FALLÓ: ${name} HTTP ${res.status}: ${JSON.stringify(res.body).slice(0,250)}`);
+        continue;
       }
     }
+
+    ids[name] = wfId;
   }
 
-  // 4. Auto-cablear WF01 con IDs reales de WF02 y WF04
+  // 5. Cablear WF01 → WF02 y WF04
   console.log('\n── CABLEANDO SUB-WORKFLOWS ──');
   const wf01Name = Object.keys(ids).find(k => k.includes('01_MASTER'));
   const wf02Name = Object.keys(ids).find(k => k.includes('02_AI'));
@@ -197,85 +217,106 @@ async function main() {
     if (wf01Res.ok && wf01Res.body.nodes) {
       const wf01 = wf01Res.body;
       let changed = 0;
+
       for (const node of wf01.nodes) {
-        if (node.type === 'n8n-nodes-base.executeWorkflow') {
-          const nm = (node.name || '').toLowerCase();
-          const wfIdParam = node.parameters && node.parameters.workflowId;
-          if (typeof wfIdParam === 'object' && wfIdParam !== null) {
-            if (nm.includes('02') || nm.includes('ai') || nm.includes('content')) {
-              node.parameters.workflowId.value = wf02Id;
-              changed++;
-            } else if (nm.includes('04') || nm.includes('blogger') || nm.includes('publisher')) {
-              node.parameters.workflowId.value = wf04Id;
-              changed++;
-            }
+        if (node.type !== 'n8n-nodes-base.executeWorkflow') continue;
+        const nm = (node.name || '').toLowerCase();
+        if (!node.parameters) continue;
+        const wfIdParam = node.parameters.workflowId;
+
+        if (typeof wfIdParam === 'object' && wfIdParam !== null && '__rl' in wfIdParam) {
+          if (nm.includes('02') || nm.includes('ai') || nm.includes('content')) {
+            node.parameters.workflowId.value = wf02Id; changed++;
+          } else if (nm.includes('04') || nm.includes('blogger') || nm.includes('publisher')) {
+            node.parameters.workflowId.value = wf04Id; changed++;
+          }
+        } else if (typeof wfIdParam === 'string') {
+          if (nm.includes('02') || nm.includes('ai') || nm.includes('content')) {
+            node.parameters.workflowId = wf02Id; changed++;
+          } else if (nm.includes('04') || nm.includes('blogger') || nm.includes('publisher')) {
+            node.parameters.workflowId = wf04Id; changed++;
           }
         }
       }
-      // Limpiar y guardar
-      delete wf01.createdAt; delete wf01.updatedAt; delete wf01.versionId;
-      const patchBuf = Buffer.from(JSON.stringify(wf01));
-      const patchRes = await new Promise((resolve) => {
-        const req = http.request({
-          hostname: 'localhost', port: 5678,
-          path: `/api/v1/workflows/${wf01Id}`,
-          method: 'PUT',
-          headers: { 'X-N8N-API-KEY': API_KEY, 'Content-Type': 'application/json', 'Content-Length': patchBuf.length }
-        }, (r) => {
-          let d = ''; r.on('data', c => d += c);
-          r.on('end', () => resolve({ ok: r.statusCode < 400, status: r.statusCode }));
-        });
-        req.on('error', e => resolve({ ok: false, error: e.message }));
-        req.write(patchBuf); req.end();
-      });
+
+      // CRÍTICO: usar sanitizeForApi para no enviar campos extras
+      const patchPayload = sanitizeForApi(wf01);
+      const patchRes = await apiCall('PUT', `/api/v1/workflows/${wf01Id}`, patchPayload);
       if (patchRes.ok) {
         console.log(`  ✓ WF01 [${wf01Id}] → WF02=[${wf02Id}] WF04=[${wf04Id}] (${changed} nodos)`);
       } else {
-        console.log(`  ✗ Error patcheando WF01: status ${patchRes.status}`);
+        console.log(`  ✗ Error patcheando WF01: HTTP ${patchRes.status}`);
+        console.log(`    ${JSON.stringify(patchRes.body).slice(0, 300)}`);
       }
     }
   } else {
-    console.log('  ⚠ No se encontraron todos los IDs para cablear WF01');
-    console.log(`    WF01=${wf01Name||'?'} WF02=${wf02Name||'?'} WF04=${wf04Name||'?'}`);
+    console.log(`  ⚠ IDs faltantes: WF01=${wf01Name||'?'} WF02=${wf02Name||'?'} WF04=${wf04Name||'?'}`);
   }
 
-  // 5. Activar todos los workflows
+  // 6. Activar en orden
   console.log('\n── ACTIVANDO WORKFLOWS ──');
-  const activatePatterns = [
+  await new Promise(r => setTimeout(r, 2000));
+
+  const allWf = await getAllWorkflows();
+
+  const activateOrder = [
     '05_LOCK', '25_TITLE', '02_AI', '04_BLOGGER',
     '06_AFFILIATE', '07_MONETIZ', '08_TELEGRAM',
     '09_DIGITAL', '15_INTERLINK', '01_MASTER'
   ];
 
-  const allWfRes = await apiCall('GET', '/api/v1/workflows?limit=200');
-  const allWf = allWfRes.body.data || [];
-
-  for (const pattern of activatePatterns) {
+  for (const pattern of activateOrder) {
     const wf = allWf.find(w => w.name.includes(pattern));
     if (!wf) { console.log(`  SKIP: ${pattern}`); continue; }
+    if (wf.active) { console.log(`  ✓ YA ACTIVO: ${wf.name} [${wf.id}]`); continue; }
 
-    const actRes = await apiCall('POST', `/api/v1/workflows/${wf.id}/activate`, {});
-    const isActive = actRes.ok || actRes.body.active === true;
-    console.log(`  ${isActive ? '✓' : '✗'} ${wf.name} [${wf.id}]`);
+    const actRes = await apiCall('POST', `/api/v1/workflows/${wf.id}/activate`);
+    const ok = actRes.ok || actRes.body?.active === true;
+    console.log(`  ${ok ? '✓ ACTIVADO' : '✗ FALLÓ'}: ${wf.name} [${wf.id}]`);
+    if (!ok) console.log(`    ${JSON.stringify(actRes.body).slice(0,200)}`);
   }
 
-  // 6. Resumen final
+  // 7. Estado final
   console.log('\n── ESTADO FINAL ──');
+  await new Promise(r => setTimeout(r, 1500));
+
   const finalRes = await apiCall('GET', '/api/v1/workflows?active=true&limit=50');
   const activeWfs = finalRes.body.data || [];
-  console.log(`Workflows activos: ${activeWfs.length}`);
+  console.log(`\nWorkflows ACTIVOS: ${activeWfs.length}`);
   for (const w of activeWfs) console.log(`  ✓ ${w.name}`);
 
-  // 7. Telegram de confirmación
+  const criticalOk = ['01_MASTER', '02_AI', '04_BLOGGER', '05_LOCK']
+    .every(p => activeWfs.some(w => w.name.includes(p)));
+
+  console.log('\n── PRODUCCIÓN ──');
+  console.log(`  Importados: ${Object.keys(ids).length}`);
+  console.log(`  Activos:    ${activeWfs.length}`);
+  console.log(`  Estado:     ${criticalOk ? '✓ LISTA — 1 artículo cada 20 min' : '✗ INCOMPLETA — revisar panel'}`);
+
+  // 8. Telegram
   if (BOT_TOKEN && CHAT_ID && CHAT_ID !== '0') {
-    const msg = `🚀 <b>Fábrica SEO n8n — ACTIVA</b>\n\n✅ ${activeWfs.length} workflows activos\n✅ Crons corriendo\n\n🕐 ${new Date().toISOString().slice(0,16)}\n\n<i>Próximo artículo en 20 min.</i>`;
+    const msg = [
+      `🚀 <b>Fábrica SEO — ${criticalOk ? '🟢 ACTIVA' : '🟡 PARCIAL'}</b>`,
+      '',
+      `✅ ${Object.keys(ids).length} workflows importados`,
+      `✅ ${activeWfs.length} activos`,
+      criticalOk ? '✅ Cron: 1 artículo/20 min' : '⚠ Revisar workflows en panel',
+      '',
+      `🕐 ${new Date().toISOString().slice(0,16).replace('T',' ')}`,
+    ].join('\n');
     await telegramSend(msg);
-    console.log('\n✓ Confirmación enviada a Telegram');
+    console.log('\n✓ Telegram notificado');
   }
 
-  console.log(`\n${'═'.repeat(50)}`);
+  console.log(`\n${'═'.repeat(52)}`);
   console.log('  BOOTSTRAP COMPLETADO');
-  console.log(`${'═'.repeat(50)}\n`);
+  console.log(`${'═'.repeat(52)}\n`);
+
+  process.exit(criticalOk ? 0 : 2);
 }
 
-main().catch(e => { console.error('FATAL:', e.message, e.stack); process.exit(1); });
+main().catch(e => {
+  console.error('\nFATAL:', e.message);
+  console.error(e.stack);
+  process.exit(1);
+});
