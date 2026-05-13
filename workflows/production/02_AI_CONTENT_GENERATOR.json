@@ -2,25 +2,45 @@
   "name": "02_AI_CONTENT_GENERATOR",
   "nodes": [
     {
-      "parameters": { "inputSource": "workflowInputData" },
+      "parameters": {
+        "inputSource": "workflowInputData"
+      },
       "id": "trigger",
       "name": "Workflow Input",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
-      "position": [240, 300]
+      "position": [
+        240,
+        300
+      ]
     },
     {
       "parameters": {
-        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
-        "sheetName": { "__rl": true, "value": "NICHE_CONFIG", "mode": "name" },
+        "documentId": {
+          "__rl": true,
+          "value": "13rS31xB5418HpBT-z5-a8ONuU1NYL9cQ_ipwEmKPJ4U",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
         "options": {}
       },
       "id": "read-niche-config",
       "name": "Read NICHE_CONFIG",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [460, 300],
-      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+      "position": [
+        460,
+        300
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
     },
     {
       "parameters": {
@@ -30,7 +50,10 @@
       "name": "Build Prompt + Monetizacion",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [680, 300]
+      "position": [
+        680,
+        300
+      ]
     },
     {
       "parameters": {
@@ -39,8 +62,14 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $credentials.httpHeaderAuth.value }}" },
-            { "name": "Content-Type", "value": "application/json" }
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $credentials.httpHeaderAuth.value }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
           ]
         },
         "sendBody": true,
@@ -48,21 +77,36 @@
         "body": {
           "model": "deepseek-chat",
           "messages": [
-            { "role": "system", "content": "={{ $json.systemPrompt }}" },
-            { "role": "user", "content": "={{ $json.userPrompt }}" }
+            {
+              "role": "system",
+              "content": "={{ $json.systemPrompt }}"
+            },
+            {
+              "role": "user",
+              "content": "={{ $json.userPrompt }}"
+            }
           ],
           "max_tokens": 3500,
           "temperature": 0.65,
           "stream": false
         },
-        "options": { "timeout": 120000 }
+        "options": {
+          "timeout": 120000
+        }
       },
       "id": "deepseek-api",
       "name": "DeepSeek API",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [900, 300],
-      "credentials": { "httpHeaderAuth": { "name": "DeepSeek API" } },
+      "position": [
+        900,
+        300
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "DeepSeek API"
+        }
+      },
       "onError": "continueErrorOutput"
     },
     {
@@ -73,7 +117,10 @@
       "name": "Extraer y Validar HTML",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1120, 260]
+      "position": [
+        1120,
+        260
+      ]
     },
     {
       "parameters": {
@@ -83,22 +130,39 @@
       "name": "Manejar Error Reintento",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1120, 420]
+      "position": [
+        1120,
+        420
+      ]
     },
     {
-      "parameters": { "amount": 10, "unit": "seconds" },
+      "parameters": {
+        "amount": 10,
+        "unit": "seconds"
+      },
       "id": "wait-retry",
       "name": "Esperar 10s",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
-      "position": [1340, 420],
+      "position": [
+        1340,
+        420
+      ],
       "webhookId": "ds-retry-wait"
     },
     {
       "parameters": {
         "operation": "update",
-        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
-        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
+        "documentId": {
+          "__rl": true,
+          "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "CONTENT_PIPELINE",
+          "mode": "name"
+        },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
@@ -108,13 +172,60 @@
             "TOKENS_USED": "={{ $json.TOKENS_USED }}",
             "GENERATED_AT": "={{ $json.GENERATED_AT }}"
           },
-          "matchingColumns": ["ROW_NUMBER"],
+          "matchingColumns": [
+            "ROW_NUMBER"
+          ],
           "schema": [
-            {"id": "ROW_NUMBER", "displayName": "ROW_NUMBER", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
-            {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "HTML_CONTENT", "displayName": "HTML_CONTENT", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "TOKENS_USED", "displayName": "TOKENS_USED", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "GENERATED_AT", "displayName": "GENERATED_AT", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+            {
+              "id": "ROW_NUMBER",
+              "displayName": "ROW_NUMBER",
+              "required": false,
+              "defaultMatch": true,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "STATUS",
+              "displayName": "STATUS",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "HTML_CONTENT",
+              "displayName": "HTML_CONTENT",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "TOKENS_USED",
+              "displayName": "TOKENS_USED",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "GENERATED_AT",
+              "displayName": "GENERATED_AT",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            }
           ]
         },
         "options": {}
@@ -123,8 +234,15 @@
       "name": "Update CONTENT_READY",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [1340, 260],
-      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+      "position": [
+        1340,
+        260
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
     },
     {
       "parameters": {
@@ -134,22 +252,116 @@
       "name": "Retornar al Caller",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1560, 260]
+      "position": [
+        1560,
+        260
+      ]
     }
   ],
   "connections": {
-    "Workflow Input": { "main": [[{"node": "Read NICHE_CONFIG", "type": "main", "index": 0}]] },
-    "Read NICHE_CONFIG": { "main": [[{"node": "Build Prompt + Monetizacion", "type": "main", "index": 0}]] },
-    "Build Prompt + Monetizacion": { "main": [[{"node": "DeepSeek API", "type": "main", "index": 0}]] },
-    "DeepSeek API": { "main": [
-      [{"node": "Extraer y Validar HTML", "type": "main", "index": 0}],
-      [{"node": "Manejar Error Reintento", "type": "main", "index": 0}]
-    ]},
-    "Extraer y Validar HTML": { "main": [[{"node": "Update CONTENT_READY", "type": "main", "index": 0}]] },
-    "Update CONTENT_READY": { "main": [[{"node": "Retornar al Caller", "type": "main", "index": 0}]] },
-    "Manejar Error Reintento": { "main": [[{"node": "Esperar 10s", "type": "main", "index": 0}]] },
-    "Esperar 10s": { "main": [[{"node": "DeepSeek API", "type": "main", "index": 0}]] }
+    "Workflow Input": {
+      "main": [
+        [
+          {
+            "node": "Read NICHE_CONFIG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read NICHE_CONFIG": {
+      "main": [
+        [
+          {
+            "node": "Build Prompt + Monetizacion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Prompt + Monetizacion": {
+      "main": [
+        [
+          {
+            "node": "DeepSeek API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek API": {
+      "main": [
+        [
+          {
+            "node": "Extraer y Validar HTML",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Manejar Error Reintento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extraer y Validar HTML": {
+      "main": [
+        [
+          {
+            "node": "Update CONTENT_READY",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update CONTENT_READY": {
+      "main": [
+        [
+          {
+            "node": "Retornar al Caller",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manejar Error Reintento": {
+      "main": [
+        [
+          {
+            "node": "Esperar 10s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Esperar 10s": {
+      "main": [
+        [
+          {
+            "node": "DeepSeek API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
-  "settings": { "executionOrder": "v1", "saveManualExecutions": true, "callerPolicy": "workflowsFromSameOwner", "executionTimeout": 300 },
-  "meta": { "instanceId": "production" }
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 300
+  },
+  "meta": {
+    "instanceId": "production"
+  }
 }

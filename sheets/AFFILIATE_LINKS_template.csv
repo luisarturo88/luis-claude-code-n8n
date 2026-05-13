@@ -1,14 +1,33 @@
-KEYWORD,PRODUCT_NAME,AMAZON_URL,TYPE,NICHE,COMMISSION,ACTIVE
-"comida para hurones","Marshall Premium Ferret Diet","https://www.amazon.com/dp/ASINHERE?tag=TU_TAG","product","hurones","8%","TRUE"
-"jaula para hurones","Ferret Nation Double Unit Ferret Cage","https://www.amazon.com/dp/ASINHERE?tag=TU_TAG","product","hurones","6%","TRUE"
-"juguetes para hurones","Ware Manufacturing Ferret Playpen","https://www.amazon.com/dp/ASINHERE?tag=TU_TAG","product","hurones","6%","TRUE"
-"comida para perros","Royal Canin Adult Dog Food","https://www.amazon.com/dp/ASINHERE?tag=TU_TAG","product","veterinary","8%","TRUE"
-"antipulgas perros","Frontline Plus Flea and Tick","https://www.amazon.com/dp/ASINHERE?tag=TU_TAG","product","veterinary","6%","TRUE"
-"collar GPS perros","Whistle GO Explore GPS Tracker","https://www.amazon.com/dp/ASINHERE?tag=TU_TAG","product","veterinary","4%","TRUE"
-"comida para bulldogs","Royal Canin Bulldog Adult","https://www.amazon.com/dp/ASINHERE?tag=TU_TAG","product","bulldogs","8%","TRUE"
-"suplementos para perros","Zesty Paws Multivitamin for Dogs","https://www.amazon.com/dp/ASINHERE?tag=TU_TAG","product","veterinary","8%","TRUE"
-"","Tu Canal de Telegram","https://t.me/TU_CANAL","telegram","general","","TRUE"
-"","Guía Gratis de Mascotas","https://TU_DOMINIO/guia-mascotas","lead_magnet","veterinary","","TRUE"
-"","Guía Gratis de Finanzas","https://TU_DOMINIO/guia-finanzas","lead_magnet","finanzas","","TRUE"
-"","Tu Hotmart Principal","https://hotmart.com/TU_PRODUCTO","hotmart","general","","TRUE"
-"seguro de vida","Comparador de Seguros","https://TU_LINK_AFILIADO","keyword","seguros","15%","TRUE"
+niche,keyword,affiliate_type,anchor_text,affiliate_url,product_name,cta_text,enabled,priority,language
+veterinary,mejor comida para perros,product,mejor comida para perro adulto,https://amzn.to/PROD_VET_001,Royal Canin Adult Maxi,Ver precio en Amazon,TRUE,1,es
+veterinary,antipulgas perros,product,antipulgas para perros recomendado,https://amzn.to/PROD_VET_002,Frontline Plus Antiparasitario,Comprar antipulgas,TRUE,1,es
+veterinary,collar GPS perros,product,collar GPS para perros,https://amzn.to/PROD_VET_003,Tractive GPS Collar Perro,Ver GPS en Amazon,TRUE,2,es
+veterinary,suplementos articulaciones perros,product,suplementos para articulaciones caninas,https://amzn.to/PROD_VET_004,Cosequin DS Cápsulas,Comprar suplemento,TRUE,2,es
+veterinary,parvovirus perros,keyword,síntomas de parvovirus,https://amzn.to/PROD_VET_001,Royal Canin Recovery,Comida recomendada post-parvo,TRUE,1,es
+veterinary,sarna perros tratamiento,keyword,tratamiento para sarna,https://amzn.to/PROD_VET_002,Frontline Plus,Antipulgas y antiparásitos,TRUE,1,es
+hurones,comida para hurones,product,mejor comida para hurones,https://amzn.to/PROD_HUR_001,Marshall Premium Ferret Food,Ver precio en Amazon,TRUE,1,es
+hurones,jaula hurones,product,jaula grande para hurones,https://amzn.to/PROD_HUR_002,Midwest Deluxe Ferret Nation,Comprar jaula,TRUE,1,es
+hurones,juguetes hurones,product,juguetes interactivos para hurones,https://amzn.to/PROD_HUR_003,Super Pet Ferret Tunnel,Ver juguetes,TRUE,2,es
+hurones,insulinoma hurones,keyword,tratamiento insulinoma,https://amzn.to/PROD_HUR_001,Marshall Premium Ferret Food,Dieta recomendada,TRUE,1,es
+bulldogs,comida bulldog frances,product,mejor comida para bulldog francés,https://amzn.to/PROD_BUL_001,Royal Canin Bulldog Adult,Ver precio en Amazon,TRUE,1,es
+bulldogs,arnés bulldog,product,arnés específico para bulldog,https://amzn.to/PROD_BUL_002,Ruffwear Front Range Harness,Comprar arnés,TRUE,1,es
+seguros,seguro de vida familiar,lead_magnet,cotiza tu seguro de vida,https://hotmart.com/SEGURO_VIDA_001,Guía: Cómo elegir seguro de vida,Descargar guía gratis,TRUE,1,es
+seguros,seguro médico privado,lead_magnet,compara seguros médicos,https://hotmart.com/SEGURO_MED_001,Checklist: Seguro médico ideal,Obtener checklist,TRUE,1,es
+finanzas,invertir en bolsa principiantes,lead_magnet,guía de inversión para principiantes,https://hotmart.com/FIN_INVERSION_001,Ebook: Invierte desde $100,Descargar ebook gratis,TRUE,1,es
+finanzas,ahorrar dinero tips,lead_magnet,sistema de ahorro automático,https://hotmart.com/FIN_AHORRO_001,Plantilla: Presupuesto Mensual,Descargar plantilla,TRUE,1,es
+saas,herramientas IA negocios,product,herramientas de IA para empresas,https://amzn.to/PROD_SAAS_001,Libro: IA para Negocios,Ver en Amazon,TRUE,1,es
+saas,n8n tutorial,lead_magnet,automatización con n8n,https://hotmart.com/SAAS_N8N_001,Guía n8n: Automatiza tu negocio,Descargar guía,TRUE,2,es
+ia,chatgpt para empresas,product,guía ChatGPT empresas,https://hotmart.com/IA_CHATGPT_001,Curso ChatGPT Pro,Ver curso,TRUE,1,es
+ia,automatización marketing ia,lead_magnet,automatiza tu marketing con IA,https://hotmart.com/IA_MARKETING_001,Checklist: IA para Marketing,Obtener checklist,TRUE,1,es
+insurance,cheap car insurance,product,get cheap car insurance quotes,https://amzn.to/PROD_INS_EN_001,Auto Insurance Guide 2025,See on Amazon,TRUE,1,en
+insurance,homeowners insurance,product,best homeowners insurance,https://amzn.to/PROD_INS_EN_002,Home Insurance Complete Guide,View on Amazon,TRUE,1,en
+insurance,life insurance seniors,lead_magnet,compare life insurance for seniors,https://hotmart.com/INS_LIFE_001,Free Guide: Life Insurance Over 60,Download free guide,TRUE,1,en
+legal-us,wrongful termination,lead_magnet,free wrongful termination guide,https://hotmart.com/LEGAL_WRG_001,Know Your Rights: Wrongful Termination,Download free guide,TRUE,1,en
+legal-us,sue employer,lead_magnet,how to sue your employer,https://hotmart.com/LEGAL_SUE_001,Employee Rights Legal Guide,Get free guide,TRUE,1,en
+legal-us,personal injury settlement,product,personal injury guide,https://amzn.to/PROD_LEGAL_001,Personal Injury Handbook,See on Amazon,TRUE,2,en
+veterinary,telegram,telegram,Únete al canal Telegram,https://t.me/TU_CANAL_AQUI,Canal Veterinario Mascotas,Unirte al canal gratis,TRUE,1,es
+hurones,telegram,telegram,Únete al canal Telegram,https://t.me/TU_CANAL_AQUI,Canal Hurones & Mascotas,Unirte al canal,TRUE,1,es
+seguros,telegram,telegram,Únete al canal Telegram,https://t.me/TU_CANAL_AQUI,Canal Finanzas & Seguros,Unirte al canal,TRUE,1,es
+finanzas,telegram,telegram,Únete al canal Telegram,https://t.me/TU_CANAL_AQUI,Canal Finanzas Personales,Unirte al canal,TRUE,1,es
+insurance,telegram,telegram,Join our Telegram channel,https://t.me/TU_CANAL_AQUI,Insurance Tips Channel,Join free channel,TRUE,1,en
+legal-us,telegram,telegram,Join our Telegram channel,https://t.me/TU_CANAL_AQUI,Legal Rights Channel,Join free channel,TRUE,1,en

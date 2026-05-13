@@ -4,47 +4,96 @@
     {
       "parameters": {
         "rule": {
-          "interval": [{ "field": "hours", "hoursInterval": 6 }]
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
         }
       },
       "id": "cron-trigger",
       "name": "Cada 6 Horas",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [240, 300]
+      "position": [
+        240,
+        300
+      ]
     },
     {
       "parameters": {
-        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
-        "sheetName": { "__rl": true, "value": "NICHE_CONFIG", "mode": "name" },
+        "documentId": {
+          "__rl": true,
+          "value": "13rS31xB5418HpBT-z5-a8ONuU1NYL9cQ_ipwEmKPJ4U",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
         "options": {}
       },
       "id": "read-niches",
       "name": "Read NICHE_CONFIG",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [460, 300],
-      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+      "position": [
+        460,
+        300
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
     },
     {
       "parameters": {
-        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
-        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
+        "documentId": {
+          "__rl": true,
+          "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "CONTENT_PIPELINE",
+          "mode": "name"
+        },
         "options": {}
       },
       "id": "read-existing",
       "name": "Read Titulos Existentes",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [460, 460],
-      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+      "position": [
+        460,
+        460
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
     },
     {
       "parameters": {
         "conditions": {
-          "options": { "caseSensitive": false, "typeValidation": "loose" },
+          "options": {
+            "caseSensitive": false,
+            "typeValidation": "loose"
+          },
           "conditions": [
-            { "id": "is-active", "leftValue": "={{ $json.ACTIVE }}", "rightValue": "TRUE", "operator": { "type": "string", "operation": "equals" } }
+            {
+              "id": "is-active",
+              "leftValue": "={{ $json.ACTIVE }}",
+              "rightValue": "TRUE",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
           ],
           "combinator": "and"
         },
@@ -54,7 +103,10 @@
       "name": "Filtrar Nichos Activos",
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
-      "position": [680, 300]
+      "position": [
+        680,
+        300
+      ]
     },
     {
       "parameters": {
@@ -64,14 +116,28 @@
       "name": "Preparar Generación por Nicho",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [900, 380]
+      "position": [
+        900,
+        380
+      ]
     },
     {
       "parameters": {
         "conditions": {
-          "options": { "caseSensitive": false, "typeValidation": "loose" },
+          "options": {
+            "caseSensitive": false,
+            "typeValidation": "loose"
+          },
           "conditions": [
-            { "id": "not-skip", "leftValue": "={{ $json._skip }}", "rightValue": true, "operator": { "type": "boolean", "operation": "notTrue" } }
+            {
+              "id": "not-skip",
+              "leftValue": "={{ $json._skip }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "notTrue"
+              }
+            }
           ],
           "combinator": "and"
         },
@@ -81,7 +147,10 @@
       "name": "¿Necesita Títulos?",
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
-      "position": [1120, 380]
+      "position": [
+        1120,
+        380
+      ]
     },
     {
       "parameters": {
@@ -90,8 +159,14 @@
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $credentials.httpHeaderAuth.value }}" },
-            { "name": "Content-Type", "value": "application/json" }
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $credentials.httpHeaderAuth.value }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
           ]
         },
         "sendBody": true,
@@ -112,14 +187,23 @@
           "temperature": 0.8,
           "stream": false
         },
-        "options": { "timeout": 60000 }
+        "options": {
+          "timeout": 60000
+        }
       },
       "id": "generate-titles",
       "name": "Generar Títulos con DeepSeek",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1340, 380],
-      "credentials": { "httpHeaderAuth": { "name": "DeepSeek API" } }
+      "position": [
+        1340,
+        380
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "DeepSeek API"
+        }
+      }
     },
     {
       "parameters": {
@@ -129,39 +213,151 @@
       "name": "Parsear y Deduplicar Títulos",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1560, 380]
+      "position": [
+        1560,
+        380
+      ]
     },
     {
       "parameters": {
         "operation": "append",
-        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
-        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
+        "documentId": {
+          "__rl": true,
+          "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "CONTENT_PIPELINE",
+          "mode": "name"
+        },
         "columns": {
           "mappingMode": "autoMapInputData",
           "value": {},
           "matchingColumns": [],
           "schema": []
         },
-        "options": { "cellFormat": "USER_ENTERED" }
+        "options": {
+          "cellFormat": "USER_ENTERED"
+        }
       },
       "id": "append-to-sheet",
       "name": "Insertar en CONTENT_PIPELINE",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [1780, 380],
-      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+      "position": [
+        1780,
+        380
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "name": "Google Sheets account"
+        }
+      }
     }
   ],
   "connections": {
-    "Cada 6 Horas": { "main": [[{"node": "Read NICHE_CONFIG", "type": "main", "index": 0}, {"node": "Read Titulos Existentes", "type": "main", "index": 0}]] },
-    "Read NICHE_CONFIG": { "main": [[{"node": "Filtrar Nichos Activos", "type": "main", "index": 0}]] },
-    "Filtrar Nichos Activos": { "main": [[{"node": "Preparar Generación por Nicho", "type": "main", "index": 0}]] },
-    "Read Titulos Existentes": { "main": [[{"node": "Preparar Generación por Nicho", "type": "main", "index": 0}]] },
-    "Preparar Generación por Nicho": { "main": [[{"node": "¿Necesita Títulos?", "type": "main", "index": 0}]] },
-    "¿Necesita Títulos?": { "main": [[{"node": "Generar Títulos con DeepSeek", "type": "main", "index": 0}]] },
-    "Generar Títulos con DeepSeek": { "main": [[{"node": "Parsear y Deduplicar Títulos", "type": "main", "index": 0}]] },
-    "Parsear y Deduplicar Títulos": { "main": [[{"node": "Insertar en CONTENT_PIPELINE", "type": "main", "index": 0}]] }
+    "Cada 6 Horas": {
+      "main": [
+        [
+          {
+            "node": "Read NICHE_CONFIG",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read Titulos Existentes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read NICHE_CONFIG": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Nichos Activos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Nichos Activos": {
+      "main": [
+        [
+          {
+            "node": "Preparar Generación por Nicho",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Titulos Existentes": {
+      "main": [
+        [
+          {
+            "node": "Preparar Generación por Nicho",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Generación por Nicho": {
+      "main": [
+        [
+          {
+            "node": "¿Necesita Títulos?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Necesita Títulos?": {
+      "main": [
+        [
+          {
+            "node": "Generar Títulos con DeepSeek",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generar Títulos con DeepSeek": {
+      "main": [
+        [
+          {
+            "node": "Parsear y Deduplicar Títulos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parsear y Deduplicar Títulos": {
+      "main": [
+        [
+          {
+            "node": "Insertar en CONTENT_PIPELINE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
-  "settings": { "executionOrder": "v1", "saveManualExecutions": true, "callerPolicy": "workflowsFromSameOwner", "executionTimeout": 600 },
-  "meta": { "instanceId": "production" }
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": 600
+  },
+  "meta": {
+    "instanceId": "production"
+  }
 }
