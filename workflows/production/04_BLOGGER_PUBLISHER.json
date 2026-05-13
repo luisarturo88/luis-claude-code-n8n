@@ -9,10 +9,7 @@
       "name": "Workflow Input",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
-      "position": [
-        240,
-        300
-      ]
+      "position": [240, 300]
     },
     {
       "parameters": {
@@ -22,41 +19,17 @@
           "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug",
           "mode": "id"
         },
-        "sheetName": {
-          "__rl": true,
-          "value": "CONTENT_PIPELINE",
-          "mode": "name"
-        },
+        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
             "ID_UNICO": "={{ $json.ID_UNICO }}",
             "STATUS": "PUBLISHING"
           },
-          "matchingColumns": [
-            "ID_UNICO"
-          ],
+          "matchingColumns": ["ID_UNICO"],
           "schema": [
-            {
-              "id": "ID_UNICO",
-              "displayName": "ID_UNICO",
-              "required": false,
-              "defaultMatch": true,
-              "canBeUsedToMatch": true,
-              "display": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "STATUS",
-              "displayName": "STATUS",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
+            {"id": "ID_UNICO", "displayName": "ID_UNICO", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
+            {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
           ]
         },
         "options": {}
@@ -65,15 +38,8 @@
       "name": "Mark PUBLISHING",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [
-        460,
-        300
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "name": "Google Sheets account"
-        }
-      }
+      "position": [460, 300],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
     },
     {
       "parameters": {
@@ -83,56 +49,65 @@
       "name": "Pass Data",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        680,
-        300
-      ]
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug",
+          "mode": "id"
+        },
+        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
+        "options": {}
+      },
+      "id": "read-schedule",
+      "name": "Read Pipeline for Slot",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [900, 420],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Slow scheduling: find next available 20-min Blogger slot\n// so articles publish even if VPS goes down\nconst pipelineRows = $('Read Pipeline for Slot').all().map(i => i.json);\nconst passData = $('Pass Data').item.json;\n\n// Find max SCHEDULED_FOR across all rows (articles already uploaded)\nlet maxSlot = Date.now();\nfor (const row of pipelineRows) {\n  if (row.SCHEDULED_FOR) {\n    const t = new Date(row.SCHEDULED_FOR).getTime();\n    if (!isNaN(t) && t > maxSlot) maxSlot = t;\n  }\n}\n\n// Next slot: max(lastSlot, now) + 20 minutes — Blogger will auto-publish\nconst INTERVAL_MS = 20 * 60 * 1000; // 20 minutes\nconst nowMs = Date.now();\nconst baseMs = Math.max(maxSlot, nowMs);\nconst nextSlotMs = baseMs + INTERVAL_MS;\nconst scheduledFor = new Date(nextSlotMs).toISOString();\n\nreturn {\n  json: {\n    ...passData,\n    SCHEDULED_FOR: scheduledFor\n  }\n};"
+      },
+      "id": "compute-slot",
+      "name": "Compute Schedule Slot",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 360]
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.BLOGGER_ID }}/posts/",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.BLOGGER_ID }}/posts/?isDraft=false",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "googleOAuth2Api",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
+            { "name": "Content-Type", "value": "application/json" }
           ]
         },
         "sendBody": true,
         "contentType": "json",
         "body": {
           "kind": "blogger#post",
-          "blog": {
-            "id": "={{ $json.BLOGGER_ID }}"
-          },
+          "blog": { "id": "={{ $json.BLOGGER_ID }}" },
           "title": "={{ $json.TEMA_ARTICULO }}",
           "content": "={{ $json.HTML_FINAL }}",
-          "labels": [
-            "={{ $json.NICHO }}"
-          ]
+          "labels": ["={{ $json.NICHO }}"],
+          "published": "={{ $json.SCHEDULED_FOR }}"
         },
-        "options": {
-          "timeout": 30000
-        }
+        "options": { "timeout": 30000 }
       },
       "id": "blogger-post",
       "name": "Publish to Blogger",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [
-        900,
-        300
-      ],
-      "credentials": {
-        "googleOAuth2Api": {
-          "name": "Google Blogger OAuth2"
-        }
-      },
+      "position": [1340, 300],
+      "credentials": { "googleOAuth2Api": { "name": "Google Blogger OAuth2" } },
       "onError": "continueErrorOutput"
     },
     {
@@ -148,10 +123,7 @@
               "id": "check-429",
               "leftValue": "={{ $json.error?.httpCode || $json.statusCode }}",
               "rightValue": "429",
-              "operator": {
-                "type": "string",
-                "operation": "equals"
-              }
+              "operator": { "type": "string", "operation": "equals" }
             }
           ],
           "combinator": "and"
@@ -162,85 +134,58 @@
       "name": "Is 429 Rate Limit?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [
-        1120,
-        400
-      ]
+      "position": [1560, 420]
     },
     {
-      "parameters": {
-        "amount": 90,
-        "unit": "seconds"
-      },
+      "parameters": { "amount": 90, "unit": "seconds" },
       "id": "wait-90s",
       "name": "Wait 90 seconds",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
-      "position": [
-        1340,
-        320
-      ],
+      "position": [1780, 360],
       "webhookId": "blogger-retry-wait"
     },
     {
       "parameters": {
         "method": "POST",
-        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $('Pass Data').item.json.BLOGGER_ID }}/posts/",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $('Compute Schedule Slot').item.json.BLOGGER_ID }}/posts/?isDraft=false",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "googleOAuth2Api",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
+            { "name": "Content-Type", "value": "application/json" }
           ]
         },
         "sendBody": true,
         "contentType": "json",
         "body": {
           "kind": "blogger#post",
-          "blog": {
-            "id": "={{ $('Pass Data').item.json.BLOGGER_ID }}"
-          },
-          "title": "={{ $('Pass Data').item.json.TEMA_ARTICULO }}",
-          "content": "={{ $('Pass Data').item.json.HTML_FINAL }}",
-          "labels": [
-            "={{ $('Pass Data').item.json.NICHO }}"
-          ]
+          "blog": { "id": "={{ $('Compute Schedule Slot').item.json.BLOGGER_ID }}" },
+          "title": "={{ $('Compute Schedule Slot').item.json.TEMA_ARTICULO }}",
+          "content": "={{ $('Compute Schedule Slot').item.json.HTML_FINAL }}",
+          "labels": ["={{ $('Compute Schedule Slot').item.json.NICHO }}"],
+          "published": "={{ $('Compute Schedule Slot').item.json.SCHEDULED_FOR }}"
         },
-        "options": {
-          "timeout": 30000
-        }
+        "options": { "timeout": 30000 }
       },
       "id": "blogger-retry",
       "name": "Retry Blogger Post",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [
-        1560,
-        320
-      ],
-      "credentials": {
-        "googleOAuth2Api": {
-          "name": "Google Blogger OAuth2"
-        }
-      },
+      "position": [2000, 360],
+      "credentials": { "googleOAuth2Api": { "name": "Google Blogger OAuth2" } },
       "onError": "continueErrorOutput"
     },
     {
       "parameters": {
-        "jsCode": "// Normalize success from either first attempt or retry\nconst fromRetry = $('Retry Blogger Post').item?.json;\nconst fromFirst = $('Publish to Blogger').item?.json;\nconst data = (fromRetry?.url || fromRetry?.id) ? fromRetry : fromFirst;\n\nif (!data?.url && !data?.id) {\n  throw new Error('Blogger publish failed: ' + JSON.stringify(data));\n}\n\nreturn {\n  json: {\n    ID_UNICO: $('Workflow Input').item.json.ID_UNICO,\n    URL_FINAL: data.url || `https://www.blogger.com/blog/post/${$('Workflow Input').item.json.BLOGGER_ID}/${data.id}`,\n    POST_ID: data.id,\n    PUBLISHED_AT: new Date().toISOString()\n  }\n};"
+        "jsCode": "// Normalize success from either first attempt or retry\nconst fromRetry = $('Retry Blogger Post').item?.json;\nconst fromFirst = $('Publish to Blogger').item?.json;\nconst data = (fromRetry?.url || fromRetry?.id) ? fromRetry : fromFirst;\n\nif (!data?.url && !data?.id) {\n  throw new Error('Blogger publish failed: ' + JSON.stringify(data).slice(0,300));\n}\n\nconst slot = $('Compute Schedule Slot').item.json;\nreturn {\n  json: {\n    ID_UNICO:       slot.ID_UNICO,\n    BLOGGER_ID:     slot.BLOGGER_ID,\n    URL_FINAL:      data.url || `https://www.blogger.com/blog/post/${slot.BLOGGER_ID}/${data.id}`,\n    POST_ID:        data.id,\n    SCHEDULED_FOR:  slot.SCHEDULED_FOR,\n    PUBLISHED_AT:   new Date().toISOString()\n  }\n};"
       },
       "id": "normalize-result",
       "name": "Normalize Result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        1780,
-        300
-      ]
+      "position": [2220, 300]
     },
     {
       "parameters": {
@@ -250,118 +195,33 @@
           "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug",
           "mode": "id"
         },
-        "sheetName": {
-          "__rl": true,
-          "value": "CONTENT_PIPELINE",
-          "mode": "name"
-        },
+        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "ID_UNICO": "={{ $json.ID_UNICO }}",
-            "STATUS": "PUBLISHED",
-            "LOCK": "FALSE",
-            "URL_FINAL": "={{ $json.URL_FINAL }}",
-            "POST_ID": "={{ $json.POST_ID }}",
-            "PUBLISHED_AT": "={{ $json.PUBLISHED_AT }}",
+            "ID_UNICO":      "={{ $json.ID_UNICO }}",
+            "STATUS":        "PUBLISHED",
+            "LOCK":          "FALSE",
+            "URL_FINAL":     "={{ $json.URL_FINAL }}",
+            "POST_ID":       "={{ $json.POST_ID }}",
+            "PUBLISHED_AT":  "={{ $json.PUBLISHED_AT }}",
+            "SCHEDULED_FOR": "={{ $json.SCHEDULED_FOR }}",
             "LOCK_TIMESTAMP": "",
-            "LAST_ERROR": "",
-            "BLOGGER_ID": "={{ $('Workflow Input').item.json.BLOGGER_ID }}"
+            "LAST_ERROR":    "",
+            "BLOGGER_ID":    "={{ $json.BLOGGER_ID }}"
           },
-          "matchingColumns": [
-            "ID_UNICO"
-          ],
+          "matchingColumns": ["ID_UNICO"],
           "schema": [
-            {
-              "id": "ID_UNICO",
-              "displayName": "ID_UNICO",
-              "required": false,
-              "defaultMatch": true,
-              "canBeUsedToMatch": true,
-              "display": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "STATUS",
-              "displayName": "STATUS",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "LOCK",
-              "displayName": "LOCK",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "URL_FINAL",
-              "displayName": "URL_FINAL",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "POST_ID",
-              "displayName": "POST_ID",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "PUBLISHED_AT",
-              "displayName": "PUBLISHED_AT",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "LOCK_TIMESTAMP",
-              "displayName": "LOCK_TIMESTAMP",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "LAST_ERROR",
-              "displayName": "LAST_ERROR",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "BLOGGER_ID",
-              "displayName": "BLOGGER_ID",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
+            {"id": "ID_UNICO",       "displayName": "ID_UNICO",       "required": false, "defaultMatch": true,  "canBeUsedToMatch": true,  "display": true, "type": "string", "removed": false},
+            {"id": "STATUS",         "displayName": "STATUS",         "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LOCK",           "displayName": "LOCK",           "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "URL_FINAL",      "displayName": "URL_FINAL",      "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "POST_ID",        "displayName": "POST_ID",        "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "PUBLISHED_AT",   "displayName": "PUBLISHED_AT",   "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "SCHEDULED_FOR",  "displayName": "SCHEDULED_FOR",  "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LOCK_TIMESTAMP", "displayName": "LOCK_TIMESTAMP", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LAST_ERROR",     "displayName": "LAST_ERROR",     "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "BLOGGER_ID",     "displayName": "BLOGGER_ID",     "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
           ]
         },
         "options": {}
@@ -370,15 +230,8 @@
       "name": "Mark PUBLISHED",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [
-        2000,
-        300
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "name": "Google Sheets account"
-        }
-      }
+      "position": [2440, 300],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
     },
     {
       "parameters": {
@@ -388,74 +241,23 @@
           "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug",
           "mode": "id"
         },
-        "sheetName": {
-          "__rl": true,
-          "value": "CONTENT_PIPELINE",
-          "mode": "name"
-        },
+        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "ID_UNICO": "={{ $('Workflow Input').item.json.ID_UNICO }}",
-            "STATUS": "FAILED",
-            "LOCK": "FALSE",
-            "LAST_ERROR": "={{ $json.error?.message || $json.message || JSON.stringify($json) }}",
+            "ID_UNICO":      "={{ $('Workflow Input').item.json.ID_UNICO }}",
+            "STATUS":        "FAILED",
+            "LOCK":          "FALSE",
+            "LAST_ERROR":    "={{ $json.error?.message || $json.message || JSON.stringify($json).slice(0,200) }}",
             "LOCK_TIMESTAMP": ""
           },
-          "matchingColumns": [
-            "ID_UNICO"
-          ],
+          "matchingColumns": ["ID_UNICO"],
           "schema": [
-            {
-              "id": "ID_UNICO",
-              "displayName": "ID_UNICO",
-              "required": false,
-              "defaultMatch": true,
-              "canBeUsedToMatch": true,
-              "display": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "STATUS",
-              "displayName": "STATUS",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "LOCK",
-              "displayName": "LOCK",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "LAST_ERROR",
-              "displayName": "LAST_ERROR",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "LOCK_TIMESTAMP",
-              "displayName": "LOCK_TIMESTAMP",
-              "required": false,
-              "defaultMatch": false,
-              "canBeUsedToMatch": false,
-              "display": true,
-              "type": "string",
-              "removed": false
-            }
+            {"id": "ID_UNICO",       "displayName": "ID_UNICO",       "required": false, "defaultMatch": true,  "canBeUsedToMatch": true,  "display": true, "type": "string", "removed": false},
+            {"id": "STATUS",         "displayName": "STATUS",         "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LOCK",           "displayName": "LOCK",           "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LAST_ERROR",     "displayName": "LAST_ERROR",     "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
+            {"id": "LOCK_TIMESTAMP", "displayName": "LOCK_TIMESTAMP", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
           ]
         },
         "options": {}
@@ -464,15 +266,8 @@
       "name": "Mark FAILED (Blogger)",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [
-        1340,
-        520
-      ],
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "name": "Google Sheets account"
-        }
-      }
+      "position": [1780, 520],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
     },
     {
       "parameters": {
@@ -481,35 +276,15 @@
           "value": "SOCIAL_DISTRIBUTOR_ID",
           "mode": "id"
         },
-        "options": {
-          "waitForSubWorkflow": false
-        },
+        "options": { "waitForSubWorkflow": false },
         "fields": {
           "values": [
-            {
-              "name": "ID_UNICO",
-              "stringValue": "={{ $('Workflow Input').item.json.ID_UNICO }}"
-            },
-            {
-              "name": "TEMA_ARTICULO",
-              "stringValue": "={{ $('Workflow Input').item.json.TEMA_ARTICULO }}"
-            },
-            {
-              "name": "URL_FINAL",
-              "stringValue": "={{ $('Normalize Result').item.json.URL_FINAL }}"
-            },
-            {
-              "name": "NICHO",
-              "stringValue": "={{ $('Workflow Input').item.json.NICHO || '' }}"
-            },
-            {
-              "name": "IDIOMA",
-              "stringValue": "={{ $('Workflow Input').item.json.IDIOMA || 'es' }}"
-            },
-            {
-              "name": "HTML_FINAL",
-              "stringValue": "={{ $('Workflow Input').item.json.HTML_FINAL || '' }}"
-            }
+            {"name": "ID_UNICO",      "stringValue": "={{ $('Workflow Input').item.json.ID_UNICO }}"},
+            {"name": "TEMA_ARTICULO", "stringValue": "={{ $('Workflow Input').item.json.TEMA_ARTICULO }}"},
+            {"name": "URL_FINAL",     "stringValue": "={{ $('Normalize Result').item.json.URL_FINAL }}"},
+            {"name": "NICHO",         "stringValue": "={{ $('Workflow Input').item.json.NICHO || '' }}"},
+            {"name": "IDIOMA",        "stringValue": "={{ $('Workflow Input').item.json.IDIOMA || 'es' }}"},
+            {"name": "HTML_FINAL",    "stringValue": "={{ $('Workflow Input').item.json.HTML_FINAL || '' }}"}
           ]
         }
       },
@@ -517,132 +292,51 @@
       "name": "10 Social Media Distributor",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.1,
-      "position": [
-        2220,
-        300
-      ]
+      "position": [2660, 300]
     }
   ],
   "connections": {
     "Workflow Input": {
-      "main": [
-        [
-          {
-            "node": "Mark PUBLISHING",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{"node": "Mark PUBLISHING", "type": "main", "index": 0}]]
     },
     "Mark PUBLISHING": {
-      "main": [
-        [
-          {
-            "node": "Pass Data",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{"node": "Pass Data", "type": "main", "index": 0}]]
     },
     "Pass Data": {
-      "main": [
-        [
-          {
-            "node": "Publish to Blogger",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{"node": "Read Pipeline for Slot", "type": "main", "index": 0}]]
+    },
+    "Read Pipeline for Slot": {
+      "main": [[{"node": "Compute Schedule Slot", "type": "main", "index": 0}]]
+    },
+    "Compute Schedule Slot": {
+      "main": [[{"node": "Publish to Blogger", "type": "main", "index": 0}]]
     },
     "Publish to Blogger": {
       "main": [
-        [
-          {
-            "node": "Normalize Result",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Is 429 Rate Limit?",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [{"node": "Normalize Result", "type": "main", "index": 0}],
+        [{"node": "Is 429 Rate Limit?", "type": "main", "index": 0}]
       ]
     },
     "Is 429 Rate Limit?": {
       "main": [
-        [
-          {
-            "node": "Wait 90 seconds",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Mark FAILED (Blogger)",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [{"node": "Wait 90 seconds", "type": "main", "index": 0}],
+        [{"node": "Mark FAILED (Blogger)", "type": "main", "index": 0}]
       ]
     },
     "Wait 90 seconds": {
-      "main": [
-        [
-          {
-            "node": "Retry Blogger Post",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{"node": "Retry Blogger Post", "type": "main", "index": 0}]]
     },
     "Retry Blogger Post": {
       "main": [
-        [
-          {
-            "node": "Normalize Result",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Mark FAILED (Blogger)",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [{"node": "Normalize Result", "type": "main", "index": 0}],
+        [{"node": "Mark FAILED (Blogger)", "type": "main", "index": 0}]
       ]
     },
     "Normalize Result": {
-      "main": [
-        [
-          {
-            "node": "Mark PUBLISHED",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{"node": "Mark PUBLISHED", "type": "main", "index": 0}]]
     },
     "Mark PUBLISHED": {
-      "main": [
-        [
-          {
-            "node": "10 Social Media Distributor",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{"node": "10 Social Media Distributor", "type": "main", "index": 0}]]
     }
   },
   "settings": {
@@ -651,7 +345,5 @@
     "callerPolicy": "workflowsFromSameOwner",
     "executionTimeout": 600
   },
-  "meta": {
-    "instanceId": "production"
-  }
+  "meta": { "instanceId": "production" }
 }

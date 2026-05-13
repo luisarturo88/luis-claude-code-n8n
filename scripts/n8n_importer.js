@@ -17,12 +17,23 @@ if (!API_KEY) { console.error('ERROR: N8N_API_KEY no definida'); process.exit(1)
 
 // ── Solo los campos que n8n API v1 acepta en POST/PUT ──────────────────────────
 // Cualquier campo extra causa: "request/body must NOT have additional properties"
+const VALID_SETTINGS = new Set([
+  'executionOrder', 'saveManualExecutions', 'callerPolicy',
+  'executionTimeout', 'timezone', 'saveDataSuccessExecution',
+  'saveDataErrorExecution'
+]);
+
 function sanitizeForApi(wf) {
+  const rawSettings = wf.settings || {};
+  const settings = {};
+  for (const [k, v] of Object.entries(rawSettings)) {
+    if (VALID_SETTINGS.has(k)) settings[k] = v;
+  }
   const clean = {
     name:        wf.name,
     nodes:       wf.nodes       || [],
     connections: wf.connections || {},
-    settings:    wf.settings    || {}
+    settings
   };
   if (wf.staticData && Object.keys(wf.staticData).length > 0) {
     clean.staticData = wf.staticData;
@@ -108,7 +119,7 @@ async function main() {
   for (const w of existingList) existing[w.name] = w.id;
   console.log(`✓ Workflows existentes: ${Object.keys(existing).length}`);
 
-  // 3. Eliminar workflows basura
+  // 3. Eliminar workflows basura y deduplicar gestionados
   const TRASH_PATTERNS = [
     'TEMP_READ_PIPELINE',
     'Sheet Reset Row',
@@ -117,22 +128,47 @@ async function main() {
     '99_SEED',
     'FIX_BLOG_ID',
   ];
-  console.log('\n── LIMPIANDO WORKFLOWS BASURA ──');
+  const MANAGED_NAMES = [
+    '05_LOCK_WATCHDOG', '02_AI_CONTENT_GENERATOR', '04_BLOGGER_PUBLISHER',
+    '25_TITLE_FACTORY', '06_AFFILIATE_INJECTOR', '07_MONETIZATION_INJECTOR',
+    '08_TELEGRAM_BROADCASTER', '09_DIGITAL_PRODUCT_LINKER',
+    '10_SOCIAL_MEDIA_DISTRIBUTOR', '15_INTERLINK_BUILDER', '01_MASTER_SCHEDULER',
+  ];
+
+  console.log('\n── LIMPIANDO WORKFLOWS BASURA Y DUPLICADOS ──');
   let deleted = 0;
+
+  // Eliminar basura
   for (const w of existingList) {
     const isTrash = TRASH_PATTERNS.some(p => w.name.includes(p));
     if (!isTrash) continue;
     if (w.active) await apiCall('POST', `/api/v1/workflows/${w.id}/deactivate`);
     const del = await apiCall('DELETE', `/api/v1/workflows/${w.id}`);
     if (del.ok || del.status === 404) {
-      console.log(`  🗑 ELIMINADO: ${w.name} [${w.id}]`);
+      console.log(`  🗑 ELIMINADO basura: ${w.name} [${w.id}]`);
       deleted++;
       delete existing[w.name];
-    } else {
-      console.log(`  ⚠ No se pudo eliminar ${w.name}: HTTP ${del.status}`);
     }
   }
-  if (deleted === 0) console.log('  (ningún workflow basura encontrado)');
+
+  // Deduplicar: si hay múltiples con el mismo nombre gestionado, conservar el más reciente
+  for (const managedName of MANAGED_NAMES) {
+    const copies = existingList.filter(w => w.name === managedName);
+    if (copies.length <= 1) continue;
+    copies.sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
+    for (const old of copies.slice(1)) {
+      if (old.active) await apiCall('POST', `/api/v1/workflows/${old.id}/deactivate`);
+      const del = await apiCall('DELETE', `/api/v1/workflows/${old.id}`);
+      if (del.ok || del.status === 404) {
+        console.log(`  🗑 DEDUP: ${old.name} [${old.id}] (copia antigua eliminada)`);
+        deleted++;
+      }
+    }
+    // Actualizar el mapa existing con el ID del más reciente
+    existing[managedName] = copies[0].id;
+  }
+
+  if (deleted === 0) console.log('  (ningún workflow basura o duplicado encontrado)');
 
   // 4. Importar en orden
   const order = [
@@ -173,6 +209,11 @@ async function main() {
     let wfId;
     if (existing[name]) {
       wfId = existing[name];
+      // Desactivar antes de actualizar para evitar validación de sub-workflows
+      const existingInfo = existingList.find(w => w.id === wfId);
+      if (existingInfo && existingInfo.active) {
+        await apiCall('POST', `/api/v1/workflows/${wfId}/deactivate`);
+      }
       const res = await apiCall('PUT', `/api/v1/workflows/${wfId}`, payload);
       if (res.ok) {
         console.log(`  ✓ UPDATE: ${name} [${wfId}]`);

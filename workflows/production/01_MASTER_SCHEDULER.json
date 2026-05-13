@@ -49,12 +49,12 @@
           "options": {
             "caseSensitive": false,
             "leftValue": "",
-            "typeValidation": "strict"
+            "typeValidation": "loose"
           },
           "conditions": [
             {
               "id": "status-pending",
-              "leftValue": "={{ $json.STATUS }}",
+              "leftValue": "={{ String($json.STATUS ?? '') }}",
               "rightValue": "PENDING",
               "operator": {
                 "type": "string",
@@ -63,7 +63,7 @@
             },
             {
               "id": "lock-false",
-              "leftValue": "={{ $json.LOCK }}",
+              "leftValue": "={{ String($json.LOCK ?? '').toUpperCase() }}",
               "rightValue": "TRUE",
               "operator": {
                 "type": "string",
@@ -386,8 +386,6 @@
     "executionOrder": "v1",
     "saveManualExecutions": true,
     "callerPolicy": "workflowsFromSameOwner",
-    "errorWorkflow": "",
-    "saveExecutionProgress": true,
     "executionTimeout": 3600
   },
   "meta": {

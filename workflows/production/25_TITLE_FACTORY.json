@@ -3,10 +3,10 @@
   "nodes": [
     {
       "parameters": {
-        "rule": { "interval": [{ "field": "hours", "hoursInterval": 6 }] }
+        "rule": { "interval": [{ "field": "hours", "hoursInterval": 2 }] }
       },
       "id": "cron-trigger",
-      "name": "Cada 6 Horas",
+      "name": "Cada 2 Horas",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [240, 300]
@@ -39,7 +39,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// BLOGS_SITES_CONFIG real schema: ID_BLOG, SITIO_URL, NICHO, IDIOMA, BLOGGER_ID, WP_AUTH_ID\nconst allBlogs = $('Read BLOGS_SITES_CONFIG').all().map(i => i.json);\nconst existingRows = $('Read CONTENT_PIPELINE').all().map(i => i.json);\n\n// Titles existing (anti-canibalización por TEMA_ARTICULO)\nconst existingTitles = new Set(\n  existingRows.filter(r => r.TEMA_ARTICULO).map(r => r.TEMA_ARTICULO.toLowerCase().trim())\n);\n\n// Pending count by ID_BLOG\nconst pendingByBlog = {};\nexistingRows.filter(r => r.STATUS === 'PENDING').forEach(r => {\n  pendingByBlog[r.ID_BLOG] = (pendingByBlog[r.ID_BLOG] || 0) + 1;\n});\n\n// Get last ID_UNICO number for unique ID generation\nconst now = new Date();\nconst dateStr = now.toISOString().slice(0,10).replace(/-/g,'');\nconst lastIdx = existingRows.length + 1;\n\n// Only process blogs that have < 15 PENDING articles\nconst blogsNeedingTitles = allBlogs.filter(b => b.ID_BLOG && (pendingByBlog[b.ID_BLOG] || 0) < 15);\n\nif (blogsNeedingTitles.length === 0) {\n  return [{ json: { _skip: true, reason: 'Todos los blogs tienen suficientes artículos pendientes' } }];\n}\n\n// Process max 5 blogs per run to avoid rate limits\nconst blogsToProcess = blogsNeedingTitles.slice(0, 5);\n\nreturn blogsToProcess.map((blog, idx) => ({\n  json: {\n    blogId: blog.ID_BLOG,\n    sitioUrl: blog.SITIO_URL || '',\n    nicho: blog.NICHO || 'general',\n    idioma: blog.IDIOMA || 'es',\n    bloggerId: blog.BLOGGER_ID || '',\n    existingTitles: Array.from(existingTitles).slice(0, 50),\n    startIndex: lastIdx + (idx * 30),\n    dateStr,\n    pendingCount: pendingByBlog[blog.ID_BLOG] || 0\n  }\n}));"
+        "jsCode": "// BLOGS_SITES_CONFIG real schema: ID_BLOG, SITIO_URL, NICHO, IDIOMA, BLOGGER_ID\nconst allBlogs = $('Read BLOGS_SITES_CONFIG').all().map(i => i.json);\nconst existingRows = $('Read CONTENT_PIPELINE').all().map(i => i.json);\n\n// Anti-canibalización: set de títulos existentes\nconst existingTitles = new Set(\n  existingRows.filter(r => r.TEMA_ARTICULO).map(r => r.TEMA_ARTICULO.toLowerCase().trim())\n);\n\n// Conteo de PENDING por blog\nconst pendingByBlog = {};\nexistingRows.filter(r => String(r.STATUS ?? '') === 'PENDING').forEach(r => {\n  pendingByBlog[r.ID_BLOG] = (pendingByBlog[r.ID_BLOG] || 0) + 1;\n});\n\nconst now = new Date();\nconst dateStr = now.toISOString().slice(0,10).replace(/-/g,'');\nconst lastIdx = existingRows.length + 1;\n\n// HIGH_RPM niches — prioridad para Adsense (buyer intent, micronichos)\nconst HIGH_RPM = ['abogad','impuest','legal','segur','accidente','multa','bienes','hipotec','salud','médic','insurance','lawyer','tax','accident'];\nconst isHighRpm = (nicho) => HIGH_RPM.some(k => (nicho||'').toLowerCase().includes(k));\n\n// Umbral agresivo: procesar blogs con < 100 artículos pendientes\nconst PENDING_THRESHOLD = 100;\nconst MAX_BLOGS_PER_RUN = 10;\nconst TITLES_PER_BLOG = 50;\n\nconst validBlogs = allBlogs.filter(b => b.ID_BLOG);\nconst blogsNeedingTitles = validBlogs\n  .filter(b => (pendingByBlog[b.ID_BLOG] || 0) < PENDING_THRESHOLD)\n  .sort((a, b) => {\n    // Priorizar high-RPM primero\n    const aRpm = isHighRpm(a.NICHO) ? 0 : 1;\n    const bRpm = isHighRpm(b.NICHO) ? 0 : 1;\n    if (aRpm !== bRpm) return aRpm - bRpm;\n    // Luego por menor cantidad de pendientes\n    return (pendingByBlog[a.ID_BLOG]||0) - (pendingByBlog[b.ID_BLOG]||0);\n  })\n  .slice(0, MAX_BLOGS_PER_RUN);\n\nif (blogsNeedingTitles.length === 0) {\n  return [{ json: { _skip: true, reason: 'Todos los blogs superan ' + PENDING_THRESHOLD + ' pendientes' } }];\n}\n\nreturn blogsNeedingTitles.map((blog, idx) => ({\n  json: {\n    blogId: blog.ID_BLOG,\n    sitioUrl: blog.SITIO_URL || '',\n    nicho: blog.NICHO || 'general',\n    idioma: blog.IDIOMA || 'es',\n    bloggerId: blog.BLOGGER_ID || '',\n    isHighRpm: isHighRpm(blog.NICHO),\n    existingTitles: Array.from(existingTitles).slice(0, 30),\n    titlesPerBlog: TITLES_PER_BLOG,\n    startIndex: lastIdx + (idx * TITLES_PER_BLOG),\n    dateStr,\n    pendingCount: pendingByBlog[blog.ID_BLOG] || 0\n  }\n}));"
       },
       "id": "prepare-generation",
       "name": "Preparar por Blog",
@@ -91,10 +91,10 @@
             },
             {
               "role": "user",
-              "content": "=Genera 20 títulos SEO únicos para el blog: {{ $json.sitioUrl || $json.nicho }}\nNicho: {{ $json.nicho }}\nIdioma: {{ $json.idioma }}\n\nRequisitos:\n- Intención informacional (cómo, qué, por qué, cuándo, mejores, guía)\n- Long-tail específico, búsquedas reales\n- Sin repetir estos temas ya existentes: {{ $json.existingTitles.slice(0,20).join(' | ') }}\n- Incluye keywords naturales del nicho\n- Mezcla: 2 pilares (PRIORITY=1) + 18 clusters (PRIORITY=2)\n\nResponde SOLO con este JSON (sin markdown):\n{\"titles\": [{\"title\": \"...\", \"keywords\": \"kw1, kw2\", \"priority\": 1}]}"
+              "content": "=Genera {{ $json.titlesPerBlog }} títulos SEO únicos para el blog: {{ $json.sitioUrl || $json.nicho }}\nNicho: {{ $json.nicho }}\nIdioma: {{ $json.idioma }}\nTipo: {{ $json.isHighRpm ? 'HIGH-RPM Adsense (buyer intent, micronichos específicos)' : 'Autoridad + Afiliados (informacional + buyer)' }}\n\nRequisitos:\n- Long-tail muy específico, búsquedas reales que la gente hace\n- Sin repetir estos temas: {{ $json.existingTitles.slice(0,20).join(' | ') }}\n{{ $json.isHighRpm ? '- BUYER INTENT: incluye ciudad/estado/situación específica (ej: \"truck accident lawyer Orlando FL\", \"workers comp denied California\", \"LLC taxes non-resident 2024\")\\n- Micronichos: más específicos = menos competencia = más RPM\\n- 5 pilares (PRIORITY=1) + ' + ($json.titlesPerBlog - 5) + ' clusters (PRIORITY=2)' : '- Mezcla: 3 pilares informativos (PRIORITY=1) + ' + ($json.titlesPerBlog - 3) + ' clusters con intención mixed (PRIORITY=2)' }}\n- Deben parecer escritos por humanos expertos, no por IA\n\nResponde SOLO con este JSON exacto (sin markdown, sin texto extra):\n{\"titles\": [{\"title\": \"...\", \"keywords\": \"kw1, kw2, kw3\", \"priority\": 1}]}"
             }
           ],
-          "max_tokens": 2500,
+          "max_tokens": 4000,
           "temperature": 0.75,
           "stream": false
         },
