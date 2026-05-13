@@ -9,7 +9,10 @@
       "name": "Workflow Input",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
-      "position": [240, 300]
+      "position": [
+        240,
+        300
+      ]
     },
     {
       "parameters": {
@@ -30,10 +33,30 @@
             "ID_UNICO": "={{ $json.ID_UNICO }}",
             "STATUS": "PUBLISHING"
           },
-          "matchingColumns": ["ID_UNICO"],
+          "matchingColumns": [
+            "ID_UNICO"
+          ],
           "schema": [
-            {"id": "ID_UNICO", "displayName": "ID_UNICO", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
-            {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+            {
+              "id": "ID_UNICO",
+              "displayName": "ID_UNICO",
+              "required": false,
+              "defaultMatch": true,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "STATUS",
+              "displayName": "STATUS",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            }
           ]
         },
         "options": {}
@@ -42,7 +65,10 @@
       "name": "Mark PUBLISHING",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [460, 300],
+      "position": [
+        460,
+        300
+      ],
       "credentials": {
         "googleSheetsOAuth2Api": {
           "name": "Google Sheets account"
@@ -57,7 +83,10 @@
       "name": "Pass Data",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [680, 300]
+      "position": [
+        680,
+        300
+      ]
     },
     {
       "parameters": {
@@ -83,7 +112,9 @@
           },
           "title": "={{ $json.TEMA_ARTICULO }}",
           "content": "={{ $json.HTML_FINAL }}",
-          "labels": ["={{ $json.NICHO }}"]
+          "labels": [
+            "={{ $json.NICHO }}"
+          ]
         },
         "options": {
           "timeout": 30000
@@ -93,7 +124,10 @@
       "name": "Publish to Blogger",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [900, 300],
+      "position": [
+        900,
+        300
+      ],
       "credentials": {
         "googleOAuth2Api": {
           "name": "Google Blogger OAuth2"
@@ -128,7 +162,10 @@
       "name": "Is 429 Rate Limit?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [1120, 400]
+      "position": [
+        1120,
+        400
+      ]
     },
     {
       "parameters": {
@@ -139,7 +176,10 @@
       "name": "Wait 90 seconds",
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
-      "position": [1340, 320],
+      "position": [
+        1340,
+        320
+      ],
       "webhookId": "blogger-retry-wait"
     },
     {
@@ -166,7 +206,9 @@
           },
           "title": "={{ $('Pass Data').item.json.TEMA_ARTICULO }}",
           "content": "={{ $('Pass Data').item.json.HTML_FINAL }}",
-          "labels": ["={{ $('Pass Data').item.json.NICHO }}"]
+          "labels": [
+            "={{ $('Pass Data').item.json.NICHO }}"
+          ]
         },
         "options": {
           "timeout": 30000
@@ -176,7 +218,10 @@
       "name": "Retry Blogger Post",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1560, 320],
+      "position": [
+        1560,
+        320
+      ],
       "credentials": {
         "googleOAuth2Api": {
           "name": "Google Blogger OAuth2"
@@ -192,7 +237,10 @@
       "name": "Normalize Result",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1780, 300]
+      "position": [
+        1780,
+        300
+      ]
     },
     {
       "parameters": {
@@ -217,18 +265,103 @@
             "POST_ID": "={{ $json.POST_ID }}",
             "PUBLISHED_AT": "={{ $json.PUBLISHED_AT }}",
             "LOCK_TIMESTAMP": "",
-            "LAST_ERROR": ""
+            "LAST_ERROR": "",
+            "BLOGGER_ID": "={{ $('Workflow Input').item.json.BLOGGER_ID }}"
           },
-          "matchingColumns": ["ID_UNICO"],
+          "matchingColumns": [
+            "ID_UNICO"
+          ],
           "schema": [
-            {"id": "ID_UNICO", "displayName": "ID_UNICO", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
-            {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "LOCK", "displayName": "LOCK", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "URL_FINAL", "displayName": "URL_FINAL", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "POST_ID", "displayName": "POST_ID", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "PUBLISHED_AT", "displayName": "PUBLISHED_AT", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "LOCK_TIMESTAMP", "displayName": "LOCK_TIMESTAMP", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "LAST_ERROR", "displayName": "LAST_ERROR", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+            {
+              "id": "ID_UNICO",
+              "displayName": "ID_UNICO",
+              "required": false,
+              "defaultMatch": true,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "STATUS",
+              "displayName": "STATUS",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "LOCK",
+              "displayName": "LOCK",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "URL_FINAL",
+              "displayName": "URL_FINAL",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "POST_ID",
+              "displayName": "POST_ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "PUBLISHED_AT",
+              "displayName": "PUBLISHED_AT",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "LOCK_TIMESTAMP",
+              "displayName": "LOCK_TIMESTAMP",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "LAST_ERROR",
+              "displayName": "LAST_ERROR",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "BLOGGER_ID",
+              "displayName": "BLOGGER_ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            }
           ]
         },
         "options": {}
@@ -237,7 +370,10 @@
       "name": "Mark PUBLISHED",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [2000, 300],
+      "position": [
+        2000,
+        300
+      ],
       "credentials": {
         "googleSheetsOAuth2Api": {
           "name": "Google Sheets account"
@@ -266,13 +402,60 @@
             "LAST_ERROR": "={{ $json.error?.message || $json.message || JSON.stringify($json) }}",
             "LOCK_TIMESTAMP": ""
           },
-          "matchingColumns": ["ID_UNICO"],
+          "matchingColumns": [
+            "ID_UNICO"
+          ],
           "schema": [
-            {"id": "ID_UNICO", "displayName": "ID_UNICO", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
-            {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "LOCK", "displayName": "LOCK", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "LAST_ERROR", "displayName": "LAST_ERROR", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "LOCK_TIMESTAMP", "displayName": "LOCK_TIMESTAMP", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+            {
+              "id": "ID_UNICO",
+              "displayName": "ID_UNICO",
+              "required": false,
+              "defaultMatch": true,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "STATUS",
+              "displayName": "STATUS",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "LOCK",
+              "displayName": "LOCK",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "LAST_ERROR",
+              "displayName": "LAST_ERROR",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "LOCK_TIMESTAMP",
+              "displayName": "LOCK_TIMESTAMP",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": false,
+              "display": true,
+              "type": "string",
+              "removed": false
+            }
           ]
         },
         "options": {}
@@ -281,56 +464,184 @@
       "name": "Mark FAILED (Blogger)",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [1340, 520],
+      "position": [
+        1340,
+        520
+      ],
       "credentials": {
         "googleSheetsOAuth2Api": {
           "name": "Google Sheets account"
         }
       }
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "SOCIAL_DISTRIBUTOR_ID",
+          "mode": "id"
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        },
+        "fields": {
+          "values": [
+            {
+              "name": "ID_UNICO",
+              "stringValue": "={{ $('Workflow Input').item.json.ID_UNICO }}"
+            },
+            {
+              "name": "TEMA_ARTICULO",
+              "stringValue": "={{ $('Workflow Input').item.json.TEMA_ARTICULO }}"
+            },
+            {
+              "name": "URL_FINAL",
+              "stringValue": "={{ $('Normalize Result').item.json.URL_FINAL }}"
+            },
+            {
+              "name": "NICHO",
+              "stringValue": "={{ $('Workflow Input').item.json.NICHO || '' }}"
+            },
+            {
+              "name": "IDIOMA",
+              "stringValue": "={{ $('Workflow Input').item.json.IDIOMA || 'es' }}"
+            },
+            {
+              "name": "HTML_FINAL",
+              "stringValue": "={{ $('Workflow Input').item.json.HTML_FINAL || '' }}"
+            }
+          ]
+        }
+      },
+      "id": "call-social-distributor",
+      "name": "10 Social Media Distributor",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.1,
+      "position": [
+        2220,
+        300
+      ]
     }
   ],
   "connections": {
     "Workflow Input": {
       "main": [
-        [{"node": "Mark PUBLISHING", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Mark PUBLISHING",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Mark PUBLISHING": {
       "main": [
-        [{"node": "Pass Data", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Pass Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Pass Data": {
       "main": [
-        [{"node": "Publish to Blogger", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Publish to Blogger",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Publish to Blogger": {
       "main": [
-        [{"node": "Normalize Result", "type": "main", "index": 0}],
-        [{"node": "Is 429 Rate Limit?", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Normalize Result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is 429 Rate Limit?",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Is 429 Rate Limit?": {
       "main": [
-        [{"node": "Wait 90 seconds", "type": "main", "index": 0}],
-        [{"node": "Mark FAILED (Blogger)", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Wait 90 seconds",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark FAILED (Blogger)",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Wait 90 seconds": {
       "main": [
-        [{"node": "Retry Blogger Post", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Retry Blogger Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Retry Blogger Post": {
       "main": [
-        [{"node": "Normalize Result", "type": "main", "index": 0}],
-        [{"node": "Mark FAILED (Blogger)", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Normalize Result",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mark FAILED (Blogger)",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Normalize Result": {
       "main": [
-        [{"node": "Mark PUBLISHED", "type": "main", "index": 0}]
+        [
+          {
+            "node": "Mark PUBLISHED",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark PUBLISHED": {
+      "main": [
+        [
+          {
+            "node": "10 Social Media Distributor",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },

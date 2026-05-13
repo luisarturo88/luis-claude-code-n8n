@@ -144,6 +144,7 @@ async function main() {
     'monetization/07_MONETIZATION_INJECTOR.json',
     'distribution/08_TELEGRAM_BROADCASTER.json',
     'distribution/09_DIGITAL_PRODUCT_LINKER.json',
+    'distribution/10_SOCIAL_MEDIA_DISTRIBUTOR.json',
     'seo/15_INTERLINK_BUILDER.json',
     'production/01_MASTER_SCHEDULER.json',
   ];
@@ -253,6 +254,33 @@ async function main() {
     console.log(`  ⚠ IDs faltantes: WF01=${wf01Name||'?'} WF02=${wf02Name||'?'} WF04=${wf04Name||'?'}`);
   }
 
+  // 5b. Cablear WF04 → WF10 (Social Media Distributor)
+  const wf10Name = Object.keys(ids).find(k => k.includes('10_SOCIAL'));
+  if (wf04Name && wf10Name) {
+    const wf04Id = ids[wf04Name];
+    const wf10Id = ids[wf10Name];
+    const wf04Res = await apiCall('GET', `/api/v1/workflows/${wf04Id}`);
+    if (wf04Res.ok && wf04Res.body.nodes) {
+      const wf04 = wf04Res.body;
+      let changed = 0;
+      for (const node of wf04.nodes) {
+        if (node.type !== 'n8n-nodes-base.executeWorkflow') continue;
+        const nm = (node.name || '').toLowerCase();
+        if (!nm.includes('10') && !nm.includes('social')) continue;
+        if (!node.parameters) continue;
+        const wfIdParam = node.parameters.workflowId;
+        if (typeof wfIdParam === 'object' && '__rl' in wfIdParam) {
+          node.parameters.workflowId.value = wf10Id; changed++;
+        } else {
+          node.parameters.workflowId = wf10Id; changed++;
+        }
+      }
+      const p = await apiCall('PUT', `/api/v1/workflows/${wf04Id}`, sanitizeForApi(wf04));
+      if (p.ok) console.log(`  ✓ WF04 [${wf04Id}] → WF10=[${wf10Id}] (${changed} nodos)`);
+      else console.log(`  ✗ Error cableando WF04→WF10: HTTP ${p.status}`);
+    }
+  }
+
   // 6. Activar en orden
   console.log('\n── ACTIVANDO WORKFLOWS ──');
   await new Promise(r => setTimeout(r, 2000));
@@ -262,7 +290,7 @@ async function main() {
   const activateOrder = [
     '05_LOCK', '25_TITLE', '02_AI', '04_BLOGGER',
     '06_AFFILIATE', '07_MONETIZ', '08_TELEGRAM',
-    '09_DIGITAL', '15_INTERLINK', '01_MASTER'
+    '09_DIGITAL', '10_SOCIAL', '15_INTERLINK', '01_MASTER'
   ];
 
   for (const pattern of activateOrder) {
