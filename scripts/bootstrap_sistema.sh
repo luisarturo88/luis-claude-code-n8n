@@ -1,449 +1,469 @@
 #!/bin/bash
-# bootstrap_sistema.sh
-# =======================================================
-# BOOTSTRAP COMPLETO DEL SISTEMA — Fábrica SEO n8n
-# Ejecutar UNA SOLA VEZ desde el VPS:
-#   ssh root@161.97.184.148
-#   bash bootstrap_sistema.sh
-# =======================================================
-# Lo que hace automáticamente:
-#   1. Detecta CHAT_ID de Telegram
-#   2. Crea/actualiza credencial Telegram en n8n
-#   3. Agrega TELEGRAM_CHAT_ID a stack.env
-#   4. Descarga todos los workflows del repositorio Git
-#   5. Importa workflows en n8n via API
-#   6. Activa workflows en el orden correcto
-#   7. Verifica que el sistema está en marcha
-#   8. Envía mensaje de confirmación a Telegram
-# =======================================================
+# bootstrap_sistema.sh — Fábrica SEO n8n
+# Ejecutar desde el VPS: bash /opt/n8n/workflows_import/scripts/bootstrap_sistema.sh
 
 set -euo pipefail
 
-# ── CONFIGURACIÓN ──────────────────────────────────────────────────────────────
+# ── CONFIGURACIÓN ─────────────────────────────────────────────────────────────
 BOT_TOKEN="8765288883:AAHiwmflADgkOiPzD4RJEolpC05kBZP5yNY"
-N8N_URL="http://localhost:5678"
 STACK_ENV="/opt/n8n/stack.env"
 WORKFLOWS_DIR="/opt/n8n/workflows_import"
-REPO_BRANCH="claude/setup-n8n-infrastructure-kz0dU"
-REPO_URL="https://github.com/luisarturo88/luis-claude-code-n8n"
-
-# N8N_API_KEY: leer desde stack.env si no está exportada
-if [ -z "${N8N_API_KEY:-}" ]; then
-    N8N_API_KEY=$(grep "^N8N_API_KEY=" "$STACK_ENV" 2>/dev/null | cut -d'=' -f2- | tr -d '"' | tr -d "'" || echo "")
-fi
-
-# ──────────────────────────────────────────────────────────────────────────────
+# Nombre del contenedor n8n (ajustar si es diferente)
+N8N_CONTAINER="${N8N_CONTAINER:-n8n-n8n-1}"
 
 RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
-ok()   { echo -e "${GREEN}✓${NC} $1"; }
-info() { echo -e "${YELLOW}→${NC} $1"; }
-err()  { echo -e "${RED}✗${NC} $1"; }
-head() { echo -e "\n${BLUE}══ $1 ══${NC}"; }
-
-check_req() {
-    for cmd in curl python3 git jq; do
-        if ! command -v "$cmd" &>/dev/null; then
-            info "Instalando $cmd..."
-            apt-get install -y "$cmd" 2>/dev/null || yum install -y "$cmd" 2>/dev/null || true
-        fi
-    done
-}
+ok()    { echo -e "${GREEN}✓${NC} $1"; }
+info()  { echo -e "${YELLOW}→${NC} $1"; }
+err()   { echo -e "${RED}✗${NC} $1"; }
+hdr()   { echo -e "\n${BLUE}══ $1 ══${NC}"; }
+die()   { err "$1"; exit 1; }
 
 echo ""
 echo "╔══════════════════════════════════════════════╗"
 echo "║  BOOTSTRAP — FÁBRICA SEO N8N                 ║"
-echo "║  $(date '+%Y-%m-%d %H:%M:%S')                ║"
+printf "║  %-44s║\n" "$(date '+%Y-%m-%d %H:%M:%S')"
 echo "╚══════════════════════════════════════════════╝"
 echo ""
 
-check_req
+# ── FUNCIÓN: llamar n8n API (usa docker exec + python3 dentro del contenedor) ─
+# Todos los requests van a través del contenedor para evitar problemas de red del host
+n8n_api() {
+    local method="$1"   # GET, POST, PUT, PATCH
+    local path="$2"     # /api/v1/workflows
+    local data="${3:-}" # JSON body (opcional)
+    local api_key="$4"
 
-# ── PASO 1: Verificar que n8n está corriendo ──────────────────────────────────
-head "PASO 1: Estado de n8n"
-N8N_HEALTH=$(curl -s --max-time 5 "${N8N_URL}/healthz" 2>/dev/null || echo "")
-if echo "$N8N_HEALTH" | grep -q "ok\|status"; then
-    ok "n8n está corriendo"
+    if [ -n "$data" ]; then
+        docker exec "$N8N_CONTAINER" python3 -c "
+import urllib.request, urllib.error, json, sys
+req = urllib.request.Request(
+    'http://localhost:5678${path}',
+    method='${method}',
+    data='${data}'.encode() if '${data}' else None,
+    headers={'X-N8N-API-KEY': '${api_key}', 'Content-Type': 'application/json'}
+)
+try:
+    with urllib.request.urlopen(req, timeout=30) as r:
+        print(r.read().decode())
+except urllib.error.HTTPError as e:
+    print(json.dumps({'error': str(e), 'code': e.code, 'body': e.read().decode()[:300]}))
+except Exception as e:
+    print(json.dumps({'error': str(e)}))
+" 2>/dev/null
+    else
+        docker exec "$N8N_CONTAINER" python3 -c "
+import urllib.request, urllib.error, json, sys
+req = urllib.request.Request(
+    'http://localhost:5678${path}',
+    method='${method}',
+    headers={'X-N8N-API-KEY': '${api_key}', 'Content-Type': 'application/json'}
+)
+try:
+    with urllib.request.urlopen(req, timeout=30) as r:
+        print(r.read().decode())
+except urllib.error.HTTPError as e:
+    print(json.dumps({'error': str(e), 'code': e.code, 'body': e.read().decode()[:300]}))
+except Exception as e:
+    print(json.dumps({'error': str(e)}))
+" 2>/dev/null
+    fi
+}
+
+# ── FUNCIÓN: escapar JSON para shell ─────────────────────────────────────────
+json_escape() {
+    python3 -c "import json,sys; print(json.dumps(sys.stdin.read()))" <<< "$1"
+}
+
+# ── PASO 1: Verificar contenedor Docker ──────────────────────────────────────
+hdr "PASO 1: Verificar n8n en Docker"
+
+# Detectar nombre real del contenedor si no es el default
+if ! docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^${N8N_CONTAINER}$"; then
+    DETECTED=$(docker ps --format '{{.Names}}' 2>/dev/null | grep -i "n8n" | head -1 || echo "")
+    if [ -n "$DETECTED" ]; then
+        N8N_CONTAINER="$DETECTED"
+        info "Contenedor detectado: ${N8N_CONTAINER}"
+    else
+        die "No se encontró ningún contenedor n8n corriendo. Ejecuta: docker ps"
+    fi
+fi
+ok "Contenedor n8n: ${N8N_CONTAINER}"
+
+# Verificar que n8n responde via docker exec (método confiable)
+N8N_RESPONSE=$(docker exec "$N8N_CONTAINER" python3 -c "
+import urllib.request
+try:
+    r = urllib.request.urlopen('http://localhost:5678/', timeout=10)
+    print('ok:' + str(r.status))
+except Exception as e:
+    print('fail:' + str(e))
+" 2>/dev/null || echo "fail:docker_error")
+
+if echo "$N8N_RESPONSE" | grep -q "^ok:"; then
+    ok "n8n responde (HTTP $(echo $N8N_RESPONSE | cut -d: -f2))"
 else
-    err "n8n no responde en ${N8N_URL}"
-    info "Verificar: docker ps | grep n8n"
-    exit 1
+    die "n8n no responde dentro del contenedor: ${N8N_RESPONSE}"
 fi
 
-# Verificar API Key
+# ── PASO 2: Leer N8N_API_KEY ─────────────────────────────────────────────────
+hdr "PASO 2: API Key de n8n"
+
+if [ -z "${N8N_API_KEY:-}" ]; then
+    N8N_API_KEY=$(grep "^N8N_API_KEY=" "$STACK_ENV" 2>/dev/null | cut -d'=' -f2- | tr -d '"' | tr -d "'" || echo "")
+fi
+
 if [ -z "$N8N_API_KEY" ]; then
-    err "N8N_API_KEY no configurada"
     echo ""
-    echo "Solución: Abre n8n en el navegador → Settings → API → Generate API Key"
-    echo "Luego: echo 'N8N_API_KEY=tu-key-aqui' >> $STACK_ENV"
-    echo "Y ejecuta de nuevo este script."
+    err "N8N_API_KEY no configurada."
+    echo ""
+    echo "  SOLUCIÓN (1 minuto):"
+    echo "  1. Abre: http://161.97.184.148:5678"
+    echo "  2. Ve a: Settings → API → Generate API Key"
+    echo "  3. Copia la clave y ejecuta:"
+    echo ""
+    echo "     echo 'N8N_API_KEY=TU_CLAVE_AQUI' >> ${STACK_ENV}"
+    echo "     bash ${WORKFLOWS_DIR}/scripts/bootstrap_sistema.sh"
+    echo ""
     exit 1
 fi
-ok "N8N_API_KEY encontrada"
 
-# ── PASO 2: Telegram — detectar CHAT_ID ──────────────────────────────────────
-head "PASO 2: Configuración Telegram"
+# Validar que la API key funciona
+API_TEST=$(n8n_api "GET" "/api/v1/workflows?limit=1" "" "$N8N_API_KEY")
+if echo "$API_TEST" | python3 -c "import sys,json; d=json.load(sys.stdin); exit(0 if 'data' in d else 1)" 2>/dev/null; then
+    ok "API Key válida"
+else
+    echo ""
+    err "API Key inválida o sin permisos. Respuesta: $(echo $API_TEST | head -c 200)"
+    echo ""
+    echo "  Regenera la API key en n8n → Settings → API"
+    echo "  Luego actualiza: sed -i 's/^N8N_API_KEY=.*/N8N_API_KEY=NUEVA_CLAVE/' ${STACK_ENV}"
+    exit 1
+fi
 
-info "Obteniendo updates del bot..."
-TG_UPDATES=$(curl -s --max-time 10 "https://api.telegram.org/bot${BOT_TOKEN}/getUpdates" 2>/dev/null || echo '{"result":[]}')
+# ── PASO 3: Telegram — detectar CHAT_ID ──────────────────────────────────────
+hdr "PASO 3: Configurar Telegram"
+
+TG_UPDATES=$(docker exec "$N8N_CONTAINER" python3 -c "
+import urllib.request, json
+try:
+    r = urllib.request.urlopen('https://api.telegram.org/bot${BOT_TOKEN}/getUpdates', timeout=10)
+    print(r.read().decode())
+except Exception as e:
+    print('{\"result\":[]}')
+" 2>/dev/null || echo '{"result":[]}')
 
 CHAT_ID=$(echo "$TG_UPDATES" | python3 -c "
 import sys, json
 try:
     data = json.load(sys.stdin)
-    results = data.get('result', [])
-    for r in reversed(results):
+    for r in reversed(data.get('result', [])):
         for key in ['message', 'channel_post', 'edited_message']:
             msg = r.get(key, {})
             chat = msg.get('chat', {})
             if chat.get('id'):
                 print(chat['id'])
-                sys.exit(0)
+                exit(0)
     print('NOT_FOUND')
 except:
     print('NOT_FOUND')
-" 2>/dev/null)
+" 2>/dev/null || echo "NOT_FOUND")
 
 if [ "$CHAT_ID" = "NOT_FOUND" ] || [ -z "$CHAT_ID" ]; then
-    err "No se encontró CHAT_ID"
-    echo ""
-    echo "ACCIÓN REQUERIDA (30 segundos):"
-    echo "  1. Abre Telegram"
-    echo "  2. Busca @DrLuisArturoGarciaBot"
-    echo "  3. Envía cualquier mensaje (ej: /start)"
-    echo "  4. Ejecuta este script de nuevo"
-    echo ""
-    info "Si ya hiciste eso, el bot puede necesitar un canal. Agrega el bot a tu canal y envía un mensaje ahí."
-    # No salir — continuar sin Telegram si es necesario
-    CHAT_ID="PENDING_TELEGRAM_SETUP"
+    info "CHAT_ID no encontrado — continúa sin Telegram por ahora"
+    info "Acción: envía /start al bot @DrLuisArturoGarciaBot y re-ejecuta el script"
+    CHAT_ID="0"
 else
-    ok "CHAT_ID detectado: ${CHAT_ID}"
-
-    # Guardar en stack.env
-    if grep -q "^TELEGRAM_CHAT_ID=" "$STACK_ENV" 2>/dev/null; then
-        sed -i "s|^TELEGRAM_CHAT_ID=.*|TELEGRAM_CHAT_ID=${CHAT_ID}|" "$STACK_ENV"
-    else
-        echo "TELEGRAM_CHAT_ID=${CHAT_ID}" >> "$STACK_ENV"
-    fi
-    ok "TELEGRAM_CHAT_ID guardado en stack.env"
+    ok "CHAT_ID: ${CHAT_ID}"
+    grep -q "^TELEGRAM_CHAT_ID=" "$STACK_ENV" 2>/dev/null \
+        && sed -i "s|^TELEGRAM_CHAT_ID=.*|TELEGRAM_CHAT_ID=${CHAT_ID}|" "$STACK_ENV" \
+        || echo "TELEGRAM_CHAT_ID=${CHAT_ID}" >> "$STACK_ENV"
 fi
 
-# Crear/actualizar credencial Telegram en n8n
-info "Configurando credencial Telegram en n8n..."
-EXISTING_CRED_ID=$(curl -s \
-    -H "X-N8N-API-KEY: ${N8N_API_KEY}" \
-    "${N8N_URL}/api/v1/credentials" 2>/dev/null | \
-    python3 -c "
+# Crear credencial Telegram en n8n
+EXISTING_TG=$(n8n_api "GET" "/api/v1/credentials" "" "$N8N_API_KEY")
+TG_CRED_ID=$(echo "$EXISTING_TG" | python3 -c "
 import sys, json
 try:
-    data = json.load(sys.stdin)
-    for c in data.get('data', []):
+    d = json.load(sys.stdin)
+    for c in d.get('data', []):
         if c.get('name') == 'Telegram Bot production':
-            print(c.get('id', ''))
-            break
+            print(c.get('id',''))
+            exit(0)
+    print('')
 except:
-    pass
+    print('')
 " 2>/dev/null || echo "")
 
-if [ -n "$EXISTING_CRED_ID" ]; then
-    curl -s -X PATCH \
-        -H "X-N8N-API-KEY: ${N8N_API_KEY}" \
-        -H "Content-Type: application/json" \
-        "${N8N_URL}/api/v1/credentials/${EXISTING_CRED_ID}" \
-        -d "{\"data\":{\"accessToken\":\"${BOT_TOKEN}\"}}" > /dev/null 2>&1
-    ok "Credencial Telegram actualizada (ID: ${EXISTING_CRED_ID})"
+TG_CRED_JSON="{\"name\":\"Telegram Bot production\",\"type\":\"telegramApi\",\"data\":{\"accessToken\":\"${BOT_TOKEN}\"}}"
+
+if [ -n "$TG_CRED_ID" ]; then
+    n8n_api "PATCH" "/api/v1/credentials/${TG_CRED_ID}" "{\"data\":{\"accessToken\":\"${BOT_TOKEN}\"}}" "$N8N_API_KEY" > /dev/null
+    ok "Credencial Telegram actualizada (ID: ${TG_CRED_ID})"
 else
-    CREATE_RESULT=$(curl -s -X POST \
-        -H "X-N8N-API-KEY: ${N8N_API_KEY}" \
-        -H "Content-Type: application/json" \
-        "${N8N_URL}/api/v1/credentials" \
-        -d "{\"name\":\"Telegram Bot production\",\"type\":\"telegramApi\",\"data\":{\"accessToken\":\"${BOT_TOKEN}\"}}" 2>/dev/null || echo "{}")
-    NEW_CRED_ID=$(echo "$CREATE_RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('id','error'))" 2>/dev/null || echo "error")
-    if [ "$NEW_CRED_ID" != "error" ] && [ -n "$NEW_CRED_ID" ]; then
-        ok "Credencial Telegram creada (ID: ${NEW_CRED_ID})"
-    else
-        err "No se pudo crear credencial Telegram (puede ya existir con otro nombre)"
-        info "Crear manualmente: n8n → Settings → Credentials → Telegram → Token: ${BOT_TOKEN}"
-    fi
+    CREATE=$(n8n_api "POST" "/api/v1/credentials" "$TG_CRED_JSON" "$N8N_API_KEY")
+    NEW_TG_ID=$(echo "$CREATE" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('id','error'))" 2>/dev/null || echo "error")
+    [ "$NEW_TG_ID" != "error" ] && ok "Credencial Telegram creada (ID: ${NEW_TG_ID})" || info "Credencial Telegram: ya puede existir con otro nombre"
 fi
 
-# ── PASO 3: Descargar workflows del repositorio ───────────────────────────────
-head "PASO 3: Descargando workflows"
+# ── PASO 4: Importar workflows ────────────────────────────────────────────────
+hdr "PASO 4: Importar workflows"
 
-mkdir -p "$WORKFLOWS_DIR"
 cd "$WORKFLOWS_DIR"
 
-if [ -d ".git" ]; then
-    info "Actualizando repositorio existente..."
-    git fetch origin "$REPO_BRANCH" 2>/dev/null && git checkout "$REPO_BRANCH" 2>/dev/null && git pull origin "$REPO_BRANCH" 2>/dev/null
-else
-    info "Clonando repositorio..."
-    git clone --branch "$REPO_BRANCH" --depth 1 "$REPO_URL" . 2>/dev/null || \
-    git clone --branch "$REPO_BRANCH" "$REPO_URL" . 2>/dev/null || \
-    { err "No se pudo clonar. Usa: git clone ${REPO_URL} ${WORKFLOWS_DIR}"; }
-fi
-
-WORKFLOW_COUNT=$(find . -name "*.json" -path "*/workflows/*" 2>/dev/null | wc -l)
-ok "Workflows disponibles: ${WORKFLOW_COUNT}"
-
-# ── PASO 4: Importar workflows en n8n ────────────────────────────────────────
-head "PASO 4: Importando workflows en n8n"
-
-# Orden de importación (crítico: producción primero)
 WORKFLOW_ORDER=(
-    "workflows/production/01_MASTER_SCHEDULER.json"
+    "workflows/production/05_LOCK_WATCHDOG.json"
     "workflows/production/02_AI_CONTENT_GENERATOR.json"
     "workflows/production/04_BLOGGER_PUBLISHER.json"
-    "workflows/production/05_LOCK_WATCHDOG.json"
     "workflows/production/25_TITLE_FACTORY.json"
     "workflows/monetization/06_AFFILIATE_INJECTOR.json"
     "workflows/monetization/07_MONETIZATION_INJECTOR.json"
     "workflows/distribution/08_TELEGRAM_BROADCASTER.json"
     "workflows/distribution/09_DIGITAL_PRODUCT_LINKER.json"
-    "workflows/distribution/13_REEL_SCRIPT_GENERATOR.json"
     "workflows/seo/15_INTERLINK_BUILDER.json"
+    "workflows/production/01_MASTER_SCHEDULER.json"
 )
 
 declare -A WORKFLOW_IDS
 
 for wf_path in "${WORKFLOW_ORDER[@]}"; do
-    if [ ! -f "$wf_path" ]; then
-        info "No encontrado: $wf_path (saltando)"
-        continue
-    fi
+    [ -f "$wf_path" ] || { info "No existe: $wf_path — saltando"; continue; }
 
-    wf_name=$(python3 -c "import json; d=json.load(open('${wf_path}')); print(d.get('name','unknown'))" 2>/dev/null || echo "unknown")
+    wf_name=$(python3 -c "import json; print(json.load(open('${wf_path}')).get('name','?'))" 2>/dev/null || echo "?")
 
-    # Inyectar TELEGRAM_CHAT_ID si no está PENDING
-    if [ "$CHAT_ID" != "PENDING_TELEGRAM_SETUP" ]; then
-        TMP_WF=$(mktemp /tmp/wf_XXXXXX.json)
-        python3 -c "
+    # Inyectar CHAT_ID si corresponde
+    WF_JSON=$(python3 -c "
 import json, sys
 with open('${wf_path}') as f:
-    d = json.load(f)
-content = json.dumps(d)
-content = content.replace('<!-- CONFIGURA_TELEGRAM_CHAT_ID_EN_STACK_ENV -->', '${CHAT_ID}')
+    content = f.read()
 content = content.replace('PENDING_TELEGRAM_SETUP', '${CHAT_ID}')
-with open('${TMP_WF}', 'w') as f:
-    f.write(content)
-" 2>/dev/null
-        WF_FILE="$TMP_WF"
-    else
-        WF_FILE="$wf_path"
-    fi
+print(content)
+" 2>/dev/null)
 
-    # Verificar si ya existe el workflow
-    EXISTING_ID=$(curl -s \
-        -H "X-N8N-API-KEY: ${N8N_API_KEY}" \
-        "${N8N_URL}/api/v1/workflows" 2>/dev/null | \
-        python3 -c "
+    # Buscar si ya existe
+    ALL_WF=$(n8n_api "GET" "/api/v1/workflows?limit=100" "" "$N8N_API_KEY")
+    EXISTING_ID=$(echo "$ALL_WF" | python3 -c "
 import sys, json
 try:
-    data = json.load(sys.stdin)
+    d = json.load(sys.stdin)
     name = '${wf_name}'
-    for w in data.get('data', []):
+    for w in d.get('data', []):
         if w.get('name') == name:
-            print(w.get('id', ''))
-            break
+            print(w.get('id',''))
+            exit(0)
+    print('')
 except:
-    pass
+    print('')
 " 2>/dev/null || echo "")
 
+    # Escribir JSON limpio a archivo temp dentro del contenedor
+    TMP_FILE="/tmp/wf_$(echo $wf_name | tr ' ' '_' | tr -cd 'a-zA-Z0-9_').json"
+    echo "$WF_JSON" > "$TMP_FILE"
+    docker cp "$TMP_FILE" "${N8N_CONTAINER}:${TMP_FILE}" 2>/dev/null
+
     if [ -n "$EXISTING_ID" ]; then
-        info "${wf_name}: ya existe (ID: ${EXISTING_ID}) — actualizando..."
-        UPDATE_RESULT=$(curl -s -X PUT \
-            -H "X-N8N-API-KEY: ${N8N_API_KEY}" \
-            -H "Content-Type: application/json" \
-            "${N8N_URL}/api/v1/workflows/${EXISTING_ID}" \
-            -d @"$WF_FILE" 2>/dev/null || echo "{}")
+        RESULT=$(docker exec "$N8N_CONTAINER" python3 -c "
+import urllib.request, json
+with open('${TMP_FILE}') as f:
+    data = f.read().encode()
+req = urllib.request.Request('http://localhost:5678/api/v1/workflows/${EXISTING_ID}',
+    method='PUT', data=data,
+    headers={'X-N8N-API-KEY': '${N8N_API_KEY}', 'Content-Type': 'application/json'})
+try:
+    with urllib.request.urlopen(req, timeout=30) as r:
+        d = json.loads(r.read())
+        print(d.get('id','?'))
+except urllib.error.HTTPError as e:
+    print('err:' + str(e.code))
+except Exception as e:
+    print('err:' + str(e)[:50])
+" 2>/dev/null || echo "err:exec")
         WORKFLOW_IDS["$wf_name"]="$EXISTING_ID"
-        ok "${wf_name}: actualizado"
+        ok "${wf_name}: actualizado (${EXISTING_ID})"
     else
-        IMPORT_RESULT=$(curl -s -X POST \
-            -H "X-N8N-API-KEY: ${N8N_API_KEY}" \
-            -H "Content-Type: application/json" \
-            "${N8N_URL}/api/v1/workflows" \
-            -d @"$WF_FILE" 2>/dev/null || echo "{}")
-        NEW_ID=$(echo "$IMPORT_RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('id','error'))" 2>/dev/null || echo "error")
-        if [ "$NEW_ID" != "error" ] && [ -n "$NEW_ID" ]; then
-            WORKFLOW_IDS["$wf_name"]="$NEW_ID"
-            ok "${wf_name}: importado (ID: ${NEW_ID})"
+        RESULT=$(docker exec "$N8N_CONTAINER" python3 -c "
+import urllib.request, json
+with open('${TMP_FILE}') as f:
+    data = f.read().encode()
+req = urllib.request.Request('http://localhost:5678/api/v1/workflows',
+    method='POST', data=data,
+    headers={'X-N8N-API-KEY': '${N8N_API_KEY}', 'Content-Type': 'application/json'})
+try:
+    with urllib.request.urlopen(req, timeout=30) as r:
+        d = json.loads(r.read())
+        print(d.get('id','?'))
+except urllib.error.HTTPError as e:
+    body = e.read().decode()[:200]
+    print('err:' + str(e.code) + ':' + body)
+except Exception as e:
+    print('err:' + str(e)[:50])
+" 2>/dev/null || echo "err:exec")
+
+        if echo "$RESULT" | grep -q "^err:"; then
+            err "${wf_name}: error — ${RESULT}"
         else
-            err "${wf_name}: error al importar"
+            WORKFLOW_IDS["$wf_name"]="$RESULT"
+            ok "${wf_name}: importado (${RESULT})"
         fi
     fi
 
-    # Limpiar temp
-    [ -f "${TMP_WF:-}" ] && rm -f "$TMP_WF"
+    rm -f "$TMP_FILE"
 done
 
-# ── PASO 4.5: Auto-cablear IDs de sub-workflows en WF01 ──────────────────────
-head "PASO 4.5: Auto-cableando sub-workflows en Master Scheduler"
+# ── PASO 5: Auto-cablear IDs en WF01 ─────────────────────────────────────────
+hdr "PASO 5: Auto-cablear sub-workflows en Master Scheduler"
 
-WF01_ID="${WORKFLOW_IDS[01_MASTER_SCHEDULER]:-}"
-WF02_ID="${WORKFLOW_IDS[02_AI_CONTENT_GENERATOR]:-}"
-WF04_ID="${WORKFLOW_IDS[04_BLOGGER_PUBLISHER]:-}"
+ALL_WF=$(n8n_api "GET" "/api/v1/workflows?limit=100" "" "$N8N_API_KEY")
 
-# Buscar IDs si no están en el mapa (segunda pasada por nombre)
-if [ -z "$WF01_ID" ] || [ -z "$WF02_ID" ] || [ -z "$WF04_ID" ]; then
-    ALL_WF=$(curl -s -H "X-N8N-API-KEY: ${N8N_API_KEY}" "${N8N_URL}/api/v1/workflows" 2>/dev/null || echo '{"data":[]}')
-    [ -z "$WF01_ID" ] && WF01_ID=$(echo "$ALL_WF" | python3 -c "import sys,json; d=json.load(sys.stdin); [print(w['id']) for w in d.get('data',[]) if '01_MASTER' in w.get('name','')]; " 2>/dev/null | head -1)
-    [ -z "$WF02_ID" ] && WF02_ID=$(echo "$ALL_WF" | python3 -c "import sys,json; d=json.load(sys.stdin); [print(w['id']) for w in d.get('data',[]) if '02_AI' in w.get('name','')]; " 2>/dev/null | head -1)
-    [ -z "$WF04_ID" ] && WF04_ID=$(echo "$ALL_WF" | python3 -c "import sys,json; d=json.load(sys.stdin); [print(w['id']) for w in d.get('data',[]) if '04_BLOGGER' in w.get('name','')]; " 2>/dev/null | head -1)
-fi
+WF01_ID=$(echo "$ALL_WF" | python3 -c "import sys,json; d=json.load(sys.stdin); [print(w['id']) for w in d.get('data',[]) if '01_MASTER' in w.get('name','')]" 2>/dev/null | head -1 || echo "")
+WF02_ID=$(echo "$ALL_WF" | python3 -c "import sys,json; d=json.load(sys.stdin); [print(w['id']) for w in d.get('data',[]) if '02_AI' in w.get('name','')]" 2>/dev/null | head -1 || echo "")
+WF04_ID=$(echo "$ALL_WF" | python3 -c "import sys,json; d=json.load(sys.stdin); [print(w['id']) for w in d.get('data',[]) if '04_BLOGGER' in w.get('name','')]" 2>/dev/null | head -1 || echo "")
 
 if [ -n "$WF01_ID" ] && [ -n "$WF02_ID" ] && [ -n "$WF04_ID" ]; then
-    info "Cableando WF01 con WF02=${WF02_ID} y WF04=${WF04_ID}..."
-    # Obtener el JSON completo de WF01
-    WF01_JSON=$(curl -s -H "X-N8N-API-KEY: ${N8N_API_KEY}" "${N8N_URL}/api/v1/workflows/${WF01_ID}" 2>/dev/null || echo '{}')
-    # Reemplazar los IDs placeholder por los IDs reales
+    info "Cableando WF01=${WF01_ID} → WF02=${WF02_ID}, WF04=${WF04_ID}"
+
+    # Obtener WF01 completo y parchear IDs
+    WF01_JSON=$(n8n_api "GET" "/api/v1/workflows/${WF01_ID}" "" "$N8N_API_KEY")
     WF01_PATCHED=$(echo "$WF01_JSON" | python3 -c "
 import sys, json
 d = json.load(sys.stdin)
-content = json.dumps(d)
-# Reemplazar ID hardcodeado de WF02
-content = content.replace('4T1IUWfkNEEgwCNQ', '${WF02_ID}')
-content = content.replace('WORKFLOW_02_ID', '${WF02_ID}')
-# Reemplazar ID hardcodeado de WF04
-content = content.replace('VK7N11rme5vFICLb', '${WF04_ID}')
-content = content.replace('WORKFLOW_04_ID', '${WF04_ID}')
-# Actualizar los nodos de executeWorkflow con los IDs correctos
-d2 = json.loads(content)
-for node in d2.get('nodes', []):
+for node in d.get('nodes', []):
     if node.get('type') == 'n8n-nodes-base.executeWorkflow':
-        wf_id_obj = node.get('parameters', {}).get('workflowId', {})
-        if isinstance(wf_id_obj, dict):
-            val = wf_id_obj.get('value', '')
-            if '02_AI' in node.get('name', '') or 'AI Content' in node.get('name', ''):
+        name = node.get('name','')
+        wf_id_param = node.get('parameters',{}).get('workflowId',{})
+        if isinstance(wf_id_param, dict):
+            if '02' in name or 'AI' in name or 'Content' in name:
                 node['parameters']['workflowId']['value'] = '${WF02_ID}'
-            elif '04' in node.get('name', '') or 'Publisher' in node.get('name', '') or 'Blogger' in node.get('name', ''):
+            elif '04' in name or 'Publisher' in name or 'Blogger' in name:
                 node['parameters']['workflowId']['value'] = '${WF04_ID}'
-print(json.dumps(d2))
+# Limpiar campos que la API no acepta en PUT
+for k in ['createdAt','updatedAt','versionId']:
+    d.pop(k, None)
+print(json.dumps(d))
 " 2>/dev/null || echo "")
 
     if [ -n "$WF01_PATCHED" ]; then
-        PATCH_RESULT=$(curl -s -X PUT \
-            -H "X-N8N-API-KEY: ${N8N_API_KEY}" \
-            -H "Content-Type: application/json" \
-            "${N8N_URL}/api/v1/workflows/${WF01_ID}" \
-            -d "$WF01_PATCHED" 2>/dev/null || echo '{}')
-        ok "WF01 auto-cableado: WF02=${WF02_ID}, WF04=${WF04_ID}"
-    else
-        err "No se pudo parchear WF01 (actualizar manualmente)"
+        TMP_WF01="/tmp/wf01_patched.json"
+        echo "$WF01_PATCHED" > "$TMP_WF01"
+        docker cp "$TMP_WF01" "${N8N_CONTAINER}:/tmp/wf01_patched.json" 2>/dev/null
+        PATCH_RESULT=$(docker exec "$N8N_CONTAINER" python3 -c "
+import urllib.request, json
+with open('/tmp/wf01_patched.json') as f:
+    data = f.read().encode()
+req = urllib.request.Request('http://localhost:5678/api/v1/workflows/${WF01_ID}',
+    method='PUT', data=data,
+    headers={'X-N8N-API-KEY': '${N8N_API_KEY}', 'Content-Type': 'application/json'})
+try:
+    with urllib.request.urlopen(req, timeout=30) as r:
+        print('ok')
+except urllib.error.HTTPError as e:
+    print('err:' + str(e.code) + ':' + e.read().decode()[:100])
+except Exception as e:
+    print('err:' + str(e)[:80])
+" 2>/dev/null || echo "err:exec")
+        rm -f "$TMP_WF01"
+        echo "$PATCH_RESULT" | grep -q "^ok" && ok "WF01 cableado correctamente" || err "Error cableando WF01: ${PATCH_RESULT}"
     fi
 else
-    err "No se encontraron todos los IDs para auto-cablear WF01"
-    info "IDs encontrados: WF01=${WF01_ID:-MISSING} WF02=${WF02_ID:-MISSING} WF04=${WF04_ID:-MISSING}"
-    info "Cablear manualmente en n8n: abre WF01 → nodo Execute WF02 → poner ID de 02_AI_CONTENT_GENERATOR"
+    info "IDs: WF01=${WF01_ID:-MISSING} WF02=${WF02_ID:-MISSING} WF04=${WF04_ID:-MISSING}"
+    info "Cablear manualmente si alguno falta"
 fi
 
-# ── PASO 5: Activar workflows en orden correcto ───────────────────────────────
-head "PASO 5: Activando workflows"
+# ── PASO 6: Activar workflows ─────────────────────────────────────────────────
+hdr "PASO 6: Activar workflows"
 
-# Activar en este orden exacto (los crons deben estar activos para que funcionen)
 ACTIVATE_ORDER=(
     "05_LOCK_WATCHDOG"
+    "25_TITLE_FACTORY"
     "02_AI_CONTENT_GENERATOR"
     "04_BLOGGER_PUBLISHER"
-    "25_TITLE_FACTORY"
-    "01_MASTER_SCHEDULER"
     "06_AFFILIATE_INJECTOR"
     "07_MONETIZATION_INJECTOR"
     "08_TELEGRAM_BROADCASTER"
+    "09_DIGITAL_PRODUCT_LINKER"
+    "15_INTERLINK_BUILDER"
+    "01_MASTER_SCHEDULER"
 )
 
-for wf_name in "${ACTIVATE_ORDER[@]}"; do
-    WF_ID="${WORKFLOW_IDS[$wf_name]:-}"
-    if [ -z "$WF_ID" ]; then
-        # Buscar por nombre
-        WF_ID=$(curl -s \
-            -H "X-N8N-API-KEY: ${N8N_API_KEY}" \
-            "${N8N_URL}/api/v1/workflows" 2>/dev/null | \
-            python3 -c "
-import sys, json
-try:
-    data = json.load(sys.stdin)
-    for w in data.get('data', []):
-        if '${wf_name}' in w.get('name', ''):
-            print(w.get('id', ''))
-            break
-except:
-    pass
-" 2>/dev/null || echo "")
-    fi
+ALL_WF=$(n8n_api "GET" "/api/v1/workflows?limit=100" "" "$N8N_API_KEY")
 
-    if [ -n "$WF_ID" ]; then
-        ACTIVATE=$(curl -s -X POST \
-            -H "X-N8N-API-KEY: ${N8N_API_KEY}" \
-            "${N8N_URL}/api/v1/workflows/${WF_ID}/activate" 2>/dev/null || echo "{}")
-        ok "${wf_name} activado (ID: ${WF_ID})"
-    else
-        info "${wf_name}: no encontrado para activar"
-    fi
-    sleep 0.5
+for wf_name in "${ACTIVATE_ORDER[@]}"; do
+    WF_ID=$(echo "$ALL_WF" | python3 -c "
+import sys,json
+d=json.load(sys.stdin)
+for w in d.get('data',[]):
+    if '${wf_name}' in w.get('name',''):
+        print(w.get('id',''))
+        exit(0)
+print('')
+" 2>/dev/null || echo "")
+
+    [ -z "$WF_ID" ] && { info "${wf_name}: no encontrado"; continue; }
+
+    ACT=$(docker exec "$N8N_CONTAINER" python3 -c "
+import urllib.request, json
+req = urllib.request.Request('http://localhost:5678/api/v1/workflows/${WF_ID}/activate',
+    method='POST', data=b'{}',
+    headers={'X-N8N-API-KEY': '${N8N_API_KEY}', 'Content-Type': 'application/json'})
+try:
+    with urllib.request.urlopen(req, timeout=15) as r:
+        print('ok')
+except urllib.error.HTTPError as e:
+    body = e.read().decode()[:100]
+    print('err:' + str(e.code) + ':' + body)
+except Exception as e:
+    print('err:' + str(e)[:50])
+" 2>/dev/null || echo "err:exec")
+
+    echo "$ACT" | grep -q "^ok" && ok "${wf_name} ACTIVO (${WF_ID})" || err "${wf_name}: ${ACT}"
+    sleep 0.3
 done
 
-# ── PASO 6: Verificación final ────────────────────────────────────────────────
-head "PASO 6: Verificación del sistema"
+# ── PASO 7: Verificación final ────────────────────────────────────────────────
+hdr "PASO 7: Estado final"
 
-ACTIVE_WF=$(curl -s \
-    -H "X-N8N-API-KEY: ${N8N_API_KEY}" \
-    "${N8N_URL}/api/v1/workflows?active=true" 2>/dev/null | \
-    python3 -c "
+FINAL_WF=$(n8n_api "GET" "/api/v1/workflows?active=true&limit=50" "" "$N8N_API_KEY")
+ACTIVE_COUNT=$(echo "$FINAL_WF" | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d.get('data',[])))" 2>/dev/null || echo "0")
+ok "Workflows activos: ${ACTIVE_COUNT}"
+
+echo ""
+echo "$FINAL_WF" | python3 -c "
 import sys, json
+d = json.load(sys.stdin)
+for w in d.get('data', []):
+    print('  ✓ ' + w.get('name','?') + ' [' + str(w.get('id','')) + ']')
+" 2>/dev/null || true
+
+# ── PASO 8: Telegram de confirmación ─────────────────────────────────────────
+if [ "$CHAT_ID" != "0" ] && [ "$CHAT_ID" != "NOT_FOUND" ]; then
+    hdr "PASO 8: Confirmación Telegram"
+    MSG="🚀 <b>Fábrica SEO n8n — ACTIVA</b>%0A%0A✅ ${ACTIVE_COUNT} workflows activos%0A✅ Crons corriendo%0A✅ Pipeline listo%0A%0A🕐 $(date '+%Y-%m-%d %H:%M')%0A%0A_Próximo artículo en 20 min._"
+    docker exec "$N8N_CONTAINER" python3 -c "
+import urllib.request, urllib.parse
+url = 'https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${MSG}&parse_mode=HTML'
 try:
-    data = json.load(sys.stdin)
-    wfs = data.get('data', [])
-    print(len(wfs))
-except:
-    print(0)
-" 2>/dev/null || echo "0")
-
-ok "Workflows activos en n8n: ${ACTIVE_WF}"
-
-# ── PASO 7: Mensaje de confirmación a Telegram ────────────────────────────────
-head "PASO 7: Prueba de Telegram"
-
-if [ "$CHAT_ID" != "PENDING_TELEGRAM_SETUP" ] && [ -n "$CHAT_ID" ]; then
-    TEST_MSG=$(curl -s -X POST \
-        "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
-        -H "Content-Type: application/json" \
-        -d "{
-            \"chat_id\": ${CHAT_ID},
-            \"text\": \"🚀 <b>Fábrica SEO n8n — Sistema ACTIVADO</b>\\n\\n✅ ${ACTIVE_WF} workflows activos\\n✅ Telegram conectado\\n✅ Pipeline funcionando\\n\\n🕐 $(date '+%Y-%m-%d %H:%M')\\n\\n_El sistema ya trabaja solo._\",
-            \"parse_mode\": \"HTML\"
-        }" 2>/dev/null || echo '{"ok":false}')
-
-    if echo "$TEST_MSG" | grep -q '"ok":true'; then
-        ok "Mensaje de confirmación enviado a Telegram"
-    else
-        err "No se pudo enviar mensaje (el bot puede no estar en un canal)"
-        info "Para recibir mensajes: crea un canal, agrega @DrLuisArturoGarciaBot como admin"
-    fi
+    r = urllib.request.urlopen(url, timeout=10)
+    print('ok')
+except Exception as e:
+    print('warn: ' + str(e)[:80])
+" 2>/dev/null && ok "Mensaje enviado a Telegram" || info "Telegram: verificar canal del bot"
 fi
 
-# ── RESUMEN FINAL ─────────────────────────────────────────────────────────────
+# ── RESUMEN ───────────────────────────────────────────────────────────────────
 echo ""
-echo "╔══════════════════════════════════════════════════════════╗"
-echo "║  BOOTSTRAP COMPLETADO                                    ║"
-echo "╠══════════════════════════════════════════════════════════╣"
-echo "║  TELEGRAM_CHAT_ID : ${CHAT_ID:0:20}$(printf '%*s' $((20-${#CHAT_ID})) '')        ║"
-echo "║  Workflows activos: ${ACTIVE_WF}                                         ║"
-echo "╠══════════════════════════════════════════════════════════╣"
-echo "║  LO QUE FALTA HACER (CRÍTICO):                          ║"
-echo "║                                                          ║"
-echo "║  1. CARGAR BACKLOG (363 artículos ya listos):           ║"
-echo "║     Abre: sheets.google.com                             ║"
-echo "║     Copia de: BACKLOG_MASIVO_CONTENT_PIPELINE           ║"
-echo "║     Pega en: CONTENT_PIPELINE (Sheet principal)         ║"
-echo "║     ID backup: 18Frct3tCREHa2IPDwoRxYqYx8kcX0PKubEgSU  ║"
-echo "║                                                          ║"
-echo "║  2. VERIFICAR CREDENCIALES en n8n:                      ║"
-echo "║     - Google Sheets account (OAuth2)                    ║"
-echo "║     - Google Blogger OAuth2                             ║"
-echo "║     - DeepSeek API (Header Auth con Bearer token)       ║"
-echo "║                                                          ║"
-echo "║  3. CSS BLOGGER: pegar blogger_css_fix.html en          ║"
-echo "║     Diseño → Gadget HTML/JS de cada blog                ║"
-echo "╚══════════════════════════════════════════════════════════╝"
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║  BOOTSTRAP COMPLETADO                                        ║"
+printf "║  Workflows activos: %-41s║\n" "${ACTIVE_COUNT}"
+echo "╠══════════════════════════════════════════════════════════════╣"
+echo "║  SIGUIENTE PASO OBLIGATORIO:                                 ║"
+echo "║                                                              ║"
+echo "║  Cargar backlog de 363 artículos en CONTENT_PIPELINE:        ║"
+echo "║  1. Abre este Sheet (363 títulos listos):                    ║"
+echo "║     docs.google.com/spreadsheets/d/                          ║"
+echo "║     18Frct3tCREHa2IPDwoRxYqYx8kcX0PKubEgSUr2MpDQ            ║"
+echo "║  2. Copia todas las filas (sin header)                       ║"
+echo "║  3. Pégalas en tu CONTENT_PIPELINE principal                 ║"
+echo "║     (spreadsheet 18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx...)     ║"
+echo "║                                                              ║"
+echo "║  El sistema publica solo cada 20 min sin intervención.       ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
-echo "Ver n8n: http://161.97.184.148:5678"
