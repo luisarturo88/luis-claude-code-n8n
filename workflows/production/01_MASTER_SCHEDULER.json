@@ -130,22 +130,22 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "ID_UNICO": "={{ $json.ID_UNICO }}",
-            "STATUS": "QUEUED",
-            "LOCK": "TRUE",
-            "LOCK_TIMESTAMP": "={{ new Date().toISOString() }}"
+            "ID_UNICO":        "={{ $json.ID_UNICO }}",
+            "STATUS":          "QUEUED",
+            "LOCK":            "TRUE",
+            "LOCK_TIMESTAMP":  "={{ new Date().toISOString() }}"
           },
           "matchingColumns": ["ID_UNICO"],
           "schema": [
-            {"id": "ID_UNICO", "displayName": "ID_UNICO", "required": false, "defaultMatch": true, "canBeUsedToMatch": true, "display": true, "type": "string", "removed": false},
-            {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "LOCK", "displayName": "LOCK", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "LOCK_TIMESTAMP", "displayName": "LOCK_TIMESTAMP", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
+            { "id": "ID_UNICO",       "displayName": "ID_UNICO",       "required": false, "defaultMatch": true,  "canBeUsedToMatch": true,  "display": true, "type": "string", "removed": false },
+            { "id": "STATUS",         "displayName": "STATUS",         "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false },
+            { "id": "LOCK",           "displayName": "LOCK",           "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false },
+            { "id": "LOCK_TIMESTAMP", "displayName": "LOCK_TIMESTAMP", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false }
           ]
         },
         "options": {}
       },
-      "id": "acquire-lock",
+      "id": "lock-queued-node",
       "name": "Acquire Lock (QUEUED)",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
