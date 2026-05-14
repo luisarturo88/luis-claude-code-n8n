@@ -39,7 +39,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// === PREPARAR POR BLOG ===\n// Sin filtros externos — lógica completa aquí.\n// Si no hay que generar → return [] detiene el flujo limpiamente.\n\nconst allItems = $input.all().map(i => i.json);\nconsole.log('Total items recibidos en $input.all(): ' + allItems.length);\n\n// BLOGS_SITES_CONFIG: tiene ID_BLOG y NO tiene el campo STATUS\n// CONTENT_PIPELINE: tiene STATUS (incluso si está vacío)\nconst allBlogs = allItems.filter(i => i.ID_BLOG && !('STATUS' in i));\nconst existingRows = allItems.filter(i => 'STATUS' in i);\n\nconsole.log('Blogs (BLOGS_SITES_CONFIG): ' + allBlogs.length);\nconsole.log('Filas pipeline (CONTENT_PIPELINE): ' + existingRows.length);\n\nif (allBlogs.length === 0) {\n  console.log('STOP: No hay blogs en BLOGS_SITES_CONFIG. Flujo detenido.');\n  return [];\n}\n\n// Solo backlog ÚTIL — FAILED/LOCK_TIMEOUT/ERROR son basura\nconst VALID_STATUSES = new Set(['PENDING', 'QUEUED', 'CONTENT_READY', 'READY']);\nconst validRows = existingRows.filter(r => VALID_STATUSES.has(String(r.STATUS ?? '').toUpperCase().trim()));\nconst junkRows  = existingRows.filter(r => {\n  const s = String(r.STATUS ?? '').toUpperCase().trim();\n  return s === 'FAILED' || s === 'LOCK_TIMEOUT' || s === 'ERROR' || s === 'CANCELLED';\n});\nconst publishedRows  = existingRows.filter(r => String(r.STATUS ?? '').toUpperCase().trim() === 'PUBLISHED');\nconst archivedRows   = existingRows.filter(r => String(r.STATUS ?? '').toUpperCase().trim() === 'ARCHIVED');\n\nconsole.log('=== DIAGNÓSTICO PIPELINE ===');\nconsole.log('  Backlog útil (PENDING/QUEUED/READY): ' + validRows.length);\nconsole.log('  Publicados: ' + publishedRows.length);\nconsole.log('  Basura ignorada (FAILED/ERROR/etc): ' + junkRows.length);\nconsole.log('  Archivados: ' + archivedRows.length);\nconsole.log('  Total filas: ' + existingRows.length);\n\n// Anti-canibalización solo con títulos válidos\nconst existingTitles = new Set(\n  validRows.filter(r => r.TEMA_ARTICULO).map(r => r.TEMA_ARTICULO.toLowerCase().trim())\n);\n\n// Backlog válido por blog\nconst validByBlog = {};\nvalidRows.forEach(r => {\n  const id = String(r.ID_BLOG || '').trim();\n  if (id) validByBlog[id] = (validByBlog[id] || 0) + 1;\n});\n\nconst now = new Date();\nconst dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');\n\nconst HIGH_RPM = ['abogad','impuest','legal','segur','accidente','multa','bienes','hipotec','salud','médic','insurance','lawyer','tax','accident'];\nconst isHighRpm = (nicho) => HIGH_RPM.some(k => (nicho || '').toLowerCase().includes(k));\n\nconst PENDING_THRESHOLD = 1000;\nconst MAX_BLOGS_PER_RUN = 10;\nconst TITLES_PER_BLOG = 50;\n\nconst validBlogs = allBlogs.filter(b => b.ID_BLOG);\nconst blogsNeedingTitles = validBlogs\n  .filter(b => (validByBlog[b.ID_BLOG] || 0) < PENDING_THRESHOLD)\n  .sort((a, b) => {\n    const aRpm = isHighRpm(a.NICHO) ? 0 : 1;\n    const bRpm = isHighRpm(b.NICHO) ? 0 : 1;\n    if (aRpm !== bRpm) return aRpm - bRpm;\n    return (validByBlog[a.ID_BLOG] || 0) - (validByBlog[b.ID_BLOG] || 0);\n  })\n  .slice(0, MAX_BLOGS_PER_RUN);\n\nconsole.log('Blogs con backlog útil < ' + PENDING_THRESHOLD + ': ' + blogsNeedingTitles.length);\n\nif (blogsNeedingTitles.length === 0) {\n  console.log('STOP: todos los blogs tienen backlog suficiente. Flujo detenido limpiamente.');\n  return [];\n}\n\nblogsNeedingTitles.forEach(b => {\n  console.log('  → ' + (b.SITIO_URL || b.ID_BLOG) + ' nicho=' + (b.NICHO || 'general') + ' útil=' + (validByBlog[b.ID_BLOG] || 0) + (isHighRpm(b.NICHO) ? ' [HIGH-RPM]' : ''));\n});\n\nconst output = blogsNeedingTitles.map((blog) => ({\n  json: {\n    blogId: blog.ID_BLOG,\n    sitioUrl: blog.SITIO_URL || '',\n    nicho: blog.NICHO || 'general',\n    idioma: blog.IDIOMA || 'es',\n    bloggerId: blog.BLOGGER_ID || '',\n    isHighRpm: isHighRpm(blog.NICHO),\n    existingTitles: Array.from(existingTitles).slice(0, 50),\n    titlesPerBlog: TITLES_PER_BLOG,\n    dateStr,\n    validBacklog: validByBlog[blog.ID_BLOG] || 0,\n    diagnostico: {\n      totalPipeline: existingRows.length,\n      backlogUtil: validRows.length,\n      publicados: publishedRows.length,\n      basuraIgnorada: junkRows.length\n    }\n  }\n}));\n\nconsole.log('Output final: ' + output.length + ' items pasando al generador DeepSeek');\nreturn output;"
+        "jsCode": "const allItems = $input.all().map(i => i.json);\nconsole.log('Total items en $input.all(): ' + allItems.length);\n\nconst allBlogs = allItems.filter(i => i.ID_BLOG && !('STATUS' in i));\nconst existingRows = allItems.filter(i => 'STATUS' in i);\n\nconsole.log('Blogs: ' + allBlogs.length + ' | Pipeline rows: ' + existingRows.length);\n\nif (allBlogs.length === 0) {\n  console.log('STOP: sin blogs configurados.');\n  return [];\n}\n\nconst VALID_STATUSES = new Set(['PENDING', 'QUEUED', 'CONTENT_READY', 'READY']);\nconst validRows     = existingRows.filter(r => VALID_STATUSES.has(String(r.STATUS ?? '').toUpperCase().trim()));\nconst junkRows      = existingRows.filter(r => { const s = String(r.STATUS ?? '').toUpperCase().trim(); return s === 'FAILED' || s === 'LOCK_TIMEOUT' || s === 'ERROR' || s === 'CANCELLED'; });\nconst publishedRows = existingRows.filter(r => String(r.STATUS ?? '').toUpperCase().trim() === 'PUBLISHED');\n\nconsole.log('Backlog útil: ' + validRows.length + ' | Publicados: ' + publishedRows.length + ' | Basura ignorada: ' + junkRows.length);\n\nconst existingTitles = new Set(validRows.filter(r => r.TEMA_ARTICULO).map(r => r.TEMA_ARTICULO.toLowerCase().trim()));\nconst validByBlog = {};\nvalidRows.forEach(r => { const id = String(r.ID_BLOG || '').trim(); if (id) validByBlog[id] = (validByBlog[id] || 0) + 1; });\n\nconst now = new Date();\nconst dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');\nconst HIGH_RPM = ['abogad','impuest','legal','segur','accidente','multa','bienes','hipotec','salud','médic','insurance','lawyer','tax','accident'];\nconst isHighRpm = (nicho) => HIGH_RPM.some(k => (nicho || '').toLowerCase().includes(k));\n\nconst PENDING_THRESHOLD = 1000;\nconst MAX_BLOGS_PER_RUN = 10;\nconst TITLES_PER_BLOG = 50;\n\nconst blogsNeedingTitles = allBlogs\n  .filter(b => b.ID_BLOG && (validByBlog[b.ID_BLOG] || 0) < PENDING_THRESHOLD)\n  .sort((a, b) => {\n    const aRpm = isHighRpm(a.NICHO) ? 0 : 1;\n    const bRpm = isHighRpm(b.NICHO) ? 0 : 1;\n    if (aRpm !== bRpm) return aRpm - bRpm;\n    return (validByBlog[a.ID_BLOG] || 0) - (validByBlog[b.ID_BLOG] || 0);\n  })\n  .slice(0, MAX_BLOGS_PER_RUN);\n\nconsole.log('Blogs que necesitan títulos: ' + blogsNeedingTitles.length);\nif (blogsNeedingTitles.length === 0) {\n  console.log('STOP: todos los blogs tienen backlog >= ' + PENDING_THRESHOLD + '.');\n  return [];\n}\n\nblogsNeedingTitles.forEach(b => console.log('  → ' + (b.SITIO_URL || b.ID_BLOG) + ' útil=' + (validByBlog[b.ID_BLOG] || 0)));\n\nreturn blogsNeedingTitles.map(blog => ({\n  json: {\n    blogId: blog.ID_BLOG,\n    sitioUrl: blog.SITIO_URL || '',\n    nicho: blog.NICHO || 'general',\n    idioma: blog.IDIOMA || 'es',\n    bloggerId: blog.BLOGGER_ID || '',\n    isHighRpm: isHighRpm(blog.NICHO),\n    existingTitles: Array.from(existingTitles).slice(0, 50),\n    titlesPerBlog: TITLES_PER_BLOG,\n    dateStr,\n    validBacklog: validByBlog[blog.ID_BLOG] || 0\n  }\n}));"
       },
       "id": "prepare-generation",
       "name": "Preparar por Blog",
@@ -49,52 +49,46 @@
     },
     {
       "parameters": {
+        "jsCode": "// Construye el payload JSON completo para DeepSeek.\n// Usamos un Code node porque n8n HTTP Request v4.2 serializa\n// mal el body cuando contiene expresiones mezcladas con JSON anidado.\nconst blog = $input.item.json;\n\nconst systemPrompt = 'Eres un experto SEO con 15 años de experiencia en content marketing y monetización con Adsense y afiliados. Generas títulos de artículos únicos, específicos y con alto potencial de tráfico orgánico. Respondes SOLO con JSON válido, sin markdown, sin explicaciones.';\n\nconst existingStr = (blog.existingTitles || []).slice(0, 30).join(' | ');\n\nconst strategy = blog.isHighRpm\n  ? 'ESTRATEGIA HIGH-RPM:\\n- BUYER INTENT PURO: búsquedas urgentes con dinero (abogados, impuestos, seguros, accidentes)\\n- Micronichos ULTRA específicos: ciudad/estado + situación + año (ej: \"abogado accidente camión Dallas TX sin cobro adelantado\", \"apelar workers comp denegada California 2024\")\\n- FAQ alta conversión: ¿cuánto cuesta?, ¿cómo reclamar?, ¿qué pasa si?\\n- 5 artículos PILAR definitivos (PRIORITY=1) + 45 clusters ultra específicos (PRIORITY=2)'\n  : 'ESTRATEGIA AUTORIDAD + AFILIADOS:\\n- 30% informativos profundos (guías completas)\\n- 40% buyer intent suave (comparativas, mejores opciones, reviews)\\n- 30% FAQ conversional (preguntas reales)\\n- 3 artículos PILAR definitivos (PRIORITY=1) + 47 clusters específicos (PRIORITY=2)';\n\nconst userPrompt = 'Genera exactamente ' + blog.titlesPerBlog + ' títulos SEO únicos para:\\nBlog: ' + (blog.sitioUrl || blog.nicho) + '\\nNicho: ' + blog.nicho + '\\nIdioma: ' + blog.idioma + '\\nTipo: ' + (blog.isHighRpm ? 'HIGH-RPM Adsense' : 'Autoridad + Afiliados') + '\\nBacklog útil actual: ' + blog.validBacklog + ' títulos\\n\\n' + strategy + '\\n\\nOBLIGATORIO:\\n- Títulos escritos como experto humano nativo en ' + blog.idioma + '\\n- Long-tail específico (4-8 palabras mínimo)\\n- Sin repetir estos temas ya existentes: ' + existingStr + '\\n\\nResponde SOLO con este JSON (sin markdown, sin texto extra):\\n{\"titles\": [{\"title\": \"...\", \"keywords\": \"kw1, kw2, kw3\", \"priority\": 1}]}';\n\nconst payload = {\n  model: 'deepseek-chat',\n  temperature: 0.8,\n  max_tokens: 4000,\n  stream: false,\n  messages: [\n    { role: 'system', content: systemPrompt },\n    { role: 'user', content: userPrompt }\n  ]\n};\n\nconsole.log('Payload construido para blog: ' + blog.blogId + ' nicho=' + blog.nicho);\nconsole.log('user prompt length: ' + userPrompt.length + ' chars');\n\nreturn [{ json: { ...blog, _payload: JSON.stringify(payload) } }];"
+      },
+      "id": "build-payload",
+      "name": "Construir Payload DeepSeek",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, 300]
+    },
+    {
+      "parameters": {
         "method": "POST",
         "url": "https://api.deepseek.com/v1/chat/completions",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $credentials.httpHeaderAuth.value }}" },
             { "name": "Content-Type", "value": "application/json" }
           ]
         },
         "sendBody": true,
-        "contentType": "json",
-        "body": {
-          "model": "deepseek-chat",
-          "messages": [
-            {
-              "role": "system",
-              "content": "Eres un experto SEO con 15 años de experiencia en content marketing y monetización con Adsense y afiliados. Generas títulos de artículos únicos, específicos y con alto potencial de tráfico orgánico. Respondes SOLO con JSON válido, sin markdown, sin explicaciones."
-            },
-            {
-              "role": "user",
-              "content": "=Genera exactamente {{ $json.titlesPerBlog }} títulos SEO únicos para:\nBlog: {{ $json.sitioUrl || $json.nicho }}\nNicho: {{ $json.nicho }}\nIdioma: {{ $json.idioma }}\nTipo: {{ $json.isHighRpm ? 'HIGH-RPM Adsense (buyer intent, micronichos)' : 'Autoridad + Afiliados' }}\nBacklog útil actual: {{ $json.validBacklog }} títulos\n\n{{ $json.isHighRpm ? 'ESTRATEGIA HIGH-RPM:\\n- BUYER INTENT PURO: búsquedas de personas con problema urgente y dinero\\n- Micronichos ULTRA específicos: ciudad/estado + situación + año\\n- FAQ de alta conversión: ¿cuánto cuesta?, ¿cómo reclamar?, ¿qué pasa si?\\n- 5 artículos PILAR definitivos (PRIORITY=1) + 45 clusters ultra específicos (PRIORITY=2)' : 'ESTRATEGIA AUTORIDAD + AFILIADOS:\\n- 30% informativos profundos + 40% buyer intent suave + 30% FAQ conversional\\n- Long-tail muy específico con situaciones reales\\n- 3 artículos PILAR definitivos (PRIORITY=1) + 47 clusters específicos (PRIORITY=2)' }}\n\nOBLIGATORIO:\n- Títulos escritos como experto humano nativo en {{ $json.idioma }}\n- Long-tail específico (4-8 palabras)\n- Sin repetir temas: {{ $json.existingTitles.slice(0,30).join(' | ') }}\n\nResponde SOLO con este JSON (sin markdown):\n{\"titles\": [{\"title\": \"...\", \"keywords\": \"kw1, kw2, kw3\", \"priority\": 1}]}"
-            }
-          ],
-          "max_tokens": 4000,
-          "temperature": 0.8,
-          "stream": false
-        },
+        "specifyBody": "json",
+        "jsonBody": "={{ $json._payload }}",
         "options": { "timeout": 90000 }
       },
       "id": "deepseek-titles",
       "name": "Generar Títulos DeepSeek",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [960, 300],
+      "position": [1200, 300],
       "credentials": { "httpHeaderAuth": { "name": "DeepSeek API" } },
       "onError": "continueErrorOutput"
     },
     {
       "parameters": {
-        "jsCode": "const res = $('Generar Títulos DeepSeek').item.json;\nconst prev = $('Preparar por Blog').item.json;\n\nif (!res.choices || !res.choices[0]) {\n  throw new Error('DeepSeek sin respuesta: ' + JSON.stringify(res).substring(0, 300));\n}\n\nlet titlesData;\ntry {\n  const content = res.choices[0].message.content;\n  const clean = content.replace(/^```json\\s*/i, '').replace(/^```\\s*/i, '').replace(/\\s*```\\s*$/i, '').trim();\n  titlesData = JSON.parse(clean);\n} catch(e) {\n  throw new Error('JSON inválido de DeepSeek: ' + e.message);\n}\n\nconst titles = titlesData.titles || [];\nif (titles.length === 0) throw new Error('DeepSeek retornó lista vacía');\n\nconst existingSet = new Set((prev.existingTitles || []).map(t => t.toLowerCase().trim()));\nconst dateStr = prev.dateStr;\n\nconst rows = [];\nfor (const t of titles) {\n  const titleLower = (t.title || '').toLowerCase().trim();\n  if (!t.title || titleLower.length < 10 || existingSet.has(titleLower)) continue;\n  existingSet.add(titleLower);\n  const uid = 'TF' + dateStr + '-' + String(prev.blogId).substring(0, 6).replace(/[^a-z0-9]/gi, '') + '-' + Date.now().toString(36).slice(-4) + '-' + Math.random().toString(36).slice(2, 5);\n  rows.push({\n    ID_UNICO: uid,\n    STATUS: 'PENDING',\n    LOCK: 'FALSE',\n    ID_BLOG: prev.blogId,\n    KEYWORD: t.keywords || t.title.split(' ').slice(0, 4).join(' '),\n    TEMA_ARTICULO: t.title,\n    ID_PARENT_SILO: '',\n    PRIORITY: String(t.priority || 2),\n    RETRY_COUNT: '0'\n  });\n}\n\nif (rows.length === 0) throw new Error('Todos los títulos ya existen en pipeline');\n\nconsole.log('Blog: ' + prev.blogId + ' (' + prev.nicho + ')');\nconsole.log('Generados: ' + titles.length + ' | Nuevos únicos: ' + rows.length + ' | Backlog previo: ' + prev.validBacklog);\n\nreturn rows.map(r => ({ json: r }));"
+        "jsCode": "const res  = $('Generar Títulos DeepSeek').item.json;\nconst prev = $('Preparar por Blog').item.json;\n\nconsole.log('DeepSeek response keys: ' + Object.keys(res).join(', '));\n\nif (res.error) {\n  throw new Error('DeepSeek API error: ' + JSON.stringify(res.error));\n}\nif (!res.choices || !res.choices[0]) {\n  throw new Error('DeepSeek sin choices: ' + JSON.stringify(res).substring(0, 400));\n}\n\nconst rawContent = res.choices[0].message.content;\nconsole.log('Raw content length: ' + rawContent.length);\nconsole.log('Raw content preview: ' + rawContent.substring(0, 200));\n\nlet titlesData;\ntry {\n  const clean = rawContent\n    .replace(/^```json\\s*/i, '')\n    .replace(/^```\\s*/i, '')\n    .replace(/\\s*```\\s*$/i, '')\n    .trim();\n  titlesData = JSON.parse(clean);\n} catch(e) {\n  throw new Error('JSON inválido de DeepSeek: ' + e.message + ' | Raw: ' + rawContent.substring(0, 300));\n}\n\nconst titles = titlesData.titles || [];\nconsole.log('Títulos parseados: ' + titles.length);\nif (titles.length === 0) throw new Error('DeepSeek retornó lista vacía');\n\nconst existingSet = new Set((prev.existingTitles || []).map(t => t.toLowerCase().trim()));\nconst dateStr = prev.dateStr;\n\nconst rows = [];\nfor (const t of titles) {\n  const titleLower = (t.title || '').toLowerCase().trim();\n  if (!t.title || titleLower.length < 10 || existingSet.has(titleLower)) continue;\n  existingSet.add(titleLower);\n  const uid = 'TF' + dateStr + '-' + String(prev.blogId).substring(0, 6).replace(/[^a-z0-9]/gi, '') + '-' + Date.now().toString(36).slice(-4) + '-' + Math.random().toString(36).slice(2, 5);\n  rows.push({\n    ID_UNICO: uid,\n    STATUS: 'PENDING',\n    LOCK: 'FALSE',\n    ID_BLOG: prev.blogId,\n    KEYWORD: t.keywords || t.title.split(' ').slice(0, 4).join(' '),\n    TEMA_ARTICULO: t.title,\n    ID_PARENT_SILO: '',\n    PRIORITY: String(t.priority || 2),\n    RETRY_COUNT: '0'\n  });\n}\n\nif (rows.length === 0) throw new Error('Todos los títulos generados ya existen en pipeline');\n\nconsole.log('=== INSERCIÓN ===');\nconsole.log('Blog: ' + prev.blogId + ' (' + prev.nicho + ')');\nconsole.log('Títulos nuevos únicos: ' + rows.length + ' / ' + titles.length);\nconsole.log('Backlog útil antes: ' + prev.validBacklog + ' → estimado después: ' + (prev.validBacklog + rows.length));\n\nreturn rows.map(r => ({ json: r }));"
       },
       "id": "parse-titles",
       "name": "Parsear Títulos",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1200, 300]
+      "position": [1440, 300]
     },
     {
       "parameters": {
@@ -133,12 +127,12 @@
       "name": "Insertar en CONTENT_PIPELINE",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [1440, 300],
+      "position": [1680, 300],
       "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
     },
     {
       "parameters": {
-        "jsCode": "// Archivado automático de FAILED con RETRY > 2\n// Sin filtro externo — return [] si no hay nada que archivar\nconst allItems = $input.all().map(i => i.json);\n\nconst toArchive = allItems.filter(r => {\n  const status = String(r.STATUS ?? '').toUpperCase().trim();\n  const retry = parseInt(String(r.RETRY_COUNT || '0'), 10);\n  return (status === 'FAILED' || status === 'LOCK_TIMEOUT') && retry > 2 && r.ID_UNICO;\n});\n\nif (toArchive.length === 0) {\n  console.log('Limpieza: sin huérfanos para archivar.');\n  return [];\n}\n\nconsole.log('Archivando ' + toArchive.length + ' registros FAILED/LOCK_TIMEOUT (RETRY > 2)');\nreturn toArchive.map(r => ({ json: { ID_UNICO: r.ID_UNICO, STATUS: 'ARCHIVED' } }));"
+        "jsCode": "const allItems = $input.all().map(i => i.json);\nconst toArchive = allItems.filter(r => {\n  const status = String(r.STATUS ?? '').toUpperCase().trim();\n  const retry = parseInt(String(r.RETRY_COUNT || '0'), 10);\n  return (status === 'FAILED' || status === 'LOCK_TIMEOUT') && retry > 2 && r.ID_UNICO;\n});\nif (toArchive.length === 0) {\n  console.log('Limpieza: sin huérfanos para archivar.');\n  return [];\n}\nconsole.log('Archivando ' + toArchive.length + ' registros FAILED/LOCK_TIMEOUT (RETRY > 2)');\nreturn toArchive.map(r => ({ json: { ID_UNICO: r.ID_UNICO, STATUS: 'ARCHIVED' } }));"
       },
       "id": "identify-orphans",
       "name": "Identificar Huérfanos",
@@ -194,6 +188,9 @@
       ]
     },
     "Preparar por Blog": {
+      "main": [[{ "node": "Construir Payload DeepSeek", "type": "main", "index": 0 }]]
+    },
+    "Construir Payload DeepSeek": {
       "main": [[{ "node": "Generar Títulos DeepSeek", "type": "main", "index": 0 }]]
     },
     "Generar Títulos DeepSeek": {
