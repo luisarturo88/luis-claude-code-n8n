@@ -1,5 +1,5 @@
 {
-  "id": "wf01-master-simple",
+  "id": "wf01-inline",
   "name": "01_MASTER_SCHEDULER",
   "nodes": [
     {
@@ -10,7 +10,7 @@
       "name": "Every 20 Minutes",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [240, 300]
+      "position": [200, 300]
     },
     {
       "parameters": {
@@ -22,7 +22,7 @@
       "name": "Read CONTENT_PIPELINE",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [460, 300],
+      "position": [420, 300],
       "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
     },
     {
@@ -31,7 +31,7 @@
           "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
           "conditions": [
             {
-              "id": "cond-pending",
+              "id": "cond-status",
               "leftValue": "={{ String($json.STATUS ?? '').toUpperCase().trim() }}",
               "rightValue": "PENDING",
               "operator": { "type": "string", "operation": "equals" }
@@ -45,7 +45,7 @@
       "name": "Filter PENDING",
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
-      "position": [680, 300]
+      "position": [640, 300]
     },
     {
       "parameters": {
@@ -57,142 +57,136 @@
         },
         "options": {}
       },
-      "id": "sort-priority",
+      "id": "sort-rows",
       "name": "Sort by Priority",
       "type": "n8n-nodes-base.sort",
       "typeVersion": 1,
-      "position": [900, 300]
+      "position": [860, 300]
     },
     {
-      "parameters": {
-        "operation": "limit",
-        "maxItems": 1
-      },
+      "parameters": { "operation": "limit", "maxItems": 1 },
       "id": "take-one",
       "name": "Take 1 Row",
       "type": "n8n-nodes-base.limit",
       "typeVersion": 1,
-      "position": [1120, 300]
+      "position": [1080, 300]
     },
     {
       "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "ACTUALIZAR_ID_WF02",
-          "mode": "id"
-        },
-        "options": { "waitForSubWorkflow": true },
-        "fields": {
-          "values": [
-            { "name": "ID_UNICO",      "stringValue": "={{ $json.ID_UNICO }}" },
-            { "name": "TEMA_ARTICULO", "stringValue": "={{ $json.TEMA_ARTICULO }}" },
-            { "name": "KEYWORD",       "stringValue": "={{ $json.KEYWORD || '' }}" },
-            { "name": "ID_BLOG",       "stringValue": "={{ $json.ID_BLOG }}" },
-            { "name": "NICHO",         "stringValue": "={{ $json.NICHO || '' }}" },
-            { "name": "IDIOMA",        "stringValue": "={{ $json.IDIOMA || 'es' }}" }
-          ]
-        }
-      },
-      "id": "run-wf02",
-      "name": "02 Generar Contenido",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.1,
-      "position": [1340, 300]
-    },
-    {
-      "parameters": {
-        "conditions": {
-          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
-          "conditions": [
-            {
-              "id": "cond-html",
-              "leftValue": "={{ $json.HTML_FINAL }}",
-              "rightValue": "",
-              "operator": { "type": "string", "operation": "notEmpty" }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
-      },
-      "id": "has-html",
-      "name": "Tiene HTML?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [1560, 300]
-    },
-    {
-      "parameters": {
-        "workflowId": {
-          "__rl": true,
-          "value": "ACTUALIZAR_ID_WF04",
-          "mode": "id"
-        },
-        "options": { "waitForSubWorkflow": true },
-        "fields": {
-          "values": [
-            { "name": "ID_UNICO",      "stringValue": "={{ $json.ID_UNICO }}" },
-            { "name": "TEMA_ARTICULO", "stringValue": "={{ $json.TEMA_ARTICULO }}" },
-            { "name": "ID_BLOG",       "stringValue": "={{ $json.ID_BLOG }}" },
-            { "name": "BLOGGER_ID",    "stringValue": "={{ $json.BLOGGER_ID }}" },
-            { "name": "HTML_FINAL",    "stringValue": "={{ $json.HTML_FINAL }}" },
-            { "name": "NICHO",         "stringValue": "={{ $json.NICHO || '' }}" },
-            { "name": "IDIOMA",        "stringValue": "={{ $json.IDIOMA || 'es' }}" }
-          ]
-        }
-      },
-      "id": "run-wf04",
-      "name": "04 Publicar Blogger",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.1,
-      "position": [1780, 220]
-    },
-    {
-      "parameters": {
-        "operation": "update",
         "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
-        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "ID_UNICO": "={{ $('Take 1 Row').item.json.ID_UNICO }}",
-            "STATUS":   "FAILED"
-          },
-          "matchingColumns": ["ID_UNICO"],
-          "schema": [
-            { "id": "ID_UNICO", "displayName": "ID_UNICO", "required": false, "defaultMatch": true,  "canBeUsedToMatch": true,  "display": true, "type": "string", "removed": false },
-            { "id": "STATUS",   "displayName": "STATUS",   "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false }
-          ]
-        },
+        "sheetName": { "__rl": true, "value": "BLOGS_SITES_CONFIG", "mode": "name" },
         "options": {}
       },
-      "id": "mark-failed",
-      "name": "Marcar FAILED",
+      "id": "read-blogs",
+      "name": "Read BLOGS_CONFIG",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [1780, 400],
+      "position": [1300, 300],
+      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "const pipeline = $('Take 1 Row').item.json;\nconst blogs = $input.all().map(i => i.json);\nconst blog = blogs.find(b => String(b.ID_BLOG).trim() === String(pipeline.ID_BLOG).trim()) || {};\n\nconst idioma = blog.IDIOMA || pipeline.IDIOMA || 'es';\nconst nicho   = blog.NICHO   || pipeline.NICHO   || 'general';\nconst bloggerId = String(blog.BLOGGER_ID || '').trim();\n\nif (!bloggerId) {\n  throw new Error('BLOGGER_ID vacío para ID_BLOG=' + pipeline.ID_BLOG + '. Verifica BLOGS_SITES_CONFIG.');\n}\n\nconst enEs = idioma !== 'en';\nconst sysPrompt = enEs\n  ? 'Eres experto SEO. Escribe artículos en español usando HTML puro. Sin markdown, sin bloques de código.'\n  : 'You are an SEO expert. Write articles in English using pure HTML only. No markdown, no code blocks.';\n\nconst userPrompt = enEs\n  ? `Escribe un artículo SEO completo sobre: \"${pipeline.TEMA_ARTICULO}\"\\nPalabras clave: ${pipeline.KEYWORD || pipeline.TEMA_ARTICULO}\\nNicho: ${nicho}\\nMínimo 1200 palabras. Devuelve SOLO HTML puro empezando con <h1>. Sin texto previo ni explicaciones.`\n  : `Write a complete SEO article about: \"${pipeline.TEMA_ARTICULO}\"\\nKeywords: ${pipeline.KEYWORD || pipeline.TEMA_ARTICULO}\\nNiche: ${nicho}\\nMinimum 1200 words. Return ONLY pure HTML starting with <h1>. No preamble or explanations.`;\n\nconsole.log('Pipeline row:', pipeline.ID_UNICO, '| Blog:', bloggerId, '| row_number:', pipeline.row_number);\n\nreturn [{ json: {\n  ID_UNICO:      pipeline.ID_UNICO,\n  TEMA_ARTICULO: pipeline.TEMA_ARTICULO,\n  ID_BLOG:       pipeline.ID_BLOG,\n  BLOGGER_ID:    bloggerId,\n  NICHO:         nicho,\n  IDIOMA:        idioma,\n  KEYWORD:       pipeline.KEYWORD || '',\n  row_number:    pipeline.row_number,\n  systemPrompt:  sysPrompt,\n  userPrompt:    userPrompt\n} }];"
+      },
+      "id": "prepare-data",
+      "name": "Preparar Datos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1520, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'system', content: $json.systemPrompt }, { role: 'user', content: $json.userPrompt }], temperature: 0.7, max_tokens: 4000 }) }}",
+        "options": { "timeout": 120000 }
+      },
+      "id": "deepseek-call",
+      "name": "DeepSeek API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1740, 300],
+      "credentials": { "httpHeaderAuth": { "name": "DeepSeek API" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "const prev = $('Preparar Datos').item.json;\nconst res  = $json;\n\nif (!res.choices || !res.choices[0]) {\n  throw new Error('DeepSeek sin respuesta válida: ' + JSON.stringify(res).slice(0, 300));\n}\n\nlet html = (res.choices[0].message.content || '').trim();\nhtml = html.replace(/^```html\\s*/i,'').replace(/^```\\s*/i,'').replace(/\\s*```\\s*$/i,'').trim();\n\nif (!html || html.length < 100) {\n  throw new Error('HTML vacío o demasiado corto: ' + html.slice(0, 100));\n}\n\nconsole.log('HTML generado: ' + html.length + ' chars | tokens: ' + (res.usage?.total_tokens || 0));\n\nreturn [{ json: {\n  ...prev,\n  HTML_FINAL: html,\n  TOKENS:     res.usage?.total_tokens || 0\n} }];"
+      },
+      "id": "extract-html",
+      "name": "Extraer HTML",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1960, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.BLOGGER_ID }}/posts/",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ kind: 'blogger#post', blog: { id: $json.BLOGGER_ID }, title: $json.TEMA_ARTICULO, content: $json.HTML_FINAL }) }}",
+        "options": { "timeout": 60000 }
+      },
+      "id": "blogger-post",
+      "name": "Publicar en Blogger",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2180, 300],
+      "credentials": { "googleOAuth2Api": { "name": "Google Sheets account" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "const bloggerResp = $json;\nconst prev = $('Extraer HTML').item.json;\n\nif (!bloggerResp.id) {\n  throw new Error('Blogger no devolvió post ID: ' + JSON.stringify(bloggerResp).slice(0, 300));\n}\n\nconst postUrl = bloggerResp.url || bloggerResp.selfLink || '';\nconst row     = prev.row_number;\n\nconsole.log('Post publicado: ' + postUrl + ' | row=' + row);\n\nreturn [{ json: {\n  ID_UNICO:   prev.ID_UNICO,\n  post_url:   postUrl,\n  post_id:    String(bloggerResp.id),\n  row_number: row,\n  updateBody: {\n    valueInputOption: 'USER_ENTERED',\n    data: [\n      { range: 'CONTENT_PIPELINE!B' + row, values: [['PUBLISHED']] },\n      { range: 'CONTENT_PIPELINE!K' + row, values: [[postUrl]] }\n    ]\n  }\n} }];"
+      },
+      "id": "extract-url",
+      "name": "Extraer URL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2400, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug/values:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.updateBody) }}",
+        "options": {}
+      },
+      "id": "mark-published",
+      "name": "Marcar PUBLISHED",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2620, 300],
       "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
     }
   ],
   "connections": {
-    "Every 20 Minutes":   { "main": [[{ "node": "Read CONTENT_PIPELINE", "type": "main", "index": 0 }]] },
+    "Every 20 Minutes":    { "main": [[{ "node": "Read CONTENT_PIPELINE",  "type": "main", "index": 0 }]] },
     "Read CONTENT_PIPELINE": { "main": [[{ "node": "Filter PENDING",       "type": "main", "index": 0 }]] },
-    "Filter PENDING":     { "main": [[{ "node": "Sort by Priority",       "type": "main", "index": 0 }]] },
-    "Sort by Priority":   { "main": [[{ "node": "Take 1 Row",             "type": "main", "index": 0 }]] },
-    "Take 1 Row":         { "main": [[{ "node": "02 Generar Contenido",   "type": "main", "index": 0 }]] },
-    "02 Generar Contenido": { "main": [[{ "node": "Tiene HTML?",          "type": "main", "index": 0 }]] },
-    "Tiene HTML?": {
-      "main": [
-        [{ "node": "04 Publicar Blogger", "type": "main", "index": 0 }],
-        [{ "node": "Marcar FAILED",       "type": "main", "index": 0 }]
-      ]
-    }
+    "Filter PENDING":      { "main": [[{ "node": "Sort by Priority",       "type": "main", "index": 0 }]] },
+    "Sort by Priority":    { "main": [[{ "node": "Take 1 Row",             "type": "main", "index": 0 }]] },
+    "Take 1 Row":          { "main": [[{ "node": "Read BLOGS_CONFIG",      "type": "main", "index": 0 }]] },
+    "Read BLOGS_CONFIG":   { "main": [[{ "node": "Preparar Datos",         "type": "main", "index": 0 }]] },
+    "Preparar Datos":      { "main": [[{ "node": "DeepSeek API",           "type": "main", "index": 0 }]] },
+    "DeepSeek API":        { "main": [[{ "node": "Extraer HTML",           "type": "main", "index": 0 }]] },
+    "Extraer HTML":        { "main": [[{ "node": "Publicar en Blogger",    "type": "main", "index": 0 }]] },
+    "Publicar en Blogger": { "main": [[{ "node": "Extraer URL",            "type": "main", "index": 0 }]] },
+    "Extraer URL":         { "main": [[{ "node": "Marcar PUBLISHED",       "type": "main", "index": 0 }]] }
   },
   "settings": {
     "executionOrder": "v1",
     "saveManualExecutions": true,
     "callerPolicy": "workflowsFromSameOwner",
-    "executionTimeout": 3600
+    "executionTimeout": 300
   },
   "meta": { "instanceId": "production" }
 }
