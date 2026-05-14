@@ -89,30 +89,9 @@
         "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
         "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
         "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "ID_UNICO": "={{ $json.ID_UNICO }}",
-            "STATUS": "={{ $json.STATUS }}",
-            "LOCK": "={{ $json.LOCK }}",
-            "ID_BLOG": "={{ $json.ID_BLOG }}",
-            "KEYWORD": "={{ $json.KEYWORD }}",
-            "TEMA_ARTICULO": "={{ $json.TEMA_ARTICULO }}",
-            "ID_PARENT_SILO": "={{ $json.ID_PARENT_SILO }}",
-            "PRIORITY": "={{ $json.PRIORITY }}",
-            "RETRY_COUNT": "={{ $json.RETRY_COUNT }}"
-          },
+          "mappingMode": "autoMapInputData",
           "matchingColumns": [],
-          "schema": [
-            {"id": "ID_UNICO", "displayName": "ID_UNICO", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "LOCK", "displayName": "LOCK", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "ID_BLOG", "displayName": "ID_BLOG", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "KEYWORD", "displayName": "KEYWORD", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "TEMA_ARTICULO", "displayName": "TEMA_ARTICULO", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "ID_PARENT_SILO", "displayName": "ID_PARENT_SILO", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "PRIORITY", "displayName": "PRIORITY", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false},
-            {"id": "RETRY_COUNT", "displayName": "RETRY_COUNT", "required": false, "defaultMatch": false, "canBeUsedToMatch": false, "display": true, "type": "string", "removed": false}
-          ]
+          "schema": []
         },
         "options": { "cellFormat": "USER_ENTERED" }
       },
