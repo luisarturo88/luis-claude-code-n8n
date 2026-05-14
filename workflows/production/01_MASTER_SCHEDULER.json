@@ -27,36 +27,12 @@
     },
     {
       "parameters": {
-        "conditions": {
-          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
-          "conditions": [
-            {
-              "id": "cond-status",
-              "leftValue": "={{ String($json.STATUS ?? '').toUpperCase().trim() }}",
-              "rightValue": "PENDING",
-              "operator": { "type": "string", "operation": "equals" }
-            },
-            {
-              "id": "cond-id-blog",
-              "leftValue": "={{ $json.ID_BLOG }}",
-              "rightValue": "",
-              "operator": { "type": "string", "operation": "notEmpty" }
-            },
-            {
-              "id": "cond-tema",
-              "leftValue": "={{ $json.TEMA_ARTICULO }}",
-              "rightValue": "",
-              "operator": { "type": "string", "operation": "notEmpty" }
-            }
-          ],
-          "combinator": "and"
-        },
-        "options": {}
+        "jsCode": "const items = $input.all();\nconst valid = items.filter(item => {\n  const status = String(item.json.STATUS ?? '').toUpperCase().trim();\n  const idBlog = String(item.json.ID_BLOG ?? '').trim();\n  const tema   = String(item.json.TEMA_ARTICULO ?? '').trim();\n  return status === 'PENDING' && idBlog !== '' && tema !== '';\n});\nconsole.log('Total rows: ' + items.length + ' | PENDING validas: ' + valid.length);\nreturn valid;"
       },
       "id": "filter-pending",
       "name": "Filter PENDING",
-      "type": "n8n-nodes-base.filter",
-      "typeVersion": 2.2,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [640, 300]
     },
     {
