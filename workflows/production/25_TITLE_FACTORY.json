@@ -49,7 +49,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Construye el payload JSON completo para DeepSeek.\n// Usamos un Code node porque n8n HTTP Request v4.2 serializa\n// mal el body cuando contiene expresiones mezcladas con JSON anidado.\nconst blog = $input.item.json;\n\nconst systemPrompt = 'Eres un experto SEO con 15 años de experiencia en content marketing y monetización con Adsense y afiliados. Generas títulos de artículos únicos, específicos y con alto potencial de tráfico orgánico. Respondes SOLO con JSON válido, sin markdown, sin explicaciones.';\n\nconst existingStr = (blog.existingTitles || []).slice(0, 30).join(' | ');\n\nconst strategy = blog.isHighRpm\n  ? 'ESTRATEGIA HIGH-RPM:\\n- BUYER INTENT PURO: búsquedas urgentes con dinero (abogados, impuestos, seguros, accidentes)\\n- Micronichos ULTRA específicos: ciudad/estado + situación + año (ej: \"abogado accidente camión Dallas TX sin cobro adelantado\", \"apelar workers comp denegada California 2024\")\\n- FAQ alta conversión: ¿cuánto cuesta?, ¿cómo reclamar?, ¿qué pasa si?\\n- 5 artículos PILAR definitivos (PRIORITY=1) + 45 clusters ultra específicos (PRIORITY=2)'\n  : 'ESTRATEGIA AUTORIDAD + AFILIADOS:\\n- 30% informativos profundos (guías completas)\\n- 40% buyer intent suave (comparativas, mejores opciones, reviews)\\n- 30% FAQ conversional (preguntas reales)\\n- 3 artículos PILAR definitivos (PRIORITY=1) + 47 clusters específicos (PRIORITY=2)';\n\nconst userPrompt = 'Genera exactamente ' + blog.titlesPerBlog + ' títulos SEO únicos para:\\nBlog: ' + (blog.sitioUrl || blog.nicho) + '\\nNicho: ' + blog.nicho + '\\nIdioma: ' + blog.idioma + '\\nTipo: ' + (blog.isHighRpm ? 'HIGH-RPM Adsense' : 'Autoridad + Afiliados') + '\\nBacklog útil actual: ' + blog.validBacklog + ' títulos\\n\\n' + strategy + '\\n\\nOBLIGATORIO:\\n- Títulos escritos como experto humano nativo en ' + blog.idioma + '\\n- Long-tail específico (4-8 palabras mínimo)\\n- Sin repetir estos temas ya existentes: ' + existingStr + '\\n\\nResponde SOLO con este JSON (sin markdown, sin texto extra):\\n{\"titles\": [{\"title\": \"...\", \"keywords\": \"kw1, kw2, kw3\", \"priority\": 1}]}';\n\nconst payload = {\n  model: 'deepseek-chat',\n  temperature: 0.8,\n  max_tokens: 4000,\n  stream: false,\n  messages: [\n    { role: 'system', content: systemPrompt },\n    { role: 'user', content: userPrompt }\n  ]\n};\n\nconsole.log('Payload construido para blog: ' + blog.blogId + ' nicho=' + blog.nicho);\nconsole.log('user prompt length: ' + userPrompt.length + ' chars');\n\nreturn [{ json: { ...blog, _payload: JSON.stringify(payload) } }];"
+        "jsCode": "const blog = $input.item.json;\n\nconst systemPrompt = 'Eres un experto SEO. Respondes SOLO con JSON valido, sin markdown, sin explicaciones. Formato exacto: {\"titles\": [{\"title\": \"...\", \"keywords\": \"kw1, kw2\", \"priority\": 1}]}';\n\nconst existingStr = (blog.existingTitles || []).slice(0, 20).join(' | ');\n\nconst userPrompt = 'Genera exactamente ' + (blog.titlesPerBlog || 50) + ' titulos SEO unicos.\\nNicho: ' + (blog.nicho || 'general') + '\\nIdioma: ' + (blog.idioma || 'es') + '\\nEvitar repetir: ' + existingStr + '\\n\\nResponde SOLO con JSON: {\"titles\": [{\"title\": \"...\", \"keywords\": \"kw1, kw2\", \"priority\": 2}]}';\n\nconst payload = {\n  model: 'deepseek-chat',\n  temperature: 0.7,\n  max_tokens: 4000,\n  stream: false,\n  messages: [\n    { role: 'system', content: systemPrompt },\n    { role: 'user', content: userPrompt }\n  ]\n};\n\nconst payloadStr = JSON.stringify(payload);\nconsole.log('=== CONSTRUIR PAYLOAD ===');\nconsole.log('Blog: ' + blog.blogId + ' nicho=' + blog.nicho);\nconsole.log('Payload length: ' + payloadStr.length + ' bytes');\nconsole.log('Payload preview (500 chars): ' + payloadStr.substring(0, 500));\n\nreturn [{ json: { ...blog, _payload: payloadStr } }];"
       },
       "id": "build-payload",
       "name": "Construir Payload DeepSeek",
@@ -68,17 +68,25 @@
           ]
         },
         "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ $json._payload }}",
-        "options": { "timeout": 90000 }
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json._payload }}",
+        "options": {
+          "timeout": 90000,
+          "response": {
+            "response": {
+              "fullResponse": false,
+              "responseFormat": "json"
+            }
+          }
+        }
       },
       "id": "deepseek-titles",
       "name": "Generar Títulos DeepSeek",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [1200, 300],
-      "credentials": { "httpHeaderAuth": { "name": "DeepSeek API" } },
-      "onError": "continueErrorOutput"
+      "credentials": { "httpHeaderAuth": { "name": "DeepSeek API" } }
     },
     {
       "parameters": {
