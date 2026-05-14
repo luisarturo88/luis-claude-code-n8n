@@ -322,61 +322,98 @@ async function main() {
     }
   }
 
-  // 6. Activar en orden
-  console.log('\n── ACTIVANDO WORKFLOWS ──');
+  // 6. Activar en orden de dependencias
+  // CRÍTICO: sub-workflows deben estar activos ANTES que sus padres
+  // WF10 → WF04 (WF04 llama a WF10)
+  // WF02 + WF04 → WF01 (WF01 llama a WF02 y WF04)
+  console.log('\n── ACTIVANDO WORKFLOWS (orden de dependencias) ──');
   await new Promise(r => setTimeout(r, 2000));
 
   const allWf = await getAllWorkflows();
 
-  const activateOrder = [
-    '05_LOCK', '25_TITLE', '02_AI', '04_BLOGGER',
-    '06_AFFILIATE', '07_MONETIZ', '08_TELEGRAM',
-    '09_DIGITAL', '10_SOCIAL', '15_INTERLINK', '01_MASTER'
+  // Orden: primero los que no tienen deps, luego los que sí
+  // Usar IDs exactos del ids map para evitar activar workflows con nombres similares
+  const activateSequence = [
+    '05_LOCK_WATCHDOG',
+    '25_TITLE_FACTORY',
+    '02_AI_CONTENT_GENERATOR',      // debe activarse ANTES que WF01
+    '06_AFFILIATE_INJECTOR',
+    '07_MONETIZATION_INJECTOR',
+    '08_TELEGRAM_BROADCASTER',
+    '09_DIGITAL_PRODUCT_LINKER',
+    '10_SOCIAL_MEDIA_DISTRIBUTOR',  // debe activarse ANTES que WF04
+    '15_INTERLINK_BUILDER',
+    '04_BLOGGER_PUBLISHER',         // debe activarse DESPUÉS de WF10, ANTES de WF01
+    '01_MASTER_SCHEDULER',          // debe ser el ÚLTIMO
   ];
 
-  for (const pattern of activateOrder) {
-    const wf = allWf.find(w => w.name.includes(pattern));
-    if (!wf) { console.log(`  SKIP: ${pattern}`); continue; }
-    if (wf.active) { console.log(`  ✓ YA ACTIVO: ${wf.name} [${wf.id}]`); continue; }
+  for (const wfName of activateSequence) {
+    // Preferir el ID exacto del import actual; fallback a búsqueda por nombre exacto
+    const wfId = ids[wfName];
+    let wf;
+    if (wfId) {
+      wf = allWf.find(w => w.id === wfId);
+    }
+    if (!wf) {
+      // Buscar por nombre exacto (no prefijo) para evitar falsos positivos
+      wf = allWf.find(w => w.name === wfName);
+    }
+    if (!wf) { console.log(`  SKIP (no encontrado): ${wfName}`); continue; }
+
+    if (wf.active) {
+      console.log(`  ✓ YA ACTIVO: ${wf.name} [${wf.id}]`);
+      continue;
+    }
 
     const actRes = await apiCall('POST', `/api/v1/workflows/${wf.id}/activate`);
     const ok = actRes.ok || actRes.body?.active === true;
     console.log(`  ${ok ? '✓ ACTIVADO' : '✗ FALLÓ'}: ${wf.name} [${wf.id}]`);
-    if (!ok) console.log(`    ${JSON.stringify(actRes.body).slice(0,200)}`);
+    if (!ok) console.log(`    ${JSON.stringify(actRes.body).slice(0,300)}`);
+
+    // Breve pausa para que n8n registre el estado activo antes de activar dependientes
+    if (ok) await new Promise(r => setTimeout(r, 500));
   }
 
-  // 7. KICKSTART — disparar WF25 y WF01 para producción inmediata
+  // 7. KICKSTART — disparar WF25 para poblar pipeline
   console.log('\n── KICKSTART DE PRODUCCIÓN ──');
   await new Promise(r => setTimeout(r, 3000));
 
   const kickAllWf = await getAllWorkflows();
-  const wf25kick  = kickAllWf.find(w => w.name.includes('25_TITLE') && w.active);
-  const wf01kick  = kickAllWf.find(w => w.name.includes('01_MASTER') && w.active);
+  const wf25kick  = kickAllWf.find(w => w.id === ids['25_TITLE_FACTORY'] && w.active);
+  const wf01kick  = kickAllWf.find(w => w.id === ids['01_MASTER_SCHEDULER'] && w.active);
 
-  // Disparar WF25 (Title Factory) para poblar CONTENT_PIPELINE si está vacío
+  // Intentar disparar WF25 via webhook/test trigger si está disponible
   if (wf25kick) {
-    const r25 = await apiCall('POST', `/api/v1/workflows/${wf25kick.id}/run`, {});
+    // n8n API v1: POST /executions con workflowId
+    const r25 = await apiCall('POST', `/api/v1/workflows/${wf25kick.id}/run`);
     if (r25.ok || r25.status === 200) {
-      console.log(`  ✓ WF25 disparado — generando títulos en CONTENT_PIPELINE...`);
-      console.log('  → Esperando 50 segundos para que DeepSeek complete...');
-      await new Promise(r => setTimeout(r, 50000));
+      console.log(`  ✓ WF25 disparado [${wf25kick.id}] — generando títulos...`);
+      console.log('  → Esperando 60s para que DeepSeek complete...');
+      await new Promise(r => setTimeout(r, 60000));
       console.log('  ✓ Espera completada');
     } else {
-      console.log(`  ⚠ WF25 no se pudo disparar: HTTP ${r25.status} — ${JSON.stringify(r25.body).slice(0,150)}`);
+      console.log(`  ⚠ WF25 kickstart HTTP ${r25.status} — cron de 2h disparará automáticamente`);
+      console.log('  → ACCIÓN MANUAL: Panel n8n → 25_TITLE_FACTORY → Execute Workflow');
     }
   } else {
-    console.log('  ⚠ WF25 no activo — pipeline podría estar vacío');
+    if (ids['25_TITLE_FACTORY']) {
+      console.log('  ⚠ WF25 existe pero no está activo — revisa el panel');
+    } else {
+      console.log('  ⚠ WF25 no importado — pipeline podría estar vacío');
+    }
   }
 
-  // Disparar WF01 manualmente para primer artículo inmediato
+  // Disparar WF01 si está activo
   if (wf01kick) {
-    const r01 = await apiCall('POST', `/api/v1/workflows/${wf01kick.id}/run`, {});
+    const r01 = await apiCall('POST', `/api/v1/workflows/${wf01kick.id}/run`);
     if (r01.ok || r01.status === 200) {
-      console.log(`  ✓ WF01 disparado — primera publicación en curso...`);
+      console.log(`  ✓ WF01 disparado [${wf01kick.id}] — primer artículo en curso...`);
     } else {
-      console.log(`  ⚠ WF01: HTTP ${r01.status} — ${JSON.stringify(r01.body).slice(0,150)}`);
-      console.log('  → El cron de 20 min tomará el relevo automáticamente');
+      console.log(`  ⚠ WF01 kickstart HTTP ${r01.status} — cron de 20 min disparará automáticamente`);
     }
+  } else {
+    console.log('  ⚠ WF01 no activo — revisar errores de activación arriba');
+    console.log('  → ACCIÓN MANUAL si WF01 falló: Panel n8n → 01_MASTER_SCHEDULER → activar manualmente');
   }
 
   // 8. Estado final
@@ -388,13 +425,26 @@ async function main() {
   console.log(`\nWorkflows ACTIVOS: ${activeWfs.length}`);
   for (const w of activeWfs) console.log(`  ✓ ${w.name}`);
 
-  const criticalOk = ['01_MASTER', '02_AI', '04_BLOGGER', '05_LOCK']
-    .every(p => activeWfs.some(w => w.name.includes(p)));
+  // Verificar por ID exacto (no patrón) para evitar falsos positivos con nombres similares
+  const criticalNames = ['01_MASTER_SCHEDULER','02_AI_CONTENT_GENERATOR','04_BLOGGER_PUBLISHER','05_LOCK_WATCHDOG'];
+  const criticalStatus = {};
+  for (const n of criticalNames) {
+    const id = ids[n];
+    const active = id ? activeWfs.some(w => w.id === id) : false;
+    criticalStatus[n] = { id, active };
+    console.log(`  ${active ? '✓' : '✗'} ${n}${id ? ` [${id}]` : ' (no importado)'}`);
+  }
+  const criticalOk = criticalNames.every(n => criticalStatus[n].active);
 
   console.log('\n── PRODUCCIÓN ──');
   console.log(`  Importados: ${Object.keys(ids).length}`);
   console.log(`  Activos:    ${activeWfs.length}`);
   console.log(`  Estado:     ${criticalOk ? '✓ LISTA — 1 artículo cada 20 min' : '✗ INCOMPLETA — revisar panel'}`);
+  if (!criticalOk) {
+    for (const [n, s] of Object.entries(criticalStatus)) {
+      if (!s.active) console.log(`  ✗ PROBLEMA: ${n} — no está activo`);
+    }
+  }
 
   // 8. Telegram
   if (BOT_TOKEN && CHAT_ID && CHAT_ID !== '0') {
