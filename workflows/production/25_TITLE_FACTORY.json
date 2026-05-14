@@ -49,7 +49,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const blog = $input.item.json;\n\nconst systemPrompt = 'Eres un experto SEO. Respondes SOLO con JSON valido, sin markdown, sin explicaciones. Formato exacto: {\"titles\": [{\"title\": \"...\", \"keywords\": \"kw1, kw2\", \"priority\": 1}]}';\n\nconst existingStr = (blog.existingTitles || []).slice(0, 20).join(' | ');\n\nconst userPrompt = 'Genera exactamente ' + (blog.titlesPerBlog || 50) + ' titulos SEO unicos.\\nNicho: ' + (blog.nicho || 'general') + '\\nIdioma: ' + (blog.idioma || 'es') + '\\nEvitar repetir: ' + existingStr + '\\n\\nResponde SOLO con JSON: {\"titles\": [{\"title\": \"...\", \"keywords\": \"kw1, kw2\", \"priority\": 2}]}';\n\nconst payload = {\n  model: 'deepseek-chat',\n  temperature: 0.7,\n  max_tokens: 4000,\n  stream: false,\n  messages: [\n    { role: 'system', content: systemPrompt },\n    { role: 'user', content: userPrompt }\n  ]\n};\n\nconst payloadStr = JSON.stringify(payload);\nconsole.log('=== CONSTRUIR PAYLOAD ===');\nconsole.log('Blog: ' + blog.blogId + ' nicho=' + blog.nicho);\nconsole.log('Payload length: ' + payloadStr.length + ' bytes');\nconsole.log('Payload preview (500 chars): ' + payloadStr.substring(0, 500));\n\nreturn [{ json: { ...blog, _payload: payloadStr } }];"
+        "jsCode": "const blog = $input.item.json;\n\nconst systemPrompt = 'Eres un experto SEO con 15 años de experiencia. Generas titulos de articulos de blog. Respondes UNICAMENTE con JSON valido, sin markdown, sin texto extra. Formato: {\"titles\": [{\"title\": \"...\", \"keywords\": \"kw1, kw2, kw3\", \"priority\": 1}]}';\n\nconst existingStr = (blog.existingTitles || []).slice(0, 20).join(', ');\nconst n = blog.titlesPerBlog || 50;\nconst nicho = blog.nicho || 'general';\nconst idioma = blog.idioma || 'es';\nconst tipo = blog.isHighRpm\n  ? 'HIGH-RPM Adsense: buyer intent, micronichos especificos, ciudades/estados, situaciones urgentes con dinero (abogados, impuestos, seguros, accidentes)'\n  : 'Autoridad y afiliados: informativos, comparativas, reviews, guias completas';\n\nconst userPrompt = 'Genera exactamente ' + n + ' titulos SEO unicos para un blog de nicho: ' + nicho + '.\\nIdioma: ' + idioma + '.\\nEstrategia: ' + tipo + '.\\nLong-tail especifico, 4-8 palabras por titulo.\\nNO repetir estos temas: ' + existingStr + '.\\n\\nResponde UNICAMENTE con este JSON (sin markdown, sin explicaciones):\\n{\"titles\": [{\"title\": \"titulo aqui\", \"keywords\": \"kw1, kw2, kw3\", \"priority\": 1}]}';\n\nconst payload = {\n  model: 'deepseek-chat',\n  temperature: 0.8,\n  max_tokens: 4000,\n  stream: false,\n  messages: [\n    { role: 'system', content: systemPrompt },\n    { role: 'user', content: userPrompt }\n  ]\n};\n\nconst payloadStr = JSON.stringify(payload);\nconsole.log('Payload para blog=' + blog.blogId + ' nicho=' + nicho + ' length=' + payloadStr.length);\n\nreturn [{ json: { ...blog, _payload: payloadStr } }];"
       },
       "id": "build-payload",
       "name": "Construir Payload DeepSeek",
@@ -69,17 +69,8 @@
         },
         "sendBody": true,
         "contentType": "raw",
-        "rawContentType": "application/json",
         "body": "={{ $json._payload }}",
-        "options": {
-          "timeout": 90000,
-          "response": {
-            "response": {
-              "fullResponse": false,
-              "responseFormat": "json"
-            }
-          }
-        }
+        "options": { "timeout": 90000 }
       },
       "id": "deepseek-titles",
       "name": "Generar Títulos DeepSeek",
