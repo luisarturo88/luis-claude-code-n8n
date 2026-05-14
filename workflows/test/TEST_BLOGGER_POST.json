@@ -1,0 +1,117 @@
+{
+  "name": "TEST_BLOGGER_POST",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f1",
+              "name": "blogId",
+              "value": "REEMPLAZA_CON_TU_BLOG_ID",
+              "type": "string"
+            },
+            {
+              "id": "f2",
+              "name": "title",
+              "value": "Test Publicacion Manual - Borrar Despues",
+              "type": "string"
+            },
+            {
+              "id": "f3",
+              "name": "content",
+              "value": "<p>Este es un articulo de prueba publicado via API de Blogger. Si ves esto, la publicacion funciona correctamente.</p><p>Fecha de prueba: 2026-05-14</p>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-data",
+      "name": "Set Datos",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.blogId }}/posts/",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ kind: 'blogger#post', title: $json.title, content: $json.content }) }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "post-blogger",
+      "name": "POST a Blogger",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 300],
+      "credentials": {
+        "googleOAuth2Api": { "name": "Google Sheets account" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const resp = $json;\nconst body = resp.body || resp;\nconsole.log('Status code: ' + (resp.statusCode || 'N/A'));\nconsole.log('Response body: ' + JSON.stringify(body).substring(0, 500));\n\nconst postId  = body.id  || (body.error ? 'ERROR' : 'SIN_ID');\nconst postUrl = body.url || body.selfLink || 'SIN_URL';\nconst status  = body.status || 'SIN_STATUS';\n\nif (body.error) {\n  throw new Error('Blogger API error ' + body.error.code + ': ' + body.error.message);\n}\n\nconsole.log('Post ID: ' + postId);\nconsole.log('URL: ' + postUrl);\n\nreturn [{ json: {\n  statusCode: resp.statusCode,\n  postId,\n  postUrl,\n  bloggerStatus: status,\n  title: body.title,\n  published: body.published\n} }];"
+      },
+      "id": "extract-result",
+      "name": "Extraer Resultado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [940, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $('Set Datos').item.json.blogId }}/posts/{{ $json.postId }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleOAuth2Api",
+        "options": {}
+      },
+      "id": "verify-get",
+      "name": "Verificar GET Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1180, 300],
+      "credentials": {
+        "googleOAuth2Api": { "name": "Google Sheets account" }
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [[{ "node": "Set Datos", "type": "main", "index": 0 }]]
+    },
+    "Set Datos": {
+      "main": [[{ "node": "POST a Blogger", "type": "main", "index": 0 }]]
+    },
+    "POST a Blogger": {
+      "main": [[{ "node": "Extraer Resultado", "type": "main", "index": 0 }]]
+    },
+    "Extraer Resultado": {
+      "main": [[{ "node": "Verificar GET Post", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true
+  },
+  "meta": { "instanceId": "production" }
+}
