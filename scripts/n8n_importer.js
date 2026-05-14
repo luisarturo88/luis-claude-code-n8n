@@ -245,81 +245,71 @@ async function main() {
   }
 
   // 5. Cablear WF01 → WF02 y WF04
+  // CRÍTICO: NO usar GET response de n8n (normaliza/vacía matchingColumns en Google Sheets nodes)
+  // Usar el JSON original del archivo y solo parchear los IDs de executeWorkflow
   console.log('\n── CABLEANDO SUB-WORKFLOWS ──');
-  const wf01Name = Object.keys(ids).find(k => k.includes('01_MASTER'));
-  const wf02Name = Object.keys(ids).find(k => k.includes('02_AI'));
-  const wf04Name = Object.keys(ids).find(k => k.includes('04_BLOGGER'));
 
-  if (wf01Name && wf02Name && wf04Name) {
-    const wf01Id = ids[wf01Name];
-    const wf02Id = ids[wf02Name];
-    const wf04Id = ids[wf04Name];
+  function patchExecuteWorkflowIds(wfObj, idMap) {
+    let changed = 0;
+    for (const node of (wfObj.nodes || [])) {
+      if (node.type !== 'n8n-nodes-base.executeWorkflow') continue;
+      if (!node.parameters) continue;
+      const nm = (node.name || '').toLowerCase();
+      const wfIdParam = node.parameters.workflowId;
 
-    const wf01Res = await apiCall('GET', `/api/v1/workflows/${wf01Id}`);
-    if (wf01Res.ok && wf01Res.body.nodes) {
-      const wf01 = wf01Res.body;
-      let changed = 0;
-
-      for (const node of wf01.nodes) {
-        if (node.type !== 'n8n-nodes-base.executeWorkflow') continue;
-        const nm = (node.name || '').toLowerCase();
-        if (!node.parameters) continue;
-        const wfIdParam = node.parameters.workflowId;
-
-        if (typeof wfIdParam === 'object' && wfIdParam !== null && '__rl' in wfIdParam) {
-          if (nm.includes('02') || nm.includes('ai') || nm.includes('content')) {
-            node.parameters.workflowId.value = wf02Id; changed++;
-          } else if (nm.includes('04') || nm.includes('blogger') || nm.includes('publisher')) {
-            node.parameters.workflowId.value = wf04Id; changed++;
-          }
-        } else if (typeof wfIdParam === 'string') {
-          if (nm.includes('02') || nm.includes('ai') || nm.includes('content')) {
-            node.parameters.workflowId = wf02Id; changed++;
-          } else if (nm.includes('04') || nm.includes('blogger') || nm.includes('publisher')) {
-            node.parameters.workflowId = wf04Id; changed++;
-          }
-        }
+      let newId = null;
+      if (nm.includes('02') || nm.includes('ai_content') || nm.includes('content generator')) {
+        newId = idMap['02_AI_CONTENT_GENERATOR'];
+      } else if (nm.includes('04') || nm.includes('blogger') || nm.includes('publisher')) {
+        newId = idMap['04_BLOGGER_PUBLISHER'];
+      } else if (nm.includes('10') || nm.includes('social')) {
+        newId = idMap['10_SOCIAL_MEDIA_DISTRIBUTOR'];
       }
 
-      // CRÍTICO: usar sanitizeForApi para no enviar campos extras
-      const patchPayload = sanitizeForApi(wf01);
-      const patchRes = await apiCall('PUT', `/api/v1/workflows/${wf01Id}`, patchPayload);
-      if (patchRes.ok) {
-        console.log(`  ✓ WF01 [${wf01Id}] → WF02=[${wf02Id}] WF04=[${wf04Id}] (${changed} nodos)`);
+      if (!newId) continue;
+
+      if (typeof wfIdParam === 'object' && wfIdParam !== null && '__rl' in wfIdParam) {
+        node.parameters.workflowId.value = newId;
       } else {
-        console.log(`  ✗ Error patcheando WF01: HTTP ${patchRes.status}`);
-        console.log(`    ${JSON.stringify(patchRes.body).slice(0, 300)}`);
+        node.parameters.workflowId = { '__rl': true, 'value': newId, 'mode': 'id' };
       }
+      changed++;
     }
-  } else {
-    console.log(`  ⚠ IDs faltantes: WF01=${wf01Name||'?'} WF02=${wf02Name||'?'} WF04=${wf04Name||'?'}`);
+    return changed;
   }
 
-  // 5b. Cablear WF04 → WF10 (Social Media Distributor)
-  const wf10Name = Object.keys(ids).find(k => k.includes('10_SOCIAL'));
-  if (wf04Name && wf10Name) {
-    const wf04Id = ids[wf04Name];
-    const wf10Id = ids[wf10Name];
-    const wf04Res = await apiCall('GET', `/api/v1/workflows/${wf04Id}`);
-    if (wf04Res.ok && wf04Res.body.nodes) {
-      const wf04 = wf04Res.body;
-      let changed = 0;
-      for (const node of wf04.nodes) {
-        if (node.type !== 'n8n-nodes-base.executeWorkflow') continue;
-        const nm = (node.name || '').toLowerCase();
-        if (!nm.includes('10') && !nm.includes('social')) continue;
-        if (!node.parameters) continue;
-        const wfIdParam = node.parameters.workflowId;
-        if (typeof wfIdParam === 'object' && '__rl' in wfIdParam) {
-          node.parameters.workflowId.value = wf10Id; changed++;
-        } else {
-          node.parameters.workflowId = wf10Id; changed++;
-        }
-      }
-      const p = await apiCall('PUT', `/api/v1/workflows/${wf04Id}`, sanitizeForApi(wf04));
-      if (p.ok) console.log(`  ✓ WF04 [${wf04Id}] → WF10=[${wf10Id}] (${changed} nodos)`);
-      else console.log(`  ✗ Error cableando WF04→WF10: HTTP ${p.status}`);
+  // Parchear WF01 usando el archivo original (no GET de n8n)
+  const wf01FileId = ids['01_MASTER_SCHEDULER'];
+  const wf01FilePath = path.join(BASE_DIR, 'production/01_MASTER_SCHEDULER.json');
+  if (wf01FileId && fs.existsSync(wf01FilePath)) {
+    const wf01Orig = JSON.parse(fs.readFileSync(wf01FilePath, 'utf8'));
+    const changed = patchExecuteWorkflowIds(wf01Orig, ids);
+    const putRes = await apiCall('PUT', `/api/v1/workflows/${wf01FileId}`, sanitizeForApi(wf01Orig));
+    if (putRes.ok) {
+      console.log(`  ✓ WF01 [${wf01FileId}] → WF02=[${ids['02_AI_CONTENT_GENERATOR']}] WF04=[${ids['04_BLOGGER_PUBLISHER']}] (${changed} nodos)`);
+    } else {
+      console.log(`  ✗ Error patcheando WF01: HTTP ${putRes.status}`);
+      console.log(`    ${JSON.stringify(putRes.body).slice(0, 300)}`);
     }
+  } else {
+    console.log(`  ⚠ WF01 no encontrado: id=${wf01FileId||'?'} file=${fs.existsSync(wf01FilePath)?'OK':'FALTA'}`);
+  }
+
+  // Parchear WF04 usando el archivo original
+  const wf04FileId = ids['04_BLOGGER_PUBLISHER'];
+  const wf04FilePath = path.join(BASE_DIR, 'production/04_BLOGGER_PUBLISHER.json');
+  if (wf04FileId && fs.existsSync(wf04FilePath)) {
+    const wf04Orig = JSON.parse(fs.readFileSync(wf04FilePath, 'utf8'));
+    const changed = patchExecuteWorkflowIds(wf04Orig, ids);
+    const putRes = await apiCall('PUT', `/api/v1/workflows/${wf04FileId}`, sanitizeForApi(wf04Orig));
+    if (putRes.ok) {
+      console.log(`  ✓ WF04 [${wf04FileId}] → WF10=[${ids['10_SOCIAL_MEDIA_DISTRIBUTOR']}] (${changed} nodos)`);
+    } else {
+      console.log(`  ✗ Error patcheando WF04: HTTP ${putRes.status}`);
+      console.log(`    ${JSON.stringify(putRes.body).slice(0, 300)}`);
+    }
+  } else {
+    console.log(`  ⚠ WF04 no encontrado: id=${wf04FileId||'?'} file=${fs.existsSync(wf04FilePath)?'OK':'FALTA'}`);
   }
 
   // 6. Activar en orden de dependencias
