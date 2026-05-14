@@ -84,22 +84,9 @@
         "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.BLOGGER_ID }}/posts/?isDraft=false",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "googleOAuth2Api",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Content-Type", "value": "application/json" }
-          ]
-        },
         "sendBody": true,
-        "contentType": "json",
-        "body": {
-          "kind": "blogger#post",
-          "blog": { "id": "={{ $json.BLOGGER_ID }}" },
-          "title": "={{ $json.TEMA_ARTICULO }}",
-          "content": "={{ $json.HTML_FINAL }}",
-          "labels": ["={{ $json.NICHO }}"],
-          "published": "={{ $json.SCHEDULED_FOR }}"
-        },
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ kind: 'blogger#post', blog: { id: $json.BLOGGER_ID }, title: $json.TEMA_ARTICULO, content: $json.HTML_FINAL, labels: [$json.NICHO || 'general'], published: $json.SCHEDULED_FOR }) }}",
         "options": { "timeout": 30000 }
       },
       "id": "blogger-post",
@@ -107,7 +94,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [1340, 300],
-      "credentials": { "googleOAuth2Api": { "name": "Google Blogger OAuth2" } },
+      "credentials": { "googleOAuth2Api": { "name": "Google Sheets account" } },
       "onError": "continueErrorOutput"
     },
     {
@@ -151,22 +138,9 @@
         "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $('Compute Schedule Slot').item.json.BLOGGER_ID }}/posts/?isDraft=false",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "googleOAuth2Api",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Content-Type", "value": "application/json" }
-          ]
-        },
         "sendBody": true,
-        "contentType": "json",
-        "body": {
-          "kind": "blogger#post",
-          "blog": { "id": "={{ $('Compute Schedule Slot').item.json.BLOGGER_ID }}" },
-          "title": "={{ $('Compute Schedule Slot').item.json.TEMA_ARTICULO }}",
-          "content": "={{ $('Compute Schedule Slot').item.json.HTML_FINAL }}",
-          "labels": ["={{ $('Compute Schedule Slot').item.json.NICHO }}"],
-          "published": "={{ $('Compute Schedule Slot').item.json.SCHEDULED_FOR }}"
-        },
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ kind: 'blogger#post', blog: { id: $('Compute Schedule Slot').item.json.BLOGGER_ID }, title: $('Compute Schedule Slot').item.json.TEMA_ARTICULO, content: $('Compute Schedule Slot').item.json.HTML_FINAL, labels: [$('Compute Schedule Slot').item.json.NICHO || 'general'], published: $('Compute Schedule Slot').item.json.SCHEDULED_FOR }) }}",
         "options": { "timeout": 30000 }
       },
       "id": "blogger-retry",
@@ -174,7 +148,7 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [2000, 360],
-      "credentials": { "googleOAuth2Api": { "name": "Google Blogger OAuth2" } },
+      "credentials": { "googleOAuth2Api": { "name": "Google Sheets account" } },
       "onError": "continueErrorOutput"
     },
     {

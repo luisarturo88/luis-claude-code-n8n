@@ -59,13 +59,11 @@
       "parameters": {
         "method": "POST",
         "url": "https://api.deepseek.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            {
-              "name": "Authorization",
-              "value": "=Bearer {{ $credentials.httpHeaderAuth.value }}"
-            },
             {
               "name": "Content-Type",
               "value": "application/json"
