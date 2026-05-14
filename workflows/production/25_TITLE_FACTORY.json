@@ -85,32 +85,37 @@
     },
     {
       "parameters": {
-        "operation": "append",
-        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
-        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
-        "columns": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "ID_UNICO":       "={{ $json.ID_UNICO }}",
-            "STATUS":         "={{ $json.STATUS }}",
-            "LOCK":           "={{ $json.LOCK }}",
-            "ID_BLOG":        "={{ $json.ID_BLOG }}",
-            "KEYWORD":        "={{ $json.KEYWORD }}",
-            "TEMA_ARTICULO":  "={{ $json.TEMA_ARTICULO }}",
-            "ID_PARENT_SILO": "={{ $json.ID_PARENT_SILO }}",
-            "PRIORITY":       "={{ $json.PRIORITY }}",
-            "RETRY_COUNT":    "={{ $json.RETRY_COUNT }}"
-          },
-          "matchingColumns": [],
-          "schema": []
-        },
-        "options": { "cellFormat": "USER_ENTERED" }
+        "jsCode": "const items = $input.all();\nif (items.length === 0) { console.log('Sin rows para insertar'); return []; }\n\n// Orden de columnas: debe coincidir con el header de la sheet (A=ID_UNICO, B=STATUS, ...)\nconst values = items.map(item => {\n  const r = item.json;\n  return [\n    String(r.ID_UNICO      || ''),\n    String(r.STATUS        || 'PENDING'),\n    String(r.LOCK          || 'FALSE'),\n    String(r.ID_BLOG       || ''),\n    String(r.KEYWORD       || ''),\n    String(r.TEMA_ARTICULO || ''),\n    String(r.ID_PARENT_SILO|| ''),\n    String(r.PRIORITY      || '2'),\n    String(r.RETRY_COUNT   || '0')\n  ];\n});\n\nconsole.log('Batch listo: ' + values.length + ' rows para API Sheets v4');\nreturn [{ json: { values, count: values.length } }];"
       },
-      "id": "append-pipeline",
-      "name": "Insertar en CONTENT_PIPELINE",
-      "type": "n8n-nodes-base.googleSheets",
-      "typeVersion": 4.5,
-      "position": [1440, 300],
+      "id": "prepare-batch",
+      "name": "Preparar Batch",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1440, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug/values/CONTENT_PIPELINE!A:I:append",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "valueInputOption", "value": "USER_ENTERED" },
+            { "name": "insertDataOption", "value": "INSERT_ROWS" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: $json.values }) }}",
+        "options": {}
+      },
+      "id": "insert-api",
+      "name": "Insertar via Sheets API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1680, 300],
       "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
     },
     {
@@ -173,7 +178,10 @@
       "main": [[{ "node": "Parsear Títulos", "type": "main", "index": 0 }]]
     },
     "Parsear Títulos": {
-      "main": [[{ "node": "Insertar en CONTENT_PIPELINE", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "Preparar Batch", "type": "main", "index": 0 }]]
+    },
+    "Preparar Batch": {
+      "main": [[{ "node": "Insertar via Sheets API", "type": "main", "index": 0 }]]
     },
     "Identificar Huérfanos": {
       "main": [[{ "node": "Archivar FAILED Antiguos", "type": "main", "index": 0 }]]
