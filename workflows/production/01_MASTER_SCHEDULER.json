@@ -7,10 +7,10 @@
         "rule": { "interval": [{ "field": "minutes", "minutesInterval": 20 }] }
       },
       "id": "cron",
-      "name": "Every 20 Minutes",
+      "name": "Schedule Trigger",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [200, 300]
+      "position": [0, -288]
     },
     {
       "parameters": {
@@ -22,18 +22,18 @@
       "name": "Read CONTENT_PIPELINE",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [420, 300],
-      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+      "position": [224, -288],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "UviJg5pB7TsCtYBk", "name": "Google Sheets account" } }
     },
     {
       "parameters": {
-        "jsCode": "const items = $input.all();\nconst valid = items.filter(item => {\n  const status = String(item.json.STATUS ?? '').toUpperCase().trim();\n  const idBlog = String(item.json.ID_BLOG ?? '').trim();\n  const tema   = String(item.json.TEMA_ARTICULO ?? '').trim();\n  return status === 'PENDING' && idBlog !== '' && tema !== '';\n});\nconsole.log('Total rows: ' + items.length + ' | PENDING validas: ' + valid.length);\nreturn valid;"
+        "jsCode": "const items = $input.all();\nconst valid = items.filter(item => {\n  const status = String(item.json.STATUS ?? '').toUpperCase().trim();\n  const idBlog = String(item.json.ID_BLOG ?? '').trim();\n  const tema   = String(item.json.TEMA_ARTICULO ?? '').trim();\n  return status === 'PENDING' && idBlog !== '' && tema !== '';\n});\nconsole.log('Total: ' + items.length + ' | PENDING válidas: ' + valid.length);\nreturn valid;"
       },
       "id": "filter-pending",
       "name": "Filter PENDING",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [640, 300]
+      "position": [448, -288]
     },
     {
       "parameters": {
@@ -49,7 +49,7 @@
       "name": "Sort by Priority",
       "type": "n8n-nodes-base.sort",
       "typeVersion": 1,
-      "position": [860, 300]
+      "position": [672, -288]
     },
     {
       "parameters": { "operation": "limit", "maxItems": 1 },
@@ -57,7 +57,7 @@
       "name": "Take 1 Row",
       "type": "n8n-nodes-base.limit",
       "typeVersion": 1,
-      "position": [1080, 300]
+      "position": [896, -288]
     },
     {
       "parameters": {
@@ -69,112 +69,303 @@
       "name": "Read BLOGS_CONFIG",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
-      "position": [1300, 300],
-      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+      "position": [1120, -288],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "UviJg5pB7TsCtYBk", "name": "Google Sheets account" } }
     },
     {
       "parameters": {
-        "jsCode": "const pipeline = $('Take 1 Row').item.json;\nconst blogs = $input.all().map(i => i.json);\nconst blog = blogs.find(b => String(b.ID_BLOG).trim() === String(pipeline.ID_BLOG).trim()) || {};\n\nconst idioma = blog.IDIOMA || pipeline.IDIOMA || 'es';\nconst nicho   = blog.NICHO   || pipeline.NICHO   || 'general';\nconst bloggerId = String(blog.BLOGGER_ID || '').trim();\n\nif (!pipeline.ID_BLOG || !pipeline.TEMA_ARTICULO || !bloggerId) {\n  console.log('Skipping corrupted row: ID_UNICO=' + pipeline.ID_UNICO + ' ID_BLOG=' + pipeline.ID_BLOG + ' BLOGGER_ID=' + bloggerId);\n  return [];\n}\n\nconst enEs = idioma !== 'en';\nconst sysPrompt = enEs\n  ? 'Eres experto SEO. Escribe artículos en español usando HTML puro. Sin markdown, sin bloques de código.'\n  : 'You are an SEO expert. Write articles in English using pure HTML only. No markdown, no code blocks.';\n\nconst userPrompt = enEs\n  ? `Escribe un artículo SEO completo sobre: \"${pipeline.TEMA_ARTICULO}\"\\nPalabras clave: ${pipeline.KEYWORD || pipeline.TEMA_ARTICULO}\\nNicho: ${nicho}\\nMínimo 1200 palabras. Devuelve SOLO HTML puro empezando con <h1>. Sin texto previo ni explicaciones.`\n  : `Write a complete SEO article about: \"${pipeline.TEMA_ARTICULO}\"\\nKeywords: ${pipeline.KEYWORD || pipeline.TEMA_ARTICULO}\\nNiche: ${nicho}\\nMinimum 1200 words. Return ONLY pure HTML starting with <h1>. No preamble or explanations.`;\n\nconsole.log('Pipeline row:', pipeline.ID_UNICO, '| Blog:', bloggerId, '| row_number:', pipeline.row_number);\n\nreturn [{ json: {\n  ID_UNICO:      pipeline.ID_UNICO,\n  TEMA_ARTICULO: pipeline.TEMA_ARTICULO,\n  ID_BLOG:       pipeline.ID_BLOG,\n  BLOGGER_ID:    bloggerId,\n  NICHO:         nicho,\n  IDIOMA:        idioma,\n  KEYWORD:       pipeline.KEYWORD || '',\n  row_number:    pipeline.row_number,\n  systemPrompt:  sysPrompt,\n  userPrompt:    userPrompt\n} }];"
+        "jsCode": "const pipeline = $('Take 1 Row').item.json;\nconst blogs = $input.all().map(i => i.json);\nconst blog = blogs.find(b => String(b.ID_BLOG).trim() === String(pipeline.ID_BLOG).trim()) || {};\n\nconst idioma = blog.IDIOMA || pipeline.IDIOMA || 'es';\nconst nicho = (blog.NICHO || pipeline.NICHO || 'general').toLowerCase();\nconst bloggerId = String(blog.BLOGGER_ID || '').trim();\nconst keyword = pipeline.KEYWORD || pipeline.TEMA_ARTICULO || '';\n\nif (!pipeline.ID_BLOG || !pipeline.TEMA_ARTICULO || !bloggerId) {\n  console.log('Skipping corrupted row: ID_BLOG=' + pipeline.ID_BLOG + ' BLOGGER_ID=' + bloggerId);\n  return [];\n}\n\nconst isEs = idioma !== 'en';\nconst isVet = ['veterinaria','bovinos','ganaderia','pecuario','animal'].some(n => nicho.includes(n));\n\nlet systemPrompt;\nif (isVet && isEs) {\n  systemPrompt = 'Eres el Dr. Luis Arturo García, Médico Veterinario especializado en producción animal. Escribes artículos técnico-prácticos en HTML puro. PROHIBIDO: html, body, head, h1. Empieza con p. Sin texto fuera del HTML.';\n} else if (isEs) {\n  systemPrompt = 'Eres un experto SEO en el nicho de ' + nicho + '. Escribes artículos en español en HTML puro. PROHIBIDO: html, body, head, h1. Empieza con p. Sin markdown ni texto fuera del HTML.';\n} else {\n  systemPrompt = 'You are an SEO expert in the ' + nicho + ' niche. Write articles in English using pure HTML. FORBIDDEN: html, body, head, h1. Start with p. No markdown, no text outside HTML.';\n}\n\nconst userPrompt = isEs\n  ? 'TEMA: ' + pipeline.TEMA_ARTICULO + '. KEYWORD PRINCIPAL: ' + keyword + '. NICHO: ' + nicho + '. INSTRUCCIONES: Redacta artículo SEO completo en HTML puro. Mínimo 1200 palabras. Empieza con p. Mínimo 5 secciones h2. Incluye keyword en primer párrafo. Agrega sección FAQ con 6 preguntas y respuestas. Lenguaje claro y práctico. Devuelve SOLO HTML puro, sin explicaciones previas.'\n  : 'TOPIC: ' + pipeline.TEMA_ARTICULO + '. MAIN KEYWORD: ' + keyword + '. NICHE: ' + nicho + '. INSTRUCTIONS: Write complete SEO article in pure HTML. Minimum 1200 words. Start with p. Minimum 5 h2 sections. Include keyword in first paragraph. Add FAQ section with 6 questions and answers. Clear practical language. Return ONLY pure HTML, no explanations.';\n\nconsole.log('Procesando: ' + pipeline.ID_UNICO + ' | Blog: ' + bloggerId + ' | Nicho: ' + nicho);\n\nreturn [{ json: {\n  ID_UNICO:      pipeline.ID_UNICO,\n  TEMA_ARTICULO: pipeline.TEMA_ARTICULO,\n  ID_BLOG:       pipeline.ID_BLOG,\n  BLOGGER_ID:    bloggerId,\n  NICHO:         nicho,\n  IDIOMA:        idioma,\n  KEYWORD:       keyword,\n  row_number:    pipeline.row_number,\n  systemPrompt:  systemPrompt,\n  userPrompt:    userPrompt\n} }];"
       },
       "id": "prepare-data",
       "name": "Preparar Datos",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1520, 300]
+      "position": [1344, -288]
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://api.deepseek.com/v1/chat/completions",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "httpHeaderAuth",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'system', content: $json.systemPrompt }, { role: 'user', content: $json.userPrompt }], temperature: 0.7, max_tokens: 4000 }) }}",
-        "options": { "timeout": 120000 }
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $json.row_number }}",
+            "STATUS": "PROCESANDO"
+          },
+          "matchingColumns": ["row_number"],
+          "schema": [
+            { "id": "STATUS", "displayName": "STATUS", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "row_number", "displayName": "row_number", "required": false, "defaultMatch": false, "display": true, "type": "number", "canBeUsedToMatch": true, "readOnly": true }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
       },
-      "id": "deepseek-call",
-      "name": "DeepSeek API",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [1740, 300],
-      "credentials": { "httpHeaderAuth": { "name": "DeepSeek API" } }
+      "id": "lock-row",
+      "name": "Lock Row",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1568, -288],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "UviJg5pB7TsCtYBk", "name": "Google Sheets account" } }
     },
     {
       "parameters": {
-        "jsCode": "const prev = $('Preparar Datos').item.json;\nconst res  = $json;\n\nif (!res.choices || !res.choices[0]) {\n  throw new Error('DeepSeek sin respuesta válida: ' + JSON.stringify(res).slice(0, 300));\n}\n\nlet html = (res.choices[0].message.content || '').trim();\nhtml = html.replace(/^```html\\s*/i,'').replace(/^```\\s*/i,'').replace(/\\s*```\\s*$/i,'').trim();\n\nif (!html || html.length < 100) {\n  throw new Error('HTML vacío o demasiado corto: ' + html.slice(0, 100));\n}\n\nconsole.log('HTML generado: ' + html.length + ' chars | tokens: ' + (res.usage?.total_tokens || 0));\n\nreturn [{ json: {\n  ...prev,\n  HTML_FINAL: html,\n  TOKENS:     res.usage?.total_tokens || 0\n} }];"
+        "promptType": "define",
+        "text": "={{ $json.userPrompt }}",
+        "options": {
+          "systemMessage": "={{ $json.systemPrompt }}"
+        }
       },
-      "id": "extract-html",
-      "name": "Extraer HTML",
+      "id": "ai-agent",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [1792, -288]
+    },
+    {
+      "parameters": { "options": {} },
+      "id": "deepseek-model",
+      "name": "DeepSeek Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [1792, -64],
+      "credentials": { "deepSeekApi": { "id": "tNIbvUHUgCDukRly", "name": "DeepSeek account" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "const html = ($json.output || '')\n  .replace(/\\r?\\n/g, ' ')\n  .replace(/\\t/g, ' ')\n  .replace(/\\s+/g, ' ')\n  .trim();\n\nreturn [{ html }];"
+      },
+      "id": "code-validate",
+      "name": "Code VALIDATE",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1960, 300]
+      "position": [2016, -288]
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.BLOGGER_ID }}/posts/",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "googleOAuth2Api",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ kind: 'blogger#post', blog: { id: $json.BLOGGER_ID }, title: $json.TEMA_ARTICULO, content: $json.HTML_FINAL }) }}",
-        "options": { "timeout": 60000 }
+        "promptType": "define",
+        "text": "=Devuelve ÚNICAMENTE un JSON válido. NO escribas texto antes ni después.\n\nDevuelve EXACTAMENTE estas 3 claves:\n- correctedHTML (string)\n- errorsFound (array)\n- correctionsMade (array)\n\nHTML DE ENTRADA:\n{{ $json.html }}\n\nREGLAS:\n- HTML válido\n- PROHIBIDO: h1, head, title, html, body, meta, style, script\n- El contenido debe empezar con p\n- Mantener estructura con h2 y h3\n- Corregir etiquetas rotas, párrafos sin cerrar, listas mal formadas\n- NO cambiar el idioma ni el tema\n- NO eliminar contenido útil\n- Si NO existe FAQ, crear sección h2 con 5-6 preguntas\n\nSALIDA (solo JSON):\n{\"correctedHTML\": \"<p>...</p>\", \"errorsFound\": [], \"correctionsMade\": []}",
+        "hasOutputParser": true,
+        "batching": {}
       },
-      "id": "blogger-post",
-      "name": "Publicar en Blogger",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [2180, 300],
-      "credentials": { "googleOAuth2Api": { "name": "Google Sheets account" } }
+      "id": "llm-chain",
+      "name": "Basic LLM Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [2240, -288]
+    },
+    {
+      "parameters": { "options": {} },
+      "id": "deepseek-model2",
+      "name": "DeepSeek Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [2240, -64],
+      "credentials": { "deepSeekApi": { "id": "tNIbvUHUgCDukRly", "name": "DeepSeek account" } }
     },
     {
       "parameters": {
-        "jsCode": "const bloggerResp = $json;\nconst prev = $('Extraer HTML').item.json;\n\nif (!bloggerResp.id) {\n  throw new Error('Blogger no devolvió post ID: ' + JSON.stringify(bloggerResp).slice(0, 300));\n}\n\nconst postUrl = bloggerResp.url || bloggerResp.selfLink || '';\nconst row     = prev.row_number;\n\nconsole.log('Post publicado: ' + postUrl + ' | row=' + row);\n\nreturn [{ json: {\n  ID_UNICO:   prev.ID_UNICO,\n  post_url:   postUrl,\n  post_id:    String(bloggerResp.id),\n  row_number: row,\n  updateBody: {\n    valueInputOption: 'USER_ENTERED',\n    data: [\n      { range: 'CONTENT_PIPELINE!B' + row, values: [['PUBLISHED']] },\n      { range: 'CONTENT_PIPELINE!K' + row, values: [[postUrl]] }\n    ]\n  }\n} }];"
+        "jsonSchemaExample": "{\n  \"correctedHTML\": \"<p>Ejemplo</p>\",\n  \"errorsFound\": [\"Ejemplo error\"],\n  \"correctionsMade\": [\"Ejemplo corrección\"]\n}"
       },
-      "id": "extract-url",
-      "name": "Extraer URL",
+      "id": "output-parser",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [2384, -64]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "field-html",
+              "name": "validatedHTML",
+              "value": "={{ $json.output.correctedHTML }}",
+              "type": "string"
+            },
+            {
+              "id": "field-row",
+              "name": "rowNumber",
+              "value": "={{ $('Lock Row').item.json.row_number }}",
+              "type": "number"
+            },
+            {
+              "id": "field-blogger",
+              "name": "BLOGGER_ID",
+              "value": "={{ $('Preparar Datos').item.json.BLOGGER_ID }}",
+              "type": "string"
+            },
+            {
+              "id": "field-tema",
+              "name": "TEMA_ARTICULO",
+              "value": "={{ $('Preparar Datos').item.json.TEMA_ARTICULO }}",
+              "type": "string"
+            },
+            {
+              "id": "field-keyword",
+              "name": "KEYWORD",
+              "value": "={{ $('Preparar Datos').item.json.KEYWORD }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "prepare-validated",
+      "name": "Prepare Validated Content",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [2496, -288]
+    },
+    {
+      "parameters": {
+        "jsCode": "const PEXELS_API_KEY = 'uM57jRMv7kYk0CiSJpecMFL5jN75D28QMJ0a1cU4XVhQdKgPZ2w2Me5r';\n\nconst tema = $json.TEMA_ARTICULO || $('Preparar Datos').item.json.TEMA_ARTICULO || 'blog';\nconst keyword = $json.KEYWORD || $('Preparar Datos').item.json.KEYWORD || '';\n\nconst queryRaw = (tema + ' ' + keyword).toLowerCase();\nconst queryWords = queryRaw\n  .replace(/[^a-záéíóúñ\\s]/gi, '')\n  .split(' ')\n  .filter(w => w.length > 3)\n  .slice(0, 3)\n  .join(' ');\n\nconst searchTerms = [queryWords, 'nature field outdoor', 'landscape countryside'];\n\nlet imageUrl = '';\nlet imageAlt = tema;\nlet imageCredit = '';\nlet imageCreditUrl = '';\n\nfor (const term of searchTerms) {\n  try {\n    const url = 'https://api.pexels.com/v1/search?query=' + encodeURIComponent(term) + '&per_page=5&orientation=landscape';\n    const response = await fetch(url, { headers: { 'Authorization': PEXELS_API_KEY } });\n    if (response.ok) {\n      const data = await response.json();\n      if (data.photos && data.photos.length > 0) {\n        const idx = Math.floor(Math.random() * Math.min(5, data.photos.length));\n        const photo = data.photos[idx];\n        imageUrl = photo.src.large2x || photo.src.large || photo.src.original;\n        imageAlt = photo.alt || tema;\n        imageCredit = photo.photographer;\n        imageCreditUrl = photo.photographer_url;\n        break;\n      }\n    }\n  } catch(e) { continue; }\n}\n\nif (!imageUrl) {\n  imageUrl = 'https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=1200&q=80';\n  imageAlt = tema;\n  imageCredit = 'Unsplash';\n  imageCreditUrl = 'https://unsplash.com';\n}\n\nreturn [{\n  validatedHTML: $json.validatedHTML,\n  rowNumber: $json.rowNumber,\n  BLOGGER_ID: $json.BLOGGER_ID,\n  TEMA_ARTICULO: $json.TEMA_ARTICULO,\n  KEYWORD: $json.KEYWORD,\n  pexels_imageUrl: imageUrl,\n  pexels_imageAlt: imageAlt,\n  pexels_imageCredit: imageCredit,\n  pexels_imageCreditUrl: imageCreditUrl\n}];"
+      },
+      "id": "pexels-search",
+      "name": "Buscar Imagen Pexels",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2400, 300]
+      "position": [2720, -288]
     },
     {
       "parameters": {
-        "method": "POST",
-        "url": "https://sheets.googleapis.com/v4/spreadsheets/18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug/values:batchUpdate",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "googleSheetsOAuth2Api",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify($json.updateBody) }}",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bc-subject",
+              "name": "postTitle",
+              "value": "={{ $json.TEMA_ARTICULO }}",
+              "type": "string"
+            },
+            {
+              "id": "bc-body",
+              "name": "postContent",
+              "value": "=<div style=\"text-align:center; margin-bottom:24px;\">\n  <img src=\"{{ $json.pexels_imageUrl }}\" alt=\"{{ $json.pexels_imageAlt }}\" title=\"{{ $json.pexels_imageAlt }}\" style=\"max-width:100%; height:auto; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.15);\" loading=\"lazy\" />\n  <p style=\"font-size:11px; color:#888; margin-top:6px;\">Foto: <a href=\"{{ $json.pexels_imageCreditUrl }}\" target=\"_blank\" rel=\"nofollow\">{{ $json.pexels_imageCredit }}</a> vía Pexels</p>\n</div>\n{{ $json.validatedHTML }}",
+              "type": "string"
+            },
+            {
+              "id": "bc-row",
+              "name": "rowNumber",
+              "value": "={{ $json.rowNumber }}",
+              "type": "number"
+            },
+            {
+              "id": "bc-blogger",
+              "name": "BLOGGER_ID",
+              "value": "={{ $json.BLOGGER_ID }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "prepare-blogger",
+      "name": "Prepare Blogger Content",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [2944, -288]
+    },
+    {
+      "parameters": {
+        "resource": "post",
+        "operation": "insert",
+        "postBlogId": "={{ $json.BLOGGER_ID }}",
+        "title": "={{ $json.postTitle }}",
+        "content": "={{ $json.postContent }}",
+        "postAdditionalFields": {}
+      },
+      "id": "create-post",
+      "name": "Create a post",
+      "type": "@hienhoceo/n8n-nodes-blogger.blogger",
+      "typeVersion": 1,
+      "position": [3168, -288],
+      "credentials": { "bloggerOAuth2Api": { "id": "fwGp3IZaCpjnLohk", "name": "Blogger account" } }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "pu-row",
+              "name": "row_number",
+              "value": "={{ $('Prepare Blogger Content').item.json.rowNumber }}",
+              "type": "number"
+            },
+            {
+              "id": "pu-url",
+              "name": "POST_URL",
+              "value": "={{ $json.url || $json.selfLink || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "prepare-update",
+      "name": "Prepare Update Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [3392, -288]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "18BQ8BjfTvVa56R5FjWyBuvcGR8vVlz0rx-hwAVBdPug", "mode": "id" },
+        "sheetName": { "__rl": true, "value": "CONTENT_PIPELINE", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $json.row_number }}",
+            "STATUS": "PUBLISHED",
+            "URL_FINAL": "={{ $json.POST_URL }}"
+          },
+          "matchingColumns": ["row_number"],
+          "schema": [
+            { "id": "STATUS",    "displayName": "STATUS",    "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "URL_FINAL", "displayName": "URL_FINAL", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "row_number","displayName": "row_number","required": false, "defaultMatch": false, "display": true, "type": "number", "canBeUsedToMatch": true, "readOnly": true }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
         "options": {}
       },
       "id": "mark-published",
-      "name": "Marcar PUBLISHED",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [2620, 300],
-      "credentials": { "googleSheetsOAuth2Api": { "name": "Google Sheets account" } }
+      "name": "Mark as Published",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [3616, -288],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "UviJg5pB7TsCtYBk", "name": "Google Sheets account" } }
     }
   ],
   "connections": {
-    "Every 20 Minutes":    { "main": [[{ "node": "Read CONTENT_PIPELINE",  "type": "main", "index": 0 }]] },
-    "Read CONTENT_PIPELINE": { "main": [[{ "node": "Filter PENDING",       "type": "main", "index": 0 }]] },
-    "Filter PENDING":      { "main": [[{ "node": "Sort by Priority",       "type": "main", "index": 0 }]] },
-    "Sort by Priority":    { "main": [[{ "node": "Take 1 Row",             "type": "main", "index": 0 }]] },
-    "Take 1 Row":          { "main": [[{ "node": "Read BLOGS_CONFIG",      "type": "main", "index": 0 }]] },
-    "Read BLOGS_CONFIG":   { "main": [[{ "node": "Preparar Datos",         "type": "main", "index": 0 }]] },
-    "Preparar Datos":      { "main": [[{ "node": "DeepSeek API",           "type": "main", "index": 0 }]] },
-    "DeepSeek API":        { "main": [[{ "node": "Extraer HTML",           "type": "main", "index": 0 }]] },
-    "Extraer HTML":        { "main": [[{ "node": "Publicar en Blogger",    "type": "main", "index": 0 }]] },
-    "Publicar en Blogger": { "main": [[{ "node": "Extraer URL",            "type": "main", "index": 0 }]] },
-    "Extraer URL":         { "main": [[{ "node": "Marcar PUBLISHED",       "type": "main", "index": 0 }]] }
+    "Schedule Trigger":       { "main": [[{ "node": "Read CONTENT_PIPELINE",   "type": "main", "index": 0 }]] },
+    "Read CONTENT_PIPELINE":  { "main": [[{ "node": "Filter PENDING",           "type": "main", "index": 0 }]] },
+    "Filter PENDING":         { "main": [[{ "node": "Sort by Priority",         "type": "main", "index": 0 }]] },
+    "Sort by Priority":       { "main": [[{ "node": "Take 1 Row",               "type": "main", "index": 0 }]] },
+    "Take 1 Row":             { "main": [[{ "node": "Read BLOGS_CONFIG",        "type": "main", "index": 0 }]] },
+    "Read BLOGS_CONFIG":      { "main": [[{ "node": "Preparar Datos",           "type": "main", "index": 0 }]] },
+    "Preparar Datos":         { "main": [[{ "node": "Lock Row",                 "type": "main", "index": 0 }]] },
+    "Lock Row":               { "main": [[{ "node": "AI Agent",                 "type": "main", "index": 0 }]] },
+    "AI Agent":               { "main": [[{ "node": "Code VALIDATE",            "type": "main", "index": 0 }]] },
+    "DeepSeek Chat Model":    { "ai_languageModel": [[{ "node": "AI Agent",      "type": "ai_languageModel", "index": 0 }]] },
+    "Code VALIDATE":          { "main": [[{ "node": "Basic LLM Chain",          "type": "main", "index": 0 }]] },
+    "Basic LLM Chain":        { "main": [[{ "node": "Prepare Validated Content","type": "main", "index": 0 }]] },
+    "DeepSeek Chat Model1":   { "ai_languageModel": [[{ "node": "Basic LLM Chain","type": "ai_languageModel", "index": 0 }]] },
+    "Structured Output Parser":{ "ai_outputParser": [[{ "node": "Basic LLM Chain","type": "ai_outputParser",  "index": 0 }]] },
+    "Prepare Validated Content":{ "main": [[{ "node": "Buscar Imagen Pexels",   "type": "main", "index": 0 }]] },
+    "Buscar Imagen Pexels":   { "main": [[{ "node": "Prepare Blogger Content",  "type": "main", "index": 0 }]] },
+    "Prepare Blogger Content":{ "main": [[{ "node": "Create a post",            "type": "main", "index": 0 }]] },
+    "Create a post":          { "main": [[{ "node": "Prepare Update Data",      "type": "main", "index": 0 }]] },
+    "Prepare Update Data":    { "main": [[{ "node": "Mark as Published",        "type": "main", "index": 0 }]] }
   },
   "settings": {
     "executionOrder": "v1",
     "saveManualExecutions": true,
     "callerPolicy": "workflowsFromSameOwner",
-    "executionTimeout": 300
+    "executionTimeout": 600
   },
   "meta": { "instanceId": "production" }
 }
