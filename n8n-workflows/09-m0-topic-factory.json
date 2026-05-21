@@ -1,0 +1,123 @@
+{
+  "name": "🌱 M0 - Topic Factory (Generar 1500 Temas por Blog en Sheets)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "start",
+      "name": "Inicio Manual",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n// M0 TOPIC FACTORY — Configuración de todos los blogs\n// Genera 1500 temas por blog y los guarda en Sheets\n// Cada blog tiene su propia pestaña en el Sheet\n// ============================================================\n\nconst BLOGS = [\n  // === ANIMALES (Hotmart + Amazon) ===\n  { id: '6910813708926842116', nombre: 'Alimentación para perros',  tab: 'Perros-Alimentacion',   nicho: 'animales', idioma: 'es', tema_central: 'alimentación natural, dieta BARF, recetas caseras y nutrición para perros', productos: ['dieta-natural','snack-barf','vital-pet','calculadora'] },\n  { id: '6617865557052467517', nombre: 'Alimentación para gatos',   tab: 'Gatos-Alimentacion',    nicho: 'animales', idioma: 'es', tema_central: 'alimentación natural y nutrición para gatos, dieta felina, recetas caseras', productos: ['dieta-natural','entiende-gato','mascotas-sanas'] },\n  { id: '7132652999311318625', nombre: 'Bulldogs Vet',              tab: 'Bulldogs',              nicho: 'animales', idioma: 'es', tema_central: 'cuidado, salud, alimentación y adiestramiento de Bulldogs Inglés y Francés', productos: ['adiestramiento','mascotas-sanas','dieta-natural'] },\n  { id: '7273203559821314231', nombre: 'Pastor alemán',             tab: 'Pastor-Aleman',         nicho: 'animales', idioma: 'es', tema_central: 'pastor alemán: adiestramiento, salud, alimentación y comportamiento', productos: ['adiestramiento','mascotas-sanas'] },\n  { id: '7970072706943429023', nombre: 'Razas de perro',            tab: 'Razas-Perro',           nicho: 'animales', idioma: 'es', tema_central: 'todas las razas de perros: características, cuidados, salud y temperamento', productos: ['adiestramiento','mascotas-sanas','dieta-natural'] },\n  { id: '2171262240069038424', nombre: 'Hurones',                   tab: 'Hurones',               nicho: 'animales', idioma: 'es', tema_central: 'cuidado, alimentación, salud, comportamiento y enfermedades de hurones domésticos', productos: ['mascotas-sanas'] },\n  { id: '1030958178929697769', nombre: 'Mastín tibetano',           tab: 'Mastin-Tibetano',       nicho: 'animales', idioma: 'es', tema_central: 'mastín tibetano: cuidado, salud, alimentación y características de la raza', productos: ['adiestramiento','mascotas-sanas'] },\n  { id: '6959662622118866680', nombre: 'Vet bovinos',               tab: 'Vet-Bovinos',           nicho: 'animales', idioma: 'es', tema_central: 'salud, enfermedades y veterinaria bovina: vacas, toros, becerros', productos: ['mascotas-sanas'] },\n  { id: '7061935825690274620', nombre: 'Geckos leopardo',           tab: 'Geckos-Leopardo',       nicho: 'animales', idioma: 'es', tema_central: 'cuidado, alimentación y salud de geckos leopardo', productos: ['mascotas-sanas'] },\n  { id: '5870777650335706589', nombre: 'Reptiles',                  tab: 'Reptiles',              nicho: 'animales', idioma: 'es', tema_central: 'cuidado, alimentación y salud de reptiles: serpientes, iguanas, camaleones, tortugas', productos: ['mascotas-sanas'] },\n  { id: '2381883842356306082', nombre: 'Guacamayos',                tab: 'Guacamayos',            nicho: 'animales', idioma: 'es', tema_central: 'cuidado, alimentación, enfermedades y comportamiento de guacamayos', productos: ['mascotas-sanas'] },\n  { id: '932323301748607096',  nombre: 'Loros',                     tab: 'Loros',                 nicho: 'animales', idioma: 'es', tema_central: 'cuidado, alimentación, entrenamiento y enfermedades de loros y cotorras', productos: ['mascotas-sanas'] },\n  { id: '8117586046258831070', nombre: 'Patos',                     tab: 'Patos',                 nicho: 'animales', idioma: 'es', tema_central: 'cuidado, alimentación y salud de patos domésticos', productos: ['mascotas-sanas'] },\n  { id: '5154298280010659457', nombre: 'Periquitos',                tab: 'Periquitos',            nicho: 'animales', idioma: 'es', tema_central: 'cuidado, alimentación, salud y entrenamiento de periquitos australianos', productos: ['mascotas-sanas'] },\n  { id: '1437877554925595070', nombre: 'Chinchillas exóticas',      tab: 'Chinchillas',           nicho: 'animales', idioma: 'es', tema_central: 'cuidado, alimentación y salud de chinchillas como mascota', productos: ['mascotas-sanas'] },\n  { id: '1287626644093713914', nombre: 'Seguros de mascotas',       tab: 'Seguros-Mascotas',      nicho: 'animales', idioma: 'es', tema_central: 'seguros de mascotas: comparativas, coberturas, precios y recomendaciones', productos: ['mascotas-sanas'] },\n  { id: '2772493032989228627', nombre: 'Blog Vet Luis García',      tab: 'Vet-LuisGarcia',        nicho: 'animales', idioma: 'es', tema_central: 'veterinaria general: diagnóstico, tratamiento, prevención y bienestar animal', productos: ['mascotas-sanas','dieta-natural'] },\n  // === LEYES (AdSense + Leads) ===\n  { id: '4185821469969358370', nombre: 'Abogados bienes raíces USA',    tab: 'Abog-BienesRaices',  nicho: 'leyes', idioma: 'es', tema_central: 'abogados de bienes raíces en USA: contratos, disputas, compraventa, propiedades', productos: [] },\n  { id: '6030388327366455376', nombre: 'Abogados accidente Orlando',    tab: 'Abog-Accidente',     nicho: 'leyes', idioma: 'es', tema_central: 'abogados de accidentes de auto en Orlando y Florida: compensación, proceso legal', productos: [] },\n  { id: '3503300865393838043', nombre: 'Abogados familia USA',          tab: 'Abog-Familia',       nicho: 'leyes', idioma: 'es', tema_central: 'abogados de familia en USA: divorcio, custodia, adopción, órdenes de protección', productos: [] },\n  { id: '3388695765945711848', nombre: 'Litigios USA',                  tab: 'Litigios',           nicho: 'leyes', idioma: 'es', tema_central: 'litigios civiles y comerciales en USA: demandas, contratos, disputas empresariales', productos: [] },\n  { id: '1977134253598268505', nombre: 'Impuestos en USA',              tab: 'Impuestos-USA',      nicho: 'leyes', idioma: 'es', tema_central: 'impuestos en Estados Unidos para hispanos: declaración, deducciones, ITIN, IRS', productos: [] },\n  { id: '7904190967942615231', nombre: 'Multas y permisos laborales',   tab: 'Multas-Laborales',  nicho: 'leyes', idioma: 'es', tema_central: 'multas de trabajo, permisos laborales y derechos del trabajador en USA', productos: [] },\n  { id: '4771412328831507137', nombre: 'Abogados accidente USA',        tab: 'Abog-AccidenteUSA', nicho: 'leyes', idioma: 'es', tema_central: 'abogados de accidentes de auto en toda USA: compensación, médicos, proceso legal', productos: [] },\n  // === SALUD ===\n  { id: '6257184429407355034', nombre: 'Hipertensión arterial',      tab: 'Hipertension',    nicho: 'salud', idioma: 'es', tema_central: 'hipertensión arterial: causas, síntomas, tratamiento, dieta y prevención', productos: ['101-recetas-diabeticos'] },\n  { id: '2524001519825376565', nombre: 'Esclerosis múltiple',        tab: 'Esclerosis',      nicho: 'salud', idioma: 'es', tema_central: 'esclerosis múltiple: síntomas, diagnóstico, tratamientos y vida con EM', productos: ['101-recetas-diabeticos'] },\n  { id: '8052591155706275029', nombre: 'Baumanómetros digitales',    tab: 'Baumanometros',   nicho: 'salud', idioma: 'es', tema_central: 'tensiómetros y baumanómetros digitales: comparativas, uso correcto, recomendaciones', productos: [] },\n  { id: '7021059855008053005', nombre: 'Tensiómetro',                tab: 'Tensiometro',     nicho: 'salud', idioma: 'es', tema_central: 'tensiómetros de brazo y muñeca: guías de compra, uso y mantenimiento', productos: [] },\n  { id: '5549247981721112976', nombre: 'Técnicas anti estrés',       tab: 'Anti-Estres',     nicho: 'salud', idioma: 'es', tema_central: 'técnicas para reducir el estrés: meditación, respiración, mindfulness, rutinas', productos: [] }\n];\n\n// Configuración de generación por lotes\nconst TEMAS_POR_BLOG = 1500;\nconst TEMAS_POR_LOTE = 50; // DeepSeek genera 50 temas por llamada API\nconst LOTES_POR_BLOG = Math.ceil(TEMAS_POR_BLOG / TEMAS_POR_LOTE); // = 30 lotes\n\nconst SHEETS_ID = '14NYqDn77J9nsTjD8ZsvxzDe1lggNwmC6kUZcE3LNbJI';\n\nreturn BLOGS.map((blog, idx) => ({\n  json: { blog, TEMAS_POR_LOTE, LOTES_POR_BLOG, TEMAS_POR_BLOG, SHEETS_ID, blogIndex: idx }\n}));"
+      },
+      "id": "config-blogs",
+      "name": "Configurar Todos los Blogs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generar los números de lote para este blog\nconst { blog, TEMAS_POR_LOTE, LOTES_POR_BLOG } = $input.item.json;\n\nconst lotes = [];\nfor (let i = 0; i < LOTES_POR_BLOG; i++) {\n  const offset = i * TEMAS_POR_LOTE;\n  const cantidad = (offset + TEMAS_POR_LOTE <= 1500) ? TEMAS_POR_LOTE : 1500 - offset;\n  lotes.push({ json: { ...$input.item.json, lote: i + 1, offset, cantidad } });\n}\nreturn lotes;"
+      },
+      "id": "dividir-lotes",
+      "name": "Dividir en Lotes de 50",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'system', content: 'Eres un experto en SEO y marketing de contenidos para blogs en español. Generas títulos de artículos altamente específicos, optimizados para Google, con intención de búsqueda clara. Respondes SIEMPRE en JSON válido sin markdown.' }, { role: 'user', content: 'Blog: \"' + $json.blog.nombre + '\". Tema central: ' + $json.blog.tema_central + '. Genera exactamente ' + $json.cantidad + ' títulos de artículos SEO únicos (lote ' + $json.lote + '/30, temas ' + ($json.offset + 1) + '-' + ($json.offset + $json.cantidad) + '). REGLAS: (1) Keywords de cola larga específicas, (2) Intención mixta: 80% comercial/transaccional + 20% informacional, (3) Títulos con síntoma+animal+solución para blogs de mascotas, (4) Sin repetir temas ya generados en lotes anteriores, (5) Varía el formato: preguntas, listas numeradas, guías, comparativas. Responde SOLO con JSON: {\"temas\":[{\"titulo\":\"...\",\"keyword\":\"...\",\"intencion\":\"comercial|informacional\",\"formato\":\"guia|lista|pregunta|comparativa\",\"producto_relacionado\":\"...\"}]}' }], max_tokens: 4000, temperature: 0.9 }) }}",
+        "options": {}
+      },
+      "id": "deepseek-generar-temas",
+      "name": "DeepSeek: Generar 50 Temas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [940, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "DEEPSEEK_CREDENTIAL_ID",
+          "name": "DeepSeek API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.item.json;\nconst config = $('Dividir en Lotes de 50').item.json;\nconst { blog, lote, offset, SHEETS_ID } = config;\n\n// Parsear respuesta de DeepSeek\nlet rawContent = response.choices?.[0]?.message?.content || '{\"temas\":[]}';\nrawContent = rawContent.replace(/```json\\n?/g,'').replace(/```\\n?/g,'').trim();\n\nlet data;\ntry { data = JSON.parse(rawContent); } catch(e) {\n  const match = rawContent.match(/\\{.*\\}/s);\n  data = match ? JSON.parse(match[0]) : { temas: [] };\n}\n\nconst temas = data.temas || [];\n\n// Calcular fechas de publicación escalonadas\n// 1500 artículos en 60 días = 1 cada ~57.6 minutos\nconst INTERVALO_MS = (60 * 24 * 60 * 60 * 1000) / 1500;\nconst fechaInicio = new Date();\nfechaInicio.setDate(fechaInicio.getDate() + 1); // Empezar mañana\nfechaInicio.setHours(8, 0, 0, 0); // Empezar a las 8am\n\nreturn temas.map((tema, idx) => {\n  const numArticulo = offset + idx;\n  const fechaPub = new Date(fechaInicio.getTime() + (numArticulo * INTERVALO_MS));\n  return {\n    json: {\n      blogTab: blog.tab,\n      blogId: blog.id,\n      blogNombre: blog.nombre,\n      blogNicho: blog.nicho,\n      titulo: tema.titulo || '',\n      keyword: tema.keyword || '',\n      intencion: tema.intencion || 'informacional',\n      formato: tema.formato || 'guia',\n      producto_relacionado: tema.producto_relacionado || (blog.productos[0] || ''),\n      estado: 'pendiente',\n      fecha_publicacion: fechaPub.toISOString(),\n      lote,\n      num_articulo: numArticulo + 1,\n      SHEETS_ID\n    }\n  };\n});"
+      },
+      "id": "parsear-temas",
+      "name": "Parsear y Asignar Fechas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1180, 400]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "mode": "id", "value": "14NYqDn77J9nsTjD8ZsvxzDe1lggNwmC6kUZcE3LNbJI" },
+        "sheetName":  { "__rl": true, "mode": "name", "value": "={{ $json.blogTab }}" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "num_articulo":      "={{ $json.num_articulo }}",
+            "titulo":            "={{ $json.titulo }}",
+            "keyword":           "={{ $json.keyword }}",
+            "intencion":         "={{ $json.intencion }}",
+            "formato":           "={{ $json.formato }}",
+            "producto_relacionado": "={{ $json.producto_relacionado }}",
+            "estado":            "={{ $json.estado }}",
+            "fecha_publicacion": "={{ $json.fecha_publicacion }}",
+            "url_publicada":     "",
+            "fecha_generacion":  "",
+            "notas":             ""
+          }
+        },
+        "options": {}
+      },
+      "id": "guardar-en-sheets",
+      "name": "Guardar Temas en Sheets (Tab del Blog)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [1420, 400],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2,
+        "unit": "seconds"
+      },
+      "id": "wait-api",
+      "name": "Esperar (rate limit DeepSeek)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1660, 400]
+    }
+  ],
+  "connections": {
+    "Inicio Manual":                        { "main": [[{ "node": "Configurar Todos los Blogs",          "type": "main", "index": 0 }]] },
+    "Configurar Todos los Blogs":           { "main": [[{ "node": "Dividir en Lotes de 50",              "type": "main", "index": 0 }]] },
+    "Dividir en Lotes de 50":              { "main": [[{ "node": "DeepSeek: Generar 50 Temas",           "type": "main", "index": 0 }]] },
+    "DeepSeek: Generar 50 Temas":          { "main": [[{ "node": "Parsear y Asignar Fechas",             "type": "main", "index": 0 }]] },
+    "Parsear y Asignar Fechas":            { "main": [[{ "node": "Guardar Temas en Sheets (Tab del Blog)","type": "main", "index": 0 }]] },
+    "Guardar Temas en Sheets (Tab del Blog)": { "main": [[{ "node": "Esperar (rate limit DeepSeek)",    "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": ["m0","topic-factory","deepseek","sheets","seo","blogger"],
+  "triggerCount": 0
+}

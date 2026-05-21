@@ -1,0 +1,216 @@
+{
+  "name": "📝 M1 - Article Factory (4 Agentes DeepSeek → Publicar en Blogger)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "minutes", "minutesInterval": 20 }]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Ejecutar cada 20 minutos",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n// Seleccionar qué blog procesar en esta ejecución\n// Rota entre todos los blogs para distribuir la carga\n// ============================================================\n\nconst BLOGS_TABS = [\n  { blogId: '6910813708926842116', tab: 'Perros-Alimentacion',   nicho: 'animales', nombre: 'Alimentación para perros' },\n  { blogId: '6617865557052467517', tab: 'Gatos-Alimentacion',    nicho: 'animales', nombre: 'Alimentación para gatos' },\n  { blogId: '7132652999311318625', tab: 'Bulldogs',              nicho: 'animales', nombre: 'Bulldogs Vet' },\n  { blogId: '7273203559821314231', tab: 'Pastor-Aleman',         nicho: 'animales', nombre: 'Pastor alemán' },\n  { blogId: '7970072706943429023', tab: 'Razas-Perro',           nicho: 'animales', nombre: 'Razas de perro' },\n  { blogId: '2171262240069038424', tab: 'Hurones',               nicho: 'animales', nombre: 'Hurones' },\n  { blogId: '1030958178929697769', tab: 'Mastin-Tibetano',       nicho: 'animales', nombre: 'Mastín tibetano' },\n  { blogId: '6959662622118866680', tab: 'Vet-Bovinos',           nicho: 'animales', nombre: 'Vet bovinos' },\n  { blogId: '7061935825690274620', tab: 'Geckos-Leopardo',       nicho: 'animales', nombre: 'Geckos leopardo' },\n  { blogId: '5870777650335706589', tab: 'Reptiles',              nicho: 'animales', nombre: 'Reptiles' },\n  { blogId: '2381883842356306082', tab: 'Guacamayos',            nicho: 'animales', nombre: 'Guacamayos' },\n  { blogId: '932323301748607096',  tab: 'Loros',                 nicho: 'animales', nombre: 'Loros' },\n  { blogId: '8117586046258831070', tab: 'Patos',                 nicho: 'animales', nombre: 'Patos' },\n  { blogId: '5154298280010659457', tab: 'Periquitos',            nicho: 'animales', nombre: 'Periquitos' },\n  { blogId: '1437877554925595070', tab: 'Chinchillas',           nicho: 'animales', nombre: 'Chinchillas exóticas' },\n  { blogId: '1287626644093713914', tab: 'Seguros-Mascotas',      nicho: 'animales', nombre: 'Seguros de mascotas' },\n  { blogId: '2772493032989228627', tab: 'Vet-LuisGarcia',        nicho: 'animales', nombre: 'Blog Vet Luis García' },\n  { blogId: '4185821469969358370', tab: 'Abog-BienesRaices',     nicho: 'leyes',    nombre: 'Abogados bienes raíces USA' },\n  { blogId: '6030388327366455376', tab: 'Abog-Accidente',        nicho: 'leyes',    nombre: 'Abogados accidente Orlando' },\n  { blogId: '3503300865393838043', tab: 'Abog-Familia',          nicho: 'leyes',    nombre: 'Abogados familia USA' },\n  { blogId: '3388695765945711848', tab: 'Litigios',              nicho: 'leyes',    nombre: 'Litigios USA' },\n  { blogId: '1977134253598268505', tab: 'Impuestos-USA',         nicho: 'leyes',    nombre: 'Impuestos en USA' },\n  { blogId: '7904190967942615231', tab: 'Multas-Laborales',      nicho: 'leyes',    nombre: 'Multas y permisos laborales' },\n  { blogId: '4771412328831507137', tab: 'Abog-AccidenteUSA',     nicho: 'leyes',    nombre: 'Abogados accidente USA' },\n  { blogId: '6257184429407355034', tab: 'Hipertension',          nicho: 'salud',    nombre: 'Hipertensión arterial' },\n  { blogId: '2524001519825376565', tab: 'Esclerosis',            nicho: 'salud',    nombre: 'Esclerosis múltiple' },\n  { blogId: '8052591155706275029', tab: 'Baumanometros',         nicho: 'salud',    nombre: 'Baumanómetros digitales' },\n  { blogId: '7021059855008053005', tab: 'Tensiometro',           nicho: 'salud',    nombre: 'Tensiómetro' },\n  { blogId: '5549247981721112976', tab: 'Anti-Estres',           nicho: 'salud',    nombre: 'Técnicas anti estrés' }\n];\n\n// Rotar entre blogs usando el minuto actual como índice\nconst minutoActual = new Date().getMinutes();\nconst idx = minutoActual % BLOGS_TABS.length;\nconst blog = BLOGS_TABS[idx];\n\nreturn [{ json: { blog, SHEETS_ID: '14NYqDn77J9nsTjD8ZsvxzDe1lggNwmC6kUZcE3LNbJI' } }];"
+      },
+      "id": "seleccionar-blog",
+      "name": "Seleccionar Blog a Procesar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "operation": "readOrGetAllRows",
+        "documentId": { "__rl": true, "mode": "id", "value": "14NYqDn77J9nsTjD8ZsvxzDe1lggNwmC6kUZcE3LNbJI" },
+        "sheetName":  { "__rl": true, "mode": "name", "value": "={{ $json.blog.tab }}" },
+        "filters": {
+          "conditions": [{ "leftValue": "={{ $json.estado }}", "condition": "equals", "rightValue": "pendiente" }]
+        },
+        "options": { "returnFirstMatch": true }
+      },
+      "id": "leer-tema-pendiente",
+      "name": "Leer 1 Tema Pendiente de Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [700, 400],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const tema = $input.item.json;\nconst config = $('Seleccionar Blog a Procesar').item.json;\nconst { blog } = config;\n\nif (!tema || !tema.titulo) {\n  return [{ json: { skip: true, motivo: 'No hay temas pendientes para ' + blog.nombre } }];\n}\n\nreturn [{ json: { tema, blog, skip: false } }];"
+      },
+      "id": "verificar-tema",
+      "name": "Verificar Tema Disponible",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [940, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true },
+          "conditions": [{ "leftValue": "={{ $json.skip }}", "rightValue": true, "operator": { "type": "boolean", "operation": "equals" } }]
+        }
+      },
+      "id": "if-tiene-tema",
+      "name": "¿Hay Tema Disponible?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1180, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'system', content: 'Eres un Redactor Emocional experto en SEO y escritura persuasiva en español. Usas la fórmula: sujeto + verbo de acción + predicado con urgencia emocional + keyword principal. Respondes en JSON válido sin markdown.' }, { role: 'user', content: 'Tema: \"' + $json.tema.titulo + '\". Keyword: \"' + ($json.tema.keyword || $json.tema.titulo) + '\". Blog nicho: ' + $json.blog.nicho + '. Genera la estructura del artículo siguiendo esta fórmula. Responde con JSON: {\"titulo_final\":\"...\",\"meta_descripcion\":\"...\",\"h2_secciones\":[{\"h2\":\"...\",\"h3s\":[\"...\",\"...\"],\"intencion\":\"...\"}],\"formato_articulo\":\"guia|lista|pregunta|comparativa|diagnostico\",\"producto_sugerido\":\"...\",\"palabras_clave_lsi\":[\"...\",\"...\",\"...\"],\"intencion_busqueda\":\"comercial|informacional|transaccional\"}' }], max_tokens: 2000, temperature: 0.8 }) }}",
+        "options": {}
+      },
+      "id": "agente1-estructura",
+      "name": "Agente 1 DeepSeek: Estructura + Título SEO",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1420, 280],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "DEEPSEEK_CREDENTIAL_ID",
+          "name": "DeepSeek API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const resp1 = $input.item.json;\nconst ctx = $('Verificar Tema Disponible').item.json;\n\nlet rawContent = resp1.choices?.[0]?.message?.content || '{}';\nrawContent = rawContent.replace(/```json\\n?/g,'').replace(/```\\n?/g,'').trim();\n\nlet estructura;\ntry { estructura = JSON.parse(rawContent); } catch(e) {\n  const match = rawContent.match(/\\{.*\\}/s);\n  estructura = match ? JSON.parse(match[0]) : {};\n}\n\nreturn [{ json: { ...ctx, estructura } }];"
+      },
+      "id": "parsear-estructura",
+      "name": "Parsear Estructura",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1660, 280]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'system', content: 'Eres un experto escritor de contenido SEO en español. Escribes artículos en HTML con CSS inline, listos para Blogger. Tu contenido es informativo, empático y persuasivo. Siempre incluyes: tablas HTML cuando hay comparaciones, listas cuando hay pasos, párrafos con ejemplos concretos. Citas en formato APA cuando hay datos científicos. Incluyes SIEMPRE al menos 1 emoji por sección H2.' }, { role: 'user', content: 'Escribe el artículo completo en HTML con CSS inline para Blogger. Datos del artículo: Título: \"' + ($json.estructura.titulo_final || $json.tema.titulo) + '\". Formato: ' + ($json.estructura.formato_articulo || 'guia') + '. Intención: ' + ($json.estructura.intencion_busqueda || 'informacional') + '. Secciones H2 a cubrir: ' + JSON.stringify($json.estructura.h2_secciones || []) + '. Blog nicho: ' + $json.blog.nicho + '. FÓRMULA OBLIGATORIA para blogs de mascotas: (1)Síntoma/Situación (2)Gravedad (3)Causa (4)Qué hacer (5)Prevención (6)Producto recomendado (7)Siguiente artículo relacionado. REGLAS: Solo HTML+CSS inline, sin <html><head><body>, longitud 900-1200 palabras, 1 imagen placeholder <img> con alt SEO por cada 300 palabras, link a Telegram al final: t.me/tucanal.' }], max_tokens: 5000, temperature: 0.7 }) }}",
+        "options": {}
+      },
+      "id": "agente2-contenido",
+      "name": "Agente 2 DeepSeek: Escribir Artículo HTML",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1900, 280],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "DEEPSEEK_CREDENTIAL_ID",
+          "name": "DeepSeek API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const respContenido = $input.item.json;\nconst ctx = $('Parsear Estructura').item.json;\nconst { tema, blog, estructura } = ctx;\n\nconst contenidoIA = respContenido.choices?.[0]?.message?.content || '';\n\n// -------------------------------------------------------\n// PRODUCTOS HOTMART\n// -------------------------------------------------------\nconst PRODUCTOS = {\n  'dieta-natural':   { nombre:'Dieta Natural para Perros y Gatos',  link:'https://go.hotmart.com/X103617747C',      img:'https://static-media.hotmart.com/KNdDfZogqE2CWDv4nqEsswzDFjc=/300x300/filters:quality(100)/hotmart/product_pictures/ecbf6914-08bb-4682-aa5b-1990b80b5afb/postinstagrampatitas.png',  grad:'135deg,#1a7a4a,#2ecc71', text:'#1a7a4a', tipo:'Guía' },\n  'snack-barf':      { nombre:'Snack BARF en Minutos',              link:'https://go.hotmart.com/R103617833Q',      img:'https://static-media.hotmart.com/XusqQYSq_oAB8-EO0Iwr3xVnPMk=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/aaef333c-c030-4c46-a0e7-0c1b780837fe/snackbarf600x600.png?w=920', grad:'135deg,#1a7a4a,#27ae60', text:'#1a7a4a', tipo:'Recetas' },\n  'adiestramiento':  { nombre:'Adiestramiento Canino Profesional',  link:'https://go.hotmart.com/D104257979A',      img:'https://hotmart.s3.amazonaws.com/product_pictures/141a3c3d-a535-40f5-99e1-a275199b7e98/Portadahotmart5.png',  grad:'135deg,#1a5276,#2980b9', text:'#1a5276', tipo:'Curso' },\n  'entiende-gato':   { nombre:'Entiende a tu Gato: Guía Práctica', link:'https://go.hotmart.com/F104226854F',      img:'https://d1yei2z3i6k35z.cloudfront.net/11998843/683bb259ca94a_CopiadeSint%C3%ADtulo1.png', grad:'135deg,#6c3483,#a569bd', text:'#6c3483', tipo:'Guía' },\n  'mascotas-sanas':  { nombre:'Mascotas Sanas',                     link:'https://go.hotmart.com/L104257678P?dp=1', img:'https://static-media.hotmart.com/9H3NJb3S4H61OsufTjZpXLy-8KY=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/78592f13-96f1-4724-9b6a-2640aadcf606/MasterSello20211116T162945331.jpg?w=920', grad:'135deg,#1a5276,#2980b9', text:'#1a5276', tipo:'Curso' },\n  'vital-pet':       { nombre:'Vital Pet System',                   link:'https://go.hotmart.com/W104257847B',      img:'https://static-media.hotmart.com/F3PzytJIAVCectZMFSnvMHJFV5g=/filters:background_color(white)/hotmart/product_pictures/a801721c-590d-4a30-ab01-5fe5eb532e8f/PORTADAVITALPET.png', grad:'135deg,#1a7a4a,#27ae60', text:'#1a7a4a', tipo:'Sistema' },\n  'calculadora':     { nombre:'Calculadora de Alimentación Cocida', link:'https://go.hotmart.com/B104226750N',      img:'https://static-media.hotmart.com/Gt9GpGBSzCdG8hfSbvKgGuXEhFY=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/5f151330-675e-4498-8764-1fba21c4b505/Calculadoradealimentacioncocidaparaperrosygatos.png?w=920', grad:'135deg,#1a7a4a,#27ae60', text:'#1a7a4a', tipo:'Herramienta' },\n  '101-recetas-diabeticos': { nombre:'101 Recetas Saludables para Diabéticos', link:'https://go.hotmart.com/S104258050O', img:'https://static-media.hotmart.com/EbTb3aQIURTRGGIiuAGCZrrR6sk=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/48ca379d-a33d-4e0d-bea7-d8d375784e2d/_dca15be1487946e9bbd84e59e20a9d46.jpg?w=920', grad:'135deg,#c0392b,#e74c3c', text:'#c0392b', tipo:'Recetario' }\n};\n\nconst ADSENSE_ID = 'ca-pub-1913674678143092';\n\n// Seleccionar producto\nconst prodId = tema.producto_relacionado || estructura.producto_sugerido || 'mascotas-sanas';\nconst prod = PRODUCTOS[prodId] || PRODUCTOS['mascotas-sanas'];\n\n// AdSense mid-article\nconst adsenseMid = `\n<div style=\"margin:32px 0;text-align:center\">\n  <ins class=\"adsbygoogle\" style=\"display:block\" data-ad-client=\"${ADSENSE_ID}\" data-ad-slot=\"SLOT_MID\" data-ad-format=\"auto\" data-full-width-responsive=\"true\"></ins>\n  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>\n</div>`;\n\n// Insertar AdSense a mitad del contenido\nconst mitad = Math.floor(contenidoIA.length / 2);\nconst corte = contenidoIA.indexOf('</p>', mitad);\nconst punto = corte > 0 ? corte + 4 : mitad;\nconst contenidoConAds = contenidoIA.slice(0, punto) + adsenseMid + contenidoIA.slice(punto);\n\n// Banner Hotmart (para blogs de animales/salud)\nlet bannerMonetizacion = '';\nif (blog.nicho === 'animales' || blog.nicho === 'salud') {\n  bannerMonetizacion = `\n<!-- HOTMART:${prodId} -->\n<div style=\"background:linear-gradient(${prod.grad});border-radius:14px;padding:0;margin:40px 0;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.12);font-family:Arial,sans-serif;max-width:700px\">\n  <div style=\"display:flex;align-items:stretch;flex-wrap:wrap\">\n    <img src=\"${prod.img}\" alt=\"${prod.nombre}\" loading=\"lazy\" style=\"width:150px;height:auto;object-fit:cover;flex-shrink:0\">\n    <div style=\"flex:1;min-width:180px;padding:20px;display:flex;flex-direction:column;justify-content:center\">\n      <p style=\"color:rgba(255,255,255,.8);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 5px\">${prod.tipo} recomendado</p>\n      <h3 style=\"color:#fff;font-size:17px;font-weight:800;margin:0 0 8px;line-height:1.3\">${prod.nombre}</h3>\n      <a href=\"${prod.link}\" target=\"_blank\" rel=\"noopener sponsored\" style=\"display:inline-block;background:#fff;color:${prod.text};font-weight:800;font-size:13px;padding:10px 20px;border-radius:8px;text-decoration:none;align-self:flex-start\">Ver ahora →</a>\n    </div>\n  </div>\n  <p style=\"color:rgba(255,255,255,.3);font-size:9px;text-align:right;padding:3px 12px;margin:0\">*Enlace de afiliado</p>\n</div>`;\n} else if (blog.nicho === 'leyes') {\n  bannerMonetizacion = `\n<!-- LEAD WIDGET -->\n<div style=\"background:linear-gradient(135deg,#1a2a6c,#2d5fa6);border-radius:14px;padding:24px 28px;margin:40px 0;font-family:Arial,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.15);max-width:700px\">\n  <div style=\"display:flex;align-items:center;gap:16px;flex-wrap:wrap\">\n    <div style=\"font-size:44px;flex-shrink:0\">⚖️</div>\n    <div style=\"flex:1;min-width:200px\">\n      <p style=\"color:rgba(255,255,255,.8);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 4px\">Consulta GRATUITA</p>\n      <h3 style=\"color:#fff;font-size:19px;font-weight:800;margin:0 0 6px;line-height:1.3\">${blog.nombre}</h3>\n      <p style=\"color:rgba(255,255,255,.85);font-size:13px;margin:0\">Sin costo. Confidencial. Respuesta en 24h.</p>\n    </div>\n    <div style=\"display:flex;flex-direction:column;gap:8px;flex-shrink:0\">\n      <a href=\"tel:+18000000000\" style=\"display:inline-block;background:#fff;color:#1a2a6c;font-weight:800;font-size:14px;padding:12px 22px;border-radius:8px;text-decoration:none;text-align:center\">📞 Llamar Gratis</a>\n      <a href=\"https://wa.me/18000000000\" target=\"_blank\" rel=\"noopener\" style=\"display:inline-block;background:#25d366;color:#fff;font-weight:800;font-size:13px;padding:10px 22px;border-radius:8px;text-decoration:none;text-align:center\">💬 WhatsApp</a>\n    </div>\n  </div>\n</div>`;\n}\n\n// AdSense bottom\nconst adsenseBottom = `\n<div style=\"margin:32px 0;text-align:center\">\n  <ins class=\"adsbygoogle\" style=\"display:block\" data-ad-client=\"${ADSENSE_ID}\" data-ad-slot=\"SLOT_BOTTOM\" data-ad-format=\"auto\" data-full-width-responsive=\"true\"></ins>\n  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>\n</div>`;\n\nconst htmlFinal = contenidoConAds + bannerMonetizacion + adsenseBottom;\n\nreturn [{\n  json: {\n    blogId: blog.blogId,\n    blogNombre: blog.nombre,\n    blogNicho: blog.nicho,\n    blogTab: blog.tab,\n    titulo: estructura.titulo_final || tema.titulo,\n    keyword: tema.keyword,\n    labels: [blog.nicho, tema.formato || 'guia'].filter(Boolean),\n    contenido: htmlFinal,\n    fecha_publicacion: tema.fecha_publicacion,\n    num_articulo: tema.num_articulo,\n    row_number: tema.row_number\n  }\n}];"
+      },
+      "id": "ensamblar-html",
+      "name": "Ensamblar HTML Final con Monetización",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2140, 280]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "method": "POST",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.blogId }}/posts?isDraft=false",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ JSON.stringify({ title: $json.titulo, content: $json.contenido, labels: $json.labels, published: $json.fecha_publicacion }) }}",
+        "options": {}
+      },
+      "id": "publicar-blogger",
+      "name": "Publicar en Blogger (Programado)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2380, 280],
+      "credentials": {
+        "oAuth2Api": {
+          "id": "BLOGGER_OAUTH2_CREDENTIAL_ID",
+          "name": "Google Blogger OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "mode": "id", "value": "14NYqDn77J9nsTjD8ZsvxzDe1lggNwmC6kUZcE3LNbJI" },
+        "sheetName":  { "__rl": true, "mode": "name", "value": "={{ $('Ensamblar HTML Final con Monetización').item.json.blogTab }}" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "estado":           "publicado",
+            "url_publicada":    "={{ $json.url }}",
+            "fecha_generacion": "={{ new Date().toISOString() }}"
+          }
+        },
+        "matchingColumns": ["num_articulo"],
+        "options": {}
+      },
+      "id": "actualizar-sheets",
+      "name": "Actualizar Estado en Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [2620, 280],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// No hay temas pendientes — registrar y terminar\nconst blog = $('Seleccionar Blog a Procesar').item.json.blog;\nconsole.log(`ℹ️ Sin temas pendientes para blog: ${blog.nombre}`);\nreturn [{ json: { status: 'sin_temas', blog: blog.nombre } }];"
+      },
+      "id": "sin-temas",
+      "name": "Sin Temas Pendientes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1420, 560]
+    }
+  ],
+  "connections": {
+    "Ejecutar cada 20 minutos":                    { "main": [[{ "node": "Seleccionar Blog a Procesar",              "type": "main", "index": 0 }]] },
+    "Seleccionar Blog a Procesar":                 { "main": [[{ "node": "Leer 1 Tema Pendiente de Sheets",          "type": "main", "index": 0 }]] },
+    "Leer 1 Tema Pendiente de Sheets":             { "main": [[{ "node": "Verificar Tema Disponible",                "type": "main", "index": 0 }]] },
+    "Verificar Tema Disponible":                   { "main": [[{ "node": "¿Hay Tema Disponible?",                    "type": "main", "index": 0 }]] },
+    "¿Hay Tema Disponible?":                       { "main": [
+      [{ "node": "Sin Temas Pendientes",                                                                              "type": "main", "index": 0 }],
+      [{ "node": "Agente 1 DeepSeek: Estructura + Título SEO",                                                        "type": "main", "index": 0 }]
+    ]},
+    "Agente 1 DeepSeek: Estructura + Título SEO":  { "main": [[{ "node": "Parsear Estructura",                       "type": "main", "index": 0 }]] },
+    "Parsear Estructura":                          { "main": [[{ "node": "Agente 2 DeepSeek: Escribir Artículo HTML","type": "main", "index": 0 }]] },
+    "Agente 2 DeepSeek: Escribir Artículo HTML":   { "main": [[{ "node": "Ensamblar HTML Final con Monetización",    "type": "main", "index": 0 }]] },
+    "Ensamblar HTML Final con Monetización":        { "main": [[{ "node": "Publicar en Blogger (Programado)",         "type": "main", "index": 0 }]] },
+    "Publicar en Blogger (Programado)":             { "main": [[{ "node": "Actualizar Estado en Sheets",              "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": ["m1","article-factory","deepseek","blogger","seo","automatico"],
+  "triggerCount": 0
+}
