@@ -1,0 +1,104 @@
+{
+  "name": "03 - Generar HTML de Clusters y Páginas Pilar",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "start",
+      "name": "Inicio Manual",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================\n// PRODUCTOS HOTMART REALES - ANIMALES\n// ============================================\nconst PRODUCTOS = {\n  'dieta-natural':   { nombre: 'Dieta Natural para Perros y Gatos',       link: 'https://go.hotmart.com/X103617747C',      imagen: 'https://static-media.hotmart.com/KNdDfZogqE2CWDv4nqEsswzDFjc=/300x300/filters:quality(100)/hotmart/product_pictures/ecbf6914-08bb-4682-aa5b-1990b80b5afb/postinstagrampatitas.png', tipo: 'Guía' },\n  'snack-barf':      { nombre: 'Snack BARF en Minutos',                   link: 'https://go.hotmart.com/R103617833Q',      imagen: 'https://static-media.hotmart.com/XusqQYSq_oAB8-EO0Iwr3xVnPMk=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/aaef333c-c030-4c46-a0e7-0c1b780837fe/snackbarf600x600.png?w=920', tipo: 'Recetas' },\n  'adiestramiento':  { nombre: 'Adiestramiento Canino Profesional',       link: 'https://go.hotmart.com/D104257979A',      imagen: 'https://hotmart.s3.amazonaws.com/product_pictures/141a3c3d-a535-40f5-99e1-a275199b7e98/Portadahotmart5.png', tipo: 'Curso' },\n  'entiende-gato':   { nombre: 'Entiende a tu Gato: Guía Práctica',      link: 'https://go.hotmart.com/F104226854F',      imagen: 'https://d1yei2z3i6k35z.cloudfront.net/11998843/683bb259ca94a_CopiadeSint%C3%ADtulo1.png', tipo: 'Guía' },\n  'mascotas-sanas':  { nombre: 'Mascotas Sanas',                          link: 'https://go.hotmart.com/L104257678P?dp=1', imagen: 'https://static-media.hotmart.com/9H3NJb3S4H61OsufTjZpXLy-8KY=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/78592f13-96f1-4724-9b6a-2640aadcf606/MasterSello20211116T162945331.jpg?w=920', tipo: 'Curso' },\n  'vital-pet':       { nombre: 'Vital Pet System',                        link: 'https://go.hotmart.com/W104257847B',      imagen: 'https://static-media.hotmart.com/F3PzytJIAVCectZMFSnvMHJFV5g=/filters:background_color(white)/hotmart/product_pictures/a801721c-590d-4a30-ab01-5fe5eb532e8f/PORTADAVITALPET.png', tipo: 'Sistema' },\n  'calculadora':     { nombre: 'Calculadora de Alimentación Cocida',      link: 'https://go.hotmart.com/B104226750N',      imagen: 'https://static-media.hotmart.com/Gt9GpGBSzCdG8hfSbvKgGuXEhFY=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/5f151330-675e-4498-8764-1fba21c4b505/Calculadoradealimentacioncocidaparaperrosygatos.png?w=920', tipo: 'Herramienta' }\n};\n\n// ============================================\n// ARQUITECTURA DE CLUSTERS\n// ============================================\nconst CLUSTERS = [\n  {\n    nicho: 'animales',\n    color: { grad: '135deg,#1a7a4a 0%,#2ecc71 100%', text: '#1a7a4a', bg: '#f0faf4', border: '#c3e6d0' },\n    emoji: '🐾',\n    pillar: {\n      titulo: 'Guía Completa de Alimentación Natural para Mascotas',\n      slug: 'guia-completa-alimentacion-natural-mascotas',\n      descripcion: 'Todo lo que necesitas saber para darle a tu perro o gato la mejor nutrición de forma natural y económica'\n    },\n    articulos: [\n      { titulo: 'Cómo iniciar la dieta BARF en perros',                slug: 'como-iniciar-dieta-barf-perros',       producto: 'snack-barf' },\n      { titulo: 'Alimentos prohibidos para perros y gatos',            slug: 'alimentos-prohibidos-perros-gatos',    producto: 'dieta-natural' },\n      { titulo: 'Recetas caseras saludables para tu mascota',          slug: 'recetas-caseras-saludables-mascotas', producto: 'snack-barf' },\n      { titulo: 'Dieta natural cocida: cómo hacerla correctamente',    slug: 'dieta-natural-cocida-mascotas',       producto: 'vital-pet' },\n      { titulo: 'Calculadora de alimentación para perros y gatos',     slug: 'calculadora-alimentacion-mascotas',   producto: 'calculadora' }\n    ]\n  },\n  {\n    nicho: 'animales',\n    color: { grad: '135deg,#1a5276 0%,#2980b9 100%', text: '#1a5276', bg: '#eaf4fb', border: '#aed6f1' },\n    emoji: '🐕',\n    pillar: {\n      titulo: 'Adiestramiento Canino: Guía Definitiva para Educar a tu Perro',\n      slug: 'adiestramiento-canino-guia-definitiva',\n      descripcion: 'Aprende las técnicas de adiestramiento más efectivas para tener un perro obediente y feliz'\n    },\n    articulos: [\n      { titulo: 'Comandos básicos que todo perro debe aprender',        slug: 'comandos-basicos-perro',              producto: 'adiestramiento' },\n      { titulo: 'Cómo corregir la agresividad en perros',              slug: 'corregir-agresividad-perros',         producto: 'adiestramiento' },\n      { titulo: 'Adiestramiento con refuerzo positivo',                slug: 'adiestramiento-refuerzo-positivo',    producto: 'adiestramiento' },\n      { titulo: 'Cómo enseñar a tu perro a no ladrar en exceso',       slug: 'perro-no-ladrar-exceso',             producto: 'adiestramiento' },\n      { titulo: 'Los 10 errores más comunes al educar a un perro',     slug: 'errores-comunes-educar-perro',        producto: 'mascotas-sanas' }\n    ]\n  },\n  {\n    nicho: 'animales',\n    color: { grad: '135deg,#6c3483 0%,#a569bd 100%', text: '#6c3483', bg: '#f9f0ff', border: '#d7bde2' },\n    emoji: '🐱',\n    pillar: {\n      titulo: 'Guía Completa para Entender y Cuidar a tu Gato',\n      slug: 'guia-completa-cuidar-gato',\n      descripcion: 'Descifra el lenguaje felino, cuida su salud y convive en armonía con tu gato'\n    },\n    articulos: [\n      { titulo: 'Qué significan los maullidos de tu gato',             slug: 'significado-maullidos-gato',          producto: 'entiende-gato' },\n      { titulo: 'Por qué los gatos amasan: el comportamiento felino',  slug: 'por-que-gatos-amasan',               producto: 'entiende-gato' },\n      { titulo: 'Alimentación natural para gatos: guía completa',      slug: 'alimentacion-natural-gatos',         producto: 'dieta-natural' },\n      { titulo: 'Cómo presentar un gato nuevo en casa',                slug: 'como-presentar-gato-nuevo',          producto: 'mascotas-sanas' },\n      { titulo: 'Enfermedades comunes en gatos y cómo prevenirlas',    slug: 'enfermedades-comunes-gatos',         producto: 'mascotas-sanas' }\n    ]\n  }\n];\n\nreturn [{ json: { CLUSTERS, PRODUCTOS } }];"
+      },
+      "id": "definir-clusters",
+      "name": "Definir Clusters y Productos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "CLUSTERS",
+        "options": {}
+      },
+      "id": "split-clusters",
+      "name": "Split por Cluster",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [700, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cluster = $input.item.json;\nconst PRODUCTOS = $('Definir Clusters y Productos').item.json.PRODUCTOS;\nconst { pillar, articulos, color, emoji } = cluster;\n\nconst buildBanner = (prod) => `\n<div style=\"background:linear-gradient(${color.grad});border-radius:12px;padding:0;margin:32px 0;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.12);font-family:Arial,sans-serif;max-width:700px\">\n  <div style=\"display:flex;align-items:stretch;flex-wrap:wrap\">\n    <img src=\"${prod.imagen}\" alt=\"${prod.nombre}\" style=\"width:140px;object-fit:cover;flex-shrink:0\">\n    <div style=\"flex:1;min-width:180px;padding:18px;display:flex;flex-direction:column;justify-content:center\">\n      <p style=\"color:rgba(255,255,255,.8);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 5px\">${prod.tipo} ${emoji}</p>\n      <h3 style=\"color:#fff;font-size:16px;font-weight:800;margin:0 0 8px;line-height:1.3\">${prod.nombre}</h3>\n      <a href=\"${prod.link}\" target=\"_blank\" rel=\"noopener sponsored\"\n         style=\"display:inline-block;background:#fff;color:${color.text};font-weight:800;font-size:12px;padding:9px 18px;border-radius:7px;text-decoration:none;align-self:flex-start\">\n        Ver ahora →\n      </a>\n    </div>\n  </div>\n  <p style=\"color:rgba(255,255,255,.4);font-size:9px;text-align:right;padding:3px 12px;margin:0\">*Enlace de afiliado</p>\n</div>`;\n\n// TOC links\nconst tocLinks = articulos.map(a =>\n  `<li style=\"margin:5px 0\"><a href=\"/p/${a.slug}.html\" style=\"color:${color.text};text-decoration:none;font-size:14px\">→ ${a.titulo}</a></li>`\n).join('\\n');\n\n// Productos únicos para el pillar (sin duplicados)\nconst productosUsados = [...new Set(articulos.map(a => a.producto))];\nconst primerProducto = PRODUCTOS[productosUsados[0]];\n\nconst htmlPillar = `<!-- PÁGINA PILAR: ${pillar.titulo} -->\n<article style=\"max-width:820px;margin:0 auto;font-family:Arial,sans-serif;line-height:1.7;color:#333\">\n\n  <h1 style=\"font-size:28px;font-weight:800;color:#1a1a1a;margin:0 0 10px\">${pillar.titulo}</h1>\n  <p style=\"color:#666;font-size:16px;margin:0 0 28px;line-height:1.6\">${pillar.descripcion}</p>\n\n  <!-- BANNER PRODUCTO PRINCIPAL -->\n  ${buildBanner(primerProducto)}\n\n  <!-- TABLA DE CONTENIDOS -->\n  <div style=\"background:${color.bg};border-left:4px solid ${color.text};border-radius:8px;padding:18px 22px;margin:28px 0\">\n    <h2 style=\"font-size:16px;font-weight:700;color:#1a1a1a;margin:0 0 10px\">${emoji} En esta guía encontrarás:</h2>\n    <ol style=\"margin:0;padding-left:18px\">${tocLinks}</ol>\n  </div>\n\n  <!-- INTRO (editar según el artículo) -->\n  <h2 style=\"font-size:22px;font-weight:700;color:#1a1a1a;margin:36px 0 12px\">¿Por qué es importante este tema?</h2>\n  <p style=\"font-size:16px;color:#444\">[Escribe aquí la introducción de tu página pilar. Mínimo 300 palabras para SEO óptimo.]</p>\n\n  <!-- GRID DE ARTÍCULOS DEL CLUSTER -->\n  <h2 style=\"font-size:22px;font-weight:700;color:#1a1a1a;margin:40px 0 16px\">Artículos completos del cluster</h2>\n  <div style=\"display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin-bottom:40px\">\n    ${articulos.map(a => {\n      const prod = PRODUCTOS[a.producto];\n      return `<a href=\"/p/${a.slug}.html\"\n         style=\"display:block;background:#fff;border:1px solid #e0e0e0;border-radius:10px;overflow:hidden;text-decoration:none;transition:box-shadow .2s\"\n         onmouseover=\"this.style.boxShadow='0 4px 14px rgba(0,0,0,.1)'\" onmouseout=\"this.style.boxShadow='none'\">\n        <img src=\"${prod.imagen}\" alt=\"\" style=\"width:100%;height:120px;object-fit:cover\">\n        <div style=\"padding:12px\">\n          <p style=\"color:${color.text};font-size:11px;font-weight:700;text-transform:uppercase;margin:0 0 4px\">${emoji} ${prod.tipo}</p>\n          <p style=\"color:#1a1a1a;font-weight:700;font-size:14px;margin:0;line-height:1.3\">${a.titulo}</p>\n        </div>\n      </a>`;\n    }).join('')}\n  </div>\n\n  <!-- BANNER FINAL -->\n  ${buildBanner(primerProducto)}\n\n</article>\n<!-- FIN PÁGINA PILAR: ${pillar.slug} -->`;\n\nreturn [{\n  json: {\n    nicho: cluster.nicho,\n    tipo: 'pillar',\n    slug: pillar.slug,\n    titulo: pillar.titulo,\n    html: htmlPillar\n  }\n}];"
+      },
+      "id": "generar-html-pillar",
+      "name": "Generar HTML - Página Pilar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [940, 180]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cluster = $input.item.json;\nconst PRODUCTOS = $('Definir Clusters y Productos').item.json.PRODUCTOS;\nconst { pillar, articulos, color, emoji } = cluster;\n\nreturn articulos.map(articulo => {\n  const prod = PRODUCTOS[articulo.producto];\n\n  const html = `<!-- SNIPPET CLUSTER para: ${articulo.titulo} -->\n\n<!-- Breadcrumb al Pilar -->\n<div style=\"background:${color.bg};border-left:4px solid ${color.text};border-radius:8px;padding:12px 16px;margin:24px 0;font-family:Arial,sans-serif\">\n  <p style=\"margin:0;font-size:13px;color:#666\">Parte de la guía completa:</p>\n  <a href=\"/p/${pillar.slug}.html\" style=\"color:${color.text};font-weight:700;font-size:14px;text-decoration:none\">\n    ${emoji} ${pillar.titulo} →\n  </a>\n</div>\n\n<!-- Banner Hotmart con imagen -->\n<div style=\"background:linear-gradient(${color.grad});border-radius:14px;padding:0;margin:40px 0;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.12);font-family:Arial,sans-serif;max-width:700px\">\n  <div style=\"display:flex;align-items:stretch;flex-wrap:wrap\">\n    <img src=\"${prod.imagen}\" alt=\"${prod.nombre}\" style=\"width:150px;height:auto;object-fit:cover;flex-shrink:0\">\n    <div style=\"flex:1;min-width:180px;padding:20px;display:flex;flex-direction:column;justify-content:center\">\n      <p style=\"color:rgba(255,255,255,.8);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 5px\">${prod.tipo} recomendado ${emoji}</p>\n      <h3 style=\"color:#fff;font-size:17px;font-weight:800;margin:0 0 8px;line-height:1.3\">${prod.nombre}</h3>\n      <p style=\"color:rgba(255,255,255,.85);font-size:13px;margin:0 0 14px\">Aprende paso a paso y domina el tema.</p>\n      <a href=\"${prod.link}\" target=\"_blank\" rel=\"noopener sponsored\"\n         style=\"display:inline-block;background:#fff;color:${color.text};font-weight:800;font-size:13px;padding:10px 20px;border-radius:8px;text-decoration:none;align-self:flex-start\">\n        Ver ahora →\n      </a>\n    </div>\n  </div>\n  <p style=\"color:rgba(255,255,255,.35);font-size:9px;text-align:right;padding:3px 12px;margin:0\">*Enlace de afiliado · Sin costo extra para ti</p>\n</div>\n<!-- FIN SNIPPET -->`;\n\n  return {\n    json: {\n      nicho: cluster.nicho,\n      tipo: 'cluster-snippet',\n      pillarSlug: pillar.slug,\n      slug: articulo.slug,\n      titulo: articulo.titulo,\n      productoId: articulo.producto,\n      html\n    }\n  };\n});"
+      },
+      "id": "generar-html-cluster",
+      "name": "Generar HTML - Artículos Cluster",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [940, 420]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": { "__rl": true, "mode": "id", "value": "TU_GOOGLE_SHEETS_ID" },
+        "sheetName": { "__rl": true, "mode": "name", "value": "HTMLs Generados" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "nicho":      "={{ $json.nicho }}",
+            "tipo":       "={{ $json.tipo }}",
+            "slug":       "={{ $json.slug }}",
+            "titulo":     "={{ $json.titulo }}",
+            "html":       "={{ $json.html }}",
+            "fecha":      "={{ new Date().toISOString() }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "guardar-sheets",
+      "name": "Guardar en Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [1180, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const todos = $input.all();\nconst pilar   = todos.filter(i => i.json.tipo === 'pillar').length;\nconst cluster = todos.filter(i => i.json.tipo === 'cluster-snippet').length;\nconsole.log(`✅ ${pilar} páginas pilar + ${cluster} artículos cluster generados`);\nreturn [{ json: { pillarGenerados: pilar, clusterGenerados: cluster, total: todos.length, timestamp: new Date().toISOString() } }];"
+      },
+      "id": "resumen",
+      "name": "Resumen",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1420, 300]
+    }
+  ],
+  "connections": {
+    "Inicio Manual":                    { "main": [[{ "node": "Definir Clusters y Productos", "type": "main", "index": 0 }]] },
+    "Definir Clusters y Productos":     { "main": [[{ "node": "Split por Cluster", "type": "main", "index": 0 }]] },
+    "Split por Cluster":                { "main": [[{ "node": "Generar HTML - Página Pilar", "type": "main", "index": 0 }], [{ "node": "Generar HTML - Artículos Cluster", "type": "main", "index": 0 }]] },
+    "Generar HTML - Página Pilar":      { "main": [[{ "node": "Guardar en Google Sheets", "type": "main", "index": 0 }]] },
+    "Generar HTML - Artículos Cluster": { "main": [[{ "node": "Guardar en Google Sheets", "type": "main", "index": 0 }]] },
+    "Guardar en Google Sheets":         { "main": [[{ "node": "Resumen", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": ["seo", "cluster", "pillar", "animales", "blogger"]
+}

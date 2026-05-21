@@ -1,0 +1,197 @@
+{
+  "name": "01 - Monetizar Posts Existentes de Blogger con Hotmart",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "start-node",
+      "name": "Inicio Manual",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================\n// CONFIGURACIÓN - REEMPLAZA BLOG IDs\n// ============================================\nconst CONFIG = {\n  // Tu Blog ID (está en blogger.com > Configuración > ID del blog)\n  BLOG_ID_ANIMALES: 'TU_BLOG_ID_ANIMALES',\n  BLOG_ID_LEYES:    'TU_BLOG_ID_LEYES',\n  MAX_POSTS_POR_LOTE: 10,\n\n  // Productos Hotmart - Nicho Animales\n  PRODUCTOS_ANIMALES: [\n    {\n      id: 'dieta-natural',\n      nombre: 'Dieta Natural para Perros y Gatos',\n      link: 'https://go.hotmart.com/X103617747C',\n      imagen: 'https://static-media.hotmart.com/KNdDfZogqE2CWDv4nqEsswzDFjc=/300x300/filters:quality(100)/hotmart/product_pictures/ecbf6914-08bb-4682-aa5b-1990b80b5afb/postinstagrampatitas.png',\n      tipo: 'Guía',\n      keywords: ['dieta','alimentacion','comida','nutricion','natural','comer']\n    },\n    {\n      id: 'snack-barf',\n      nombre: 'Snack BARF en Minutos',\n      link: 'https://go.hotmart.com/R103617833Q',\n      imagen: 'https://static-media.hotmart.com/XusqQYSq_oAB8-EO0Iwr3xVnPMk=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/aaef333c-c030-4c46-a0e7-0c1b780837fe/snackbarf600x600.png?w=920',\n      tipo: 'Recetas',\n      keywords: ['barf','snack','receta','premio','trato']\n    },\n    {\n      id: 'adiestramiento',\n      nombre: 'Adiestramiento Canino Profesional',\n      link: 'https://go.hotmart.com/D104257979A',\n      imagen: 'https://hotmart.s3.amazonaws.com/product_pictures/141a3c3d-a535-40f5-99e1-a275199b7e98/Portadahotmart5.png',\n      tipo: 'Curso',\n      keywords: ['adiestrar','adiestramiento','entrenamiento','conducta','comportamiento','perro','obediencia']\n    },\n    {\n      id: 'entiende-gato',\n      nombre: 'Entiende a tu Gato',\n      link: 'https://go.hotmart.com/F104226854F',\n      imagen: 'https://d1yei2z3i6k35z.cloudfront.net/11998843/683bb259ca94a_CopiadeSint%C3%ADtulo1.png',\n      tipo: 'Guía',\n      keywords: ['gato','felino','gatos','comportamiento gato','miau']\n    },\n    {\n      id: 'mascotas-sanas',\n      nombre: 'Mascotas Sanas',\n      link: 'https://go.hotmart.com/L104257678P?dp=1',\n      imagen: 'https://static-media.hotmart.com/9H3NJb3S4H61OsufTjZpXLy-8KY=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/78592f13-96f1-4724-9b6a-2640aadcf606/MasterSello20211116T162945331.jpg?w=920',\n      tipo: 'Curso',\n      keywords: ['salud','sano','enfermedad','veterinario','mascota']\n    },\n    {\n      id: 'vital-pet',\n      nombre: 'Vital Pet System',\n      link: 'https://go.hotmart.com/W104257847B',\n      imagen: 'https://static-media.hotmart.com/F3PzytJIAVCectZMFSnvMHJFV5g=/filters:background_color(white)/hotmart/product_pictures/a801721c-590d-4a30-ab01-5fe5eb532e8f/PORTADAVITALPET.png',\n      tipo: 'Sistema',\n      keywords: ['cocido','casero','cocina','vital','sistema']\n    }\n  ]\n};\n\nreturn [{ json: CONFIG }];"
+      },
+      "id": "config-node",
+      "name": "Configuración",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.BLOG_ID_ANIMALES }}/posts?maxResults={{ $json.MAX_POSTS_POR_LOTE }}&status=LIVE",
+        "options": {}
+      },
+      "id": "get-posts-animales",
+      "name": "Obtener Posts - Animales",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 180],
+      "credentials": {
+        "oAuth2Api": {
+          "id": "BLOGGER_OAUTH2_CREDENTIAL_ID",
+          "name": "Google Blogger OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $('Configuración').item.json.BLOG_ID_LEYES }}/posts?maxResults={{ $('Configuración').item.json.MAX_POSTS_POR_LOTE }}&status=LIVE",
+        "options": {}
+      },
+      "id": "get-posts-leyes",
+      "name": "Obtener Posts - Leyes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 420],
+      "credentials": {
+        "oAuth2Api": {
+          "id": "BLOGGER_OAUTH2_CREDENTIAL_ID",
+          "name": "Google Blogger OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.item.json;\nconst items = response.items || [];\nconst config = $('Configuración').item.json;\n\nreturn items.map(post => ({\n  json: {\n    postId: post.id,\n    blogId: config.BLOG_ID_ANIMALES,\n    titulo: post.title,\n    contenido: post.content,\n    url: post.url,\n    nicho: 'animales',\n    productos: config.PRODUCTOS_ANIMALES,\n    yaTieneMonetizacion: (post.content || '').includes('go.hotmart.com')\n  }\n}));"
+      },
+      "id": "procesar-posts-animales",
+      "name": "Procesar Posts Animales",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [940, 180]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.item.json;\nconst items = response.items || [];\nconst config = $('Configuración').item.json;\n\nreturn items.map(post => ({\n  json: {\n    postId: post.id,\n    blogId: config.BLOG_ID_LEYES,\n    titulo: post.title,\n    contenido: post.content,\n    url: post.url,\n    nicho: 'leyes',\n    productos: [],\n    yaTieneMonetizacion: (post.content || '').includes('go.hotmart.com')\n  }\n}));"
+      },
+      "id": "procesar-posts-leyes",
+      "name": "Procesar Posts Leyes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [940, 420]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true },
+          "conditions": [{ "id": "c1", "leftValue": "={{ $json.yaTieneMonetizacion }}", "rightValue": false, "operator": { "type": "boolean", "operation": "equal" } }],
+          "combinator": "and"
+        }
+      },
+      "id": "filtrar-sin-monetizacion-animales",
+      "name": "¿Ya monetizado? - Animales",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [1180, 180]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true },
+          "conditions": [{ "id": "c2", "leftValue": "={{ $json.yaTieneMonetizacion }}", "rightValue": false, "operator": { "type": "boolean", "operation": "equal" } }],
+          "combinator": "and"
+        }
+      },
+      "id": "filtrar-sin-monetizacion-leyes",
+      "name": "¿Ya monetizado? - Leyes",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [1180, 420]
+    },
+    {
+      "parameters": {
+        "jsCode": "const post = $input.item.json;\nconst titulo = (post.titulo || '').toLowerCase();\nconst contenido = (post.contenido || '').toLowerCase();\n\n// Seleccionar el producto más relevante por keywords\nlet productoSeleccionado = post.productos[0]; // default: primer producto\nlet mejorScore = 0;\n\nfor (const producto of post.productos) {\n  const score = producto.keywords.filter(kw => titulo.includes(kw) || contenido.includes(kw)).length;\n  if (score > mejorScore) {\n    mejorScore = score;\n    productoSeleccionado = producto;\n  }\n}\n\n// Generar el banner con imagen real del producto\nconst banner = `\n<!-- BANNER MONETIZACIÓN HOTMART -->\n<div style=\"background:#f0faf4;border-radius:14px;padding:0;margin:40px 0;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.12);font-family:Arial,sans-serif;max-width:700px;border:1px solid #c3e6d0\">\n  <div style=\"display:flex;align-items:stretch;flex-wrap:wrap\">\n    <img src=\"${productoSeleccionado.imagen}\" alt=\"${productoSeleccionado.nombre}\" style=\"width:150px;height:auto;object-fit:cover;flex-shrink:0\">\n    <div style=\"flex:1;min-width:180px;padding:20px;display:flex;flex-direction:column;justify-content:center\">\n      <p style=\"color:#1a7a4a;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 5px\">${productoSeleccionado.tipo} recomendado 🐾</p>\n      <h3 style=\"color:#1a1a1a;font-size:17px;font-weight:800;margin:0 0 8px;line-height:1.3\">${productoSeleccionado.nombre}</h3>\n      <p style=\"color:#555;font-size:13px;margin:0 0 14px;line-height:1.5\">Aprende todo lo que necesitas saber paso a paso.</p>\n      <a href=\"${productoSeleccionado.link}\" target=\"_blank\" rel=\"noopener sponsored\"\n         style=\"display:inline-block;background:#1a7a4a;color:#fff;font-weight:800;font-size:13px;padding:10px 20px;border-radius:8px;text-decoration:none;align-self:flex-start\">\n        Ver ahora →\n      </a>\n    </div>\n  </div>\n  <p style=\"color:#aaa;font-size:10px;text-align:right;margin:0;padding:6px 14px\">*Enlace de afiliado</p>\n</div>\n<!-- FIN BANNER -->`;\n\nreturn [{ json: { ...post, contenidoActualizado: post.contenido + banner, productoUsado: productoSeleccionado.nombre } }];"
+      },
+      "id": "agregar-banner-animales",
+      "name": "Seleccionar Producto y Agregar Banner",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1420, 180]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Banner para nicho LEYES - placeholder hasta tener productos de Hotmart de leyes\nconst post = $input.item.json;\n\nconst banner = `\n<!-- BANNER MONETIZACIÓN - LEYES -->\n<div style=\"background:linear-gradient(135deg,#1a2a6c 0%,#2d5fa6 100%);border-radius:12px;padding:24px 28px;margin:32px 0;box-shadow:0 4px 16px rgba(0,0,0,.15);font-family:Arial,sans-serif;max-width:680px\">\n  <div style=\"display:flex;align-items:center;gap:16px;flex-wrap:wrap\">\n    <div style=\"font-size:48px;flex-shrink:0\">⚖️</div>\n    <div style=\"flex:1;min-width:200px\">\n      <p style=\"color:#fff;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 4px;opacity:.85\">Recurso recomendado</p>\n      <h3 style=\"color:#fff;font-size:20px;font-weight:800;margin:0 0 6px;line-height:1.3\">Conoce tus derechos y protégete legalmente</h3>\n      <p style=\"color:rgba(255,255,255,.9);font-size:14px;margin:0;line-height:1.5\">Guía práctica para situaciones legales del día a día.</p>\n    </div>\n    <a href=\"HOTMART_LINK_LEYES_AQUI\" target=\"_blank\" rel=\"noopener sponsored\"\n       style=\"display:inline-block;background:#fff;color:#1a2a6c;font-weight:800;font-size:14px;padding:12px 24px;border-radius:8px;text-decoration:none;white-space:nowrap;flex-shrink:0\">\n      Ver guía →\n    </a>\n  </div>\n</div>\n<!-- FIN BANNER -->`;\n\nreturn [{ json: { ...post, contenidoActualizado: post.contenido + banner } }];"
+      },
+      "id": "agregar-banner-leyes",
+      "name": "Agregar Banner - Leyes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1420, 420]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "method": "PATCH",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.blogId }}/posts/{{ $json.postId }}",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ JSON.stringify({ content: $json.contenidoActualizado }) }}",
+        "options": {}
+      },
+      "id": "actualizar-post-animales",
+      "name": "Actualizar en Blogger - Animales",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1660, 180],
+      "credentials": {
+        "oAuth2Api": {
+          "id": "BLOGGER_OAUTH2_CREDENTIAL_ID",
+          "name": "Google Blogger OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "method": "PATCH",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.blogId }}/posts/{{ $json.postId }}",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ JSON.stringify({ content: $json.contenidoActualizado }) }}",
+        "options": {}
+      },
+      "id": "actualizar-post-leyes",
+      "name": "Actualizar en Blogger - Leyes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1660, 420],
+      "credentials": {
+        "oAuth2Api": {
+          "id": "BLOGGER_OAUTH2_CREDENTIAL_ID",
+          "name": "Google Blogger OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const animales = $('Actualizar en Blogger - Animales').all();\nconst leyes    = $('Actualizar en Blogger - Leyes').all();\nconsole.log(`✅ ${animales.length + leyes.length} posts monetizados`);\nreturn [{ json: {\n  timestamp: new Date().toISOString(),\n  total: animales.length + leyes.length,\n  animales: animales.length,\n  leyes: leyes.length\n}}];"
+      },
+      "id": "resumen-final",
+      "name": "Resumen Final",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1900, 300]
+    }
+  ],
+  "connections": {
+    "Inicio Manual":               { "main": [[{ "node": "Configuración", "type": "main", "index": 0 }]] },
+    "Configuración":               { "main": [[{ "node": "Obtener Posts - Animales", "type": "main", "index": 0 }], [{ "node": "Obtener Posts - Leyes", "type": "main", "index": 0 }]] },
+    "Obtener Posts - Animales":    { "main": [[{ "node": "Procesar Posts Animales", "type": "main", "index": 0 }]] },
+    "Obtener Posts - Leyes":       { "main": [[{ "node": "Procesar Posts Leyes", "type": "main", "index": 0 }]] },
+    "Procesar Posts Animales":     { "main": [[{ "node": "¿Ya monetizado? - Animales", "type": "main", "index": 0 }]] },
+    "Procesar Posts Leyes":        { "main": [[{ "node": "¿Ya monetizado? - Leyes", "type": "main", "index": 0 }]] },
+    "¿Ya monetizado? - Animales":  { "main": [[{ "node": "Seleccionar Producto y Agregar Banner", "type": "main", "index": 0 }]] },
+    "¿Ya monetizado? - Leyes":     { "main": [[{ "node": "Agregar Banner - Leyes", "type": "main", "index": 0 }]] },
+    "Seleccionar Producto y Agregar Banner": { "main": [[{ "node": "Actualizar en Blogger - Animales", "type": "main", "index": 0 }]] },
+    "Agregar Banner - Leyes":      { "main": [[{ "node": "Actualizar en Blogger - Leyes", "type": "main", "index": 0 }]] },
+    "Actualizar en Blogger - Animales": { "main": [[{ "node": "Resumen Final", "type": "main", "index": 0 }]] },
+    "Actualizar en Blogger - Leyes":    { "main": [[{ "node": "Resumen Final", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": ["blogger", "hotmart", "monetizacion", "animales"]
+}
