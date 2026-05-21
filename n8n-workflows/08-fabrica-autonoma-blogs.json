@@ -1,0 +1,263 @@
+{
+  "name": "🏭 08 - Fábrica Autónoma de Blogs (DeepSeek + Blogger)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "weeks", "triggerAtDay": [1], "triggerAtHour": 8 }]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Ejecutar cada Lunes 8am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n// CONFIGURACIÓN DE LA FÁBRICA AUTÓNOMA\n// Blogs activos con cuota de artículos por semana\n// ============================================================\n\nconst BLOGS_ACTIVOS = [\n  // === ANIMALES (Hotmart) ===\n  { id: '6910813708926842116', nombre: 'Alimentación para perros',  nicho: 'animales', articulos_semana: 3, productos: ['dieta-natural','snack-barf','vital-pet'] },\n  { id: '6617865557052467517', nombre: 'Alimentación para gatos',   nicho: 'animales', articulos_semana: 2, productos: ['entiende-gato','dieta-natural','mascotas-sanas'] },\n  { id: '7132652999311318625', nombre: 'Bulldogs Vet',              nicho: 'animales', articulos_semana: 2, productos: ['adiestramiento','mascotas-sanas'] },\n  { id: '7273203559821314231', nombre: 'Pastor alemán',             nicho: 'animales', articulos_semana: 2, productos: ['adiestramiento','mascotas-sanas'] },\n  { id: '7970072706943429023', nombre: 'Razas de perro',            nicho: 'animales', articulos_semana: 2, productos: ['adiestramiento','mascotas-sanas','dieta-natural'] },\n  { id: '2171262240069038424', nombre: 'Hurones',                   nicho: 'animales', articulos_semana: 1, productos: ['mascotas-sanas'] },\n  { id: '6959662622118866680', nombre: 'Vet bovinos',               nicho: 'animales', articulos_semana: 1, productos: ['mascotas-sanas'] },\n  // === LEYES (AdSense + Leads) ===\n  { id: '4185821469969358370', nombre: 'Abogados bienes raíces USA',    nicho: 'leyes', articulos_semana: 2, productos: [] },\n  { id: '6030388327366455376', nombre: 'Abogados accidente Orlando',    nicho: 'leyes', articulos_semana: 2, productos: [] },\n  { id: '3503300865393838043', nombre: 'Abogados familia USA',          nicho: 'leyes', articulos_semana: 2, productos: [] },\n  { id: '3388695765945711848', nombre: 'Litigios USA',                  nicho: 'leyes', articulos_semana: 1, productos: [] }\n];\n\nconst PRODUCTOS_HOTMART = {\n  'dieta-natural':   { nombre: 'Dieta Natural para Perros y Gatos',   link: 'https://go.hotmart.com/X103617747C',      imagen: 'https://static-media.hotmart.com/KNdDfZogqE2CWDv4nqEsswzDFjc=/300x300/filters:quality(100)/hotmart/product_pictures/ecbf6914-08bb-4682-aa5b-1990b80b5afb/postinstagrampatitas.png',  tipo: 'Guía',       color: { grad: '135deg,#1a7a4a,#2ecc71', text: '#1a7a4a', bg: '#eafaf1' } },\n  'snack-barf':      { nombre: 'Snack BARF en Minutos',               link: 'https://go.hotmart.com/R103617833Q',      imagen: 'https://static-media.hotmart.com/XusqQYSq_oAB8-EO0Iwr3xVnPMk=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/aaef333c-c030-4c46-a0e7-0c1b780837fe/snackbarf600x600.png?w=920', tipo: 'Recetas',    color: { grad: '135deg,#1a7a4a,#27ae60', text: '#1a7a4a', bg: '#eafaf1' } },\n  'adiestramiento':  { nombre: 'Adiestramiento Canino Profesional',   link: 'https://go.hotmart.com/D104257979A',      imagen: 'https://hotmart.s3.amazonaws.com/product_pictures/141a3c3d-a535-40f5-99e1-a275199b7e98/Portadahotmart5.png',                                                                                                             tipo: 'Curso',      color: { grad: '135deg,#1a5276,#2980b9', text: '#1a5276', bg: '#eaf4fb' } },\n  'entiende-gato':   { nombre: 'Entiende a tu Gato: Guía Práctica',  link: 'https://go.hotmart.com/F104226854F',      imagen: 'https://d1yei2z3i6k35z.cloudfront.net/11998843/683bb259ca94a_CopiadeSint%C3%ADtulo1.png',                                                                                                                          tipo: 'Guía',       color: { grad: '135deg,#6c3483,#a569bd', text: '#6c3483', bg: '#f9f0ff' } },\n  'mascotas-sanas':  { nombre: 'Mascotas Sanas',                      link: 'https://go.hotmart.com/L104257678P?dp=1', imagen: 'https://static-media.hotmart.com/9H3NJb3S4H61OsufTjZpXLy-8KY=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/78592f13-96f1-4724-9b6a-2640aadcf606/MasterSello20211116T162945331.jpg?w=920', tipo: 'Curso',      color: { grad: '135deg,#1a5276,#2980b9', text: '#1a5276', bg: '#eaf4fb' } },\n  'vital-pet':       { nombre: 'Vital Pet System',                    link: 'https://go.hotmart.com/W104257847B',      imagen: 'https://static-media.hotmart.com/F3PzytJIAVCectZMFSnvMHJFV5g=/filters:background_color(white)/hotmart/product_pictures/a801721c-590d-4a30-ab01-5fe5eb532e8f/PORTADAVITALPET.png',                                                      tipo: 'Sistema',    color: { grad: '135deg,#1a7a4a,#27ae60', text: '#1a7a4a', bg: '#eafaf1' } },\n  'calculadora':     { nombre: 'Calculadora de Alimentación Cocida',  link: 'https://go.hotmart.com/B104226750N',      imagen: 'https://static-media.hotmart.com/Gt9GpGBSzCdG8hfSbvKgGuXEhFY=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/5f151330-675e-4498-8764-1fba21c4b505/Calculadoradealimentacioncocidaparaperrosygatos.png?w=920', tipo: 'Herramienta', color: { grad: '135deg,#1a7a4a,#27ae60', text: '#1a7a4a', bg: '#eafaf1' } }\n};\n\nconst ADSENSE_PUBLISHER_ID = 'ca-pub-1913674678143092';\n\nreturn BLOGS_ACTIVOS.map(blog => ({\n  json: { blog, PRODUCTOS_HOTMART, ADSENSE_PUBLISHER_ID }\n}));"
+      },
+      "id": "config-fabrica",
+      "name": "Configuración Fábrica",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'system', content: 'Eres un experto en SEO y marketing de contenidos. Generas ideas de artículos optimizados para Google en español. Respondes SIEMPRE en JSON válido, sin texto adicional.' }, { role: 'user', content: 'Blog: \"' + $json.blog.nombre + '\". Nicho: ' + $json.blog.nicho + '. Genera exactamente ' + $json.blog.articulos_semana + ' ideas de artículos SEO para publicar esta semana. Criterios: keywords de cola larga, intención informacional, fácil de posicionar, relevante para hispanohablantes. Responde SOLO con este JSON (sin markdown): {\"articulos\":[{\"titulo\":\"...\",\"keyword_principal\":\"...\",\"intencion\":\"informacional\",\"palabras\":900,\"prompt_contenido\":\"Escribe un artículo SEO completo en HTML...\"}]}' }], max_tokens: 2000, temperature: 0.8 }) }}",
+        "options": {}
+      },
+      "id": "generar-ideas-deepseek",
+      "name": "DeepSeek: Generar Ideas de Artículos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "DEEPSEEK_CREDENTIAL_ID",
+          "name": "DeepSeek API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.item.json;\nconst config = $('Configuración Fábrica').item.json;\nconst { blog, PRODUCTOS_HOTMART } = config;\n\n// Parsear respuesta de DeepSeek\nlet rawContent = response.choices?.[0]?.message?.content || '{\"articulos\":[]}';\n// Limpiar markdown si DeepSeek lo incluye\nrawContent = rawContent.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n\nlet ideas;\ntry {\n  ideas = JSON.parse(rawContent);\n} catch (e) {\n  // Si el JSON está malformado, extraer con regex\n  const match = rawContent.match(/\\{.*\\}/s);\n  ideas = match ? JSON.parse(match[0]) : { articulos: [] };\n}\n\nconst articulos = ideas.articulos || [];\n\n// Seleccionar mejor producto para cada artículo (animales)\nconst KEYWORDS_PRODUCTO = {\n  'dieta-natural':   ['dieta','alimentacion','comida','nutricion','natural','comer'],\n  'snack-barf':      ['barf','snack','receta','premio','trato','crudo'],\n  'adiestramiento':  ['adiestrar','adiestramiento','entrenamiento','conducta','obediencia','comando','ladrar','morder'],\n  'entiende-gato':   ['gato','felino','comportamiento','maullar','ronronear','felinos'],\n  'mascotas-sanas':  ['salud','sano','enfermedad','veterinario','vacuna','cuidado'],\n  'vital-pet':       ['cocido','casero','natural','sistema','preparar'],\n  'calculadora':     ['calculadora','porcion','cantidad','medida','cuanto']\n};\n\nreturn articulos.map(art => {\n  let mejorProducto = blog.productos[0] || null;\n  let mejorScore = 0;\n\n  if (blog.nicho === 'animales' && blog.productos.length > 0) {\n    const tituloLower = art.titulo.toLowerCase();\n    for (const prodId of blog.productos) {\n      const kws = KEYWORDS_PRODUCTO[prodId] || [];\n      const score = kws.filter(kw => tituloLower.includes(kw)).length;\n      if (score > mejorScore) { mejorScore = score; mejorProducto = prodId; }\n    }\n  }\n\n  return {\n    json: {\n      blog,\n      articulo: art,\n      productoId: mejorProducto,\n      PRODUCTOS_HOTMART,\n      ADSENSE_PUBLISHER_ID: config.ADSENSE_PUBLISHER_ID\n    }\n  };\n});"
+      },
+      "id": "parsear-ideas",
+      "name": "Parsear Ideas y Asignar Producto",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [940, 400]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'system', content: 'Eres un experto en SEO y redacción de contenido en español (Latinoamérica). Escribes artículos completos, informativos y optimizados para Google. Usas HTML inline con estilos modernos. NO uses markdown, solo HTML puro listo para Blogger. Incluye H2, H3, párrafos bien estructurados, listas y tablas cuando sea útil.' }, { role: 'user', content: $json.articulo.prompt_contenido + ' Título exacto: \"' + $json.articulo.titulo + '\". Longitud: ' + ($json.articulo.palabras || 900) + ' palabras. Devuelve SOLO el HTML del cuerpo del artículo (sin <html>, <head>, <body>), con CSS inline.' }], max_tokens: 4000, temperature: 0.7 }) }}",
+        "options": {}
+      },
+      "id": "generar-contenido-deepseek",
+      "name": "DeepSeek: Generar Contenido del Artículo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1180, 400],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "DEEPSEEK_CREDENTIAL_ID",
+          "name": "DeepSeek API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.item.json;\nconst { blog, articulo, productoId, PRODUCTOS_HOTMART, ADSENSE_PUBLISHER_ID } = $('Parsear Ideas y Asignar Producto').item.json;\n\nconst contenidoIA = response.choices?.[0]?.message?.content || '';\n\n// -------------------------------------------------------\n// Insertar AdSense a mitad del contenido\n// -------------------------------------------------------\nconst adsenseMid = `\n<!-- ADSENSE MID-ARTICLE -->\n<div style=\"margin:32px 0;text-align:center\">\n  <ins class=\"adsbygoogle\"\n       style=\"display:block\"\n       data-ad-client=\"${ADSENSE_PUBLISHER_ID}\"\n       data-ad-slot=\"SLOT_MID_ARTICLE\"\n       data-ad-format=\"auto\"\n       data-full-width-responsive=\"true\"></ins>\n  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>\n</div>`;\n\nconst mitad = Math.floor(contenidoIA.length / 2);\nconst corte = contenidoIA.indexOf('</p>', mitad);\nconst punto = corte > 0 ? corte + 4 : mitad;\nconst contenidoConAds = contenidoIA.slice(0, punto) + adsenseMid + contenidoIA.slice(punto);\n\n// -------------------------------------------------------\n// Banner de monetización según nicho\n// -------------------------------------------------------\nlet bannerFinal = '';\n\nif (blog.nicho === 'animales' && productoId && PRODUCTOS_HOTMART[productoId]) {\n  const prod = PRODUCTOS_HOTMART[productoId];\n  const c = prod.color;\n  bannerFinal = `\n<!-- HOTMART BANNER -->\n<div style=\"background:linear-gradient(${c.grad});border-radius:14px;padding:0;margin:40px 0;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.12);font-family:Arial,sans-serif;max-width:700px\">\n  <div style=\"display:flex;align-items:stretch;flex-wrap:wrap\">\n    <img src=\"${prod.imagen}\" alt=\"${prod.nombre}\" style=\"width:150px;height:auto;object-fit:cover;flex-shrink:0\">\n    <div style=\"flex:1;min-width:180px;padding:20px;display:flex;flex-direction:column;justify-content:center\">\n      <p style=\"color:rgba(255,255,255,.8);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 5px\">${prod.tipo} recomendado</p>\n      <h3 style=\"color:#fff;font-size:17px;font-weight:800;margin:0 0 8px;line-height:1.3\">${prod.nombre}</h3>\n      <a href=\"${prod.link}\" target=\"_blank\" rel=\"noopener sponsored\" style=\"display:inline-block;background:#fff;color:${c.text};font-weight:800;font-size:13px;padding:10px 20px;border-radius:8px;text-decoration:none;align-self:flex-start\">Ver ahora →</a>\n    </div>\n  </div>\n  <p style=\"color:rgba(255,255,255,.3);font-size:9px;text-align:right;padding:3px 12px;margin:0\">*Enlace de afiliado</p>\n</div>`;\n} else if (blog.nicho === 'leyes') {\n  bannerFinal = `\n<!-- LEAD WIDGET LEYES -->\n<div style=\"background:#f0f3f4;border:2px solid #2c3e50;border-radius:14px;padding:28px;margin:40px 0 0;font-family:Arial,sans-serif;max-width:700px\">\n  <h3 style=\"color:#2c3e50;font-size:20px;font-weight:800;margin:0 0 8px\">¿Necesitas Asesoría Legal Gratuita? ⚖️</h3>\n  <p style=\"color:#444;font-size:14px;margin:0 0 16px;line-height:1.6\">Nuestros abogados especializados te orientan sin costo. <strong>Primera consulta gratuita y confidencial.</strong></p>\n  <div style=\"display:flex;gap:10px;flex-wrap:wrap\">\n    <a href=\"tel:+18000000000\" style=\"flex:1;min-width:160px;display:inline-block;background:#2c3e50;color:#fff;font-weight:800;font-size:14px;padding:13px 20px;border-radius:8px;text-decoration:none;text-align:center\">📞 Llamar Gratis</a>\n    <a href=\"https://wa.me/18000000000\" target=\"_blank\" rel=\"noopener\" style=\"flex:1;min-width:160px;display:inline-block;background:#25d366;color:#fff;font-weight:800;font-size:14px;padding:13px 20px;border-radius:8px;text-decoration:none;text-align:center\">💬 WhatsApp</a>\n  </div>\n  <p style=\"color:#aaa;font-size:11px;margin:12px 0 0\">Confidencial · Sin compromiso · Respuesta en 24h</p>\n</div>`;\n}\n\n// AdSense bottom\nconst adsenseBottom = `\n<div style=\"margin:32px 0;text-align:center\">\n  <ins class=\"adsbygoogle\"\n       style=\"display:block\"\n       data-ad-client=\"${ADSENSE_PUBLISHER_ID}\"\n       data-ad-slot=\"SLOT_BOTTOM_ARTICLE\"\n       data-ad-format=\"auto\"\n       data-full-width-responsive=\"true\"></ins>\n  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>\n</div>`;\n\nconst htmlFinal = contenidoConAds + bannerFinal + adsenseBottom;\n\nreturn [{\n  json: {\n    blogId: blog.id,\n    blogNombre: blog.nombre,\n    blogNicho: blog.nicho,\n    titulo: articulo.titulo,\n    keyword: articulo.keyword_principal,\n    productoUsado: productoId,\n    labels: [blog.nicho, articulo.keyword_principal?.replace(/\\s+/g,'-').toLowerCase()].filter(Boolean),\n    contenido: htmlFinal\n  }\n}];"
+      },
+      "id": "ensamblar-articulo",
+      "name": "Ensamblar con Monetización",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1420, 400]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "method": "POST",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.blogId }}/posts",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ JSON.stringify({ title: $json.titulo, content: $json.contenido, labels: $json.labels, isDraft: false }) }}",
+        "options": {}
+      },
+      "id": "publicar-blogger",
+      "name": "Publicar en Blogger",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1660, 400],
+      "credentials": {
+        "oAuth2Api": {
+          "id": "BLOGGER_OAUTH2_CREDENTIAL_ID",
+          "name": "Google Blogger OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 3,
+        "unit": "seconds"
+      },
+      "id": "wait-rate",
+      "name": "Esperar (rate limit)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1900, 400]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": { "__rl": true, "mode": "id", "value": "14NYqDn77J9nsTjD8ZsvxzDe1lggNwmC6kUZcE3LNbJI" },
+        "sheetName":  { "__rl": true, "mode": "name", "value": "Fabrica Log" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha":       "={{ new Date().toISOString() }}",
+            "blog":        "={{ $('Ensamblar con Monetización').item.json.blogNombre }}",
+            "nicho":       "={{ $('Ensamblar con Monetización').item.json.blogNicho }}",
+            "titulo":      "={{ $('Ensamblar con Monetización').item.json.titulo }}",
+            "keyword":     "={{ $('Ensamblar con Monetización').item.json.keyword }}",
+            "producto":    "={{ $('Ensamblar con Monetización').item.json.productoUsado }}",
+            "post_url":    "={{ $json.url }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "log-fabrica",
+      "name": "Registrar en Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [2140, 400],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ JSON.stringify({ model: 'deepseek-chat', messages: [{ role: 'system', content: 'Eres un analista de mercado digital experto en nichos SEO hispanohablantes. Respondes siempre en JSON válido.' }, { role: 'user', content: 'Analiza el mercado de blogs en español y recomienda 10 nichos con alto potencial de monetización rápida para 2025. Criterios: (1) baja competencia en Google, (2) alta intención comercial o informacional con CPC elevado, (3) audencia hispanohablante creciente, (4) monetizable con infoproductos Hotmart (animales/salud) O con AdSense+leads (legal/servicios). Responde SOLO con este JSON: {\"nichos\":[{\"nombre\":\"...\",\"tipo\":\"animales|leyes|salud|servicios\",\"cpc_estimado_usd\":0.0,\"competencia\":\"baja|media\",\"monetizacion\":\"hotmart|adsense|leads|mixta\",\"razon\":\"...\",\"articulos_ideas\":[\"...\",\"...\",\"...\"]}]}' }], max_tokens: 3000, temperature: 0.9 }) }}",
+        "options": {}
+      },
+      "id": "analizar-mercado",
+      "name": "DeepSeek: Analizar Mercado y Nichos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 700],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "DEEPSEEK_CREDENTIAL_ID",
+          "name": "DeepSeek API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.item.json;\nlet rawContent = response.choices?.[0]?.message?.content || '{\"nichos\":[]}';\nrawContent = rawContent.replace(/```json\\n?/g, '').replace(/```\\n?/g, '').trim();\n\nlet data;\ntry { data = JSON.parse(rawContent); } catch(e) {\n  const match = rawContent.match(/\\{.*\\}/s);\n  data = match ? JSON.parse(match[0]) : { nichos: [] };\n}\n\nreturn [{ json: { nichos: data.nichos || [], generadoEn: new Date().toISOString() } }];"
+      },
+      "id": "parsear-nichos",
+      "name": "Parsear Análisis de Nichos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [940, 700]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": { "__rl": true, "mode": "id", "value": "14NYqDn77J9nsTjD8ZsvxzDe1lggNwmC6kUZcE3LNbJI" },
+        "sheetName":  { "__rl": true, "mode": "name", "value": "Nichos Recomendados" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha":          "={{ new Date().toISOString() }}",
+            "nichos_json":    "={{ JSON.stringify($json.nichos) }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "guardar-nichos",
+      "name": "Guardar Nichos en Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [1180, 700],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "GOOGLE_SHEETS_CREDENTIAL_ID",
+          "name": "Google Sheets OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Consolidar resultados de la semana\nconst nichos = $('Parsear Análisis de Nichos').item.json.nichos || [];\n\nconst topNichos = nichos.slice(0, 5).map((n, i) =>\n  `${i+1}. <b>${n.nombre}</b> (${n.tipo}) — CPC ~$${n.cpc_estimado_usd} | Competencia: ${n.competencia} | ${n.razon}`\n).join('<br>');\n\nconst articulosIdeas = nichos.slice(0, 3).flatMap(n =>\n  (n.articulos_ideas || []).slice(0,2).map(idea => `• ${n.nombre}: ${idea}`)\n).join('<br>');\n\nreturn [{\n  json: {\n    to: 'kromasoldeluis@gmail.com',\n    subject: `🏭 Fábrica de Blogs — Resumen Semanal ${new Date().toLocaleDateString('es-MX')}`,\n    htmlBody: `\n<h2>🏭 Fábrica Autónoma de Blogs — Reporte Semanal</h2>\n<p>Se han generado y publicado artículos automáticamente en todos los blogs activos esta semana.</p>\n\n<h3>🔍 Top 5 Nichos Recomendados para Nuevos Blogs</h3>\n<p>${topNichos}</p>\n\n<h3>💡 Ideas de Artículos para Nichos Nuevos</h3>\n<p>${articulosIdeas}</p>\n\n<h3>✅ Próximos Pasos</h3>\n<ul>\n  <li>Revisa la pestaña <b>\"Nichos Recomendados\"</b> en Google Sheets para el análisis completo</li>\n  <li>Revisa <b>\"Fabrica Log\"</b> para ver todos los artículos publicados esta semana</li>\n  <li>Considera crear nuevos blogs en Blogger para los nichos con mayor potencial</li>\n</ul>\n\n<p style=\"color:#aaa;font-size:12px\">Generado automáticamente por n8n + DeepSeek AI · ${new Date().toISOString()}</p>\n`\n  }\n}];"
+      },
+      "id": "preparar-reporte",
+      "name": "Preparar Reporte Semanal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1420, 700]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "html",
+        "message": "={{ $json.htmlBody }}",
+        "options": {}
+      },
+      "id": "enviar-reporte",
+      "name": "Enviar Reporte por Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [1660, 700],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "GMAIL_CREDENTIAL_ID",
+          "name": "Gmail OAuth2"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Ejecutar cada Lunes 8am":                  { "main": [[{ "node": "Configuración Fábrica",                     "type": "main", "index": 0 }]] },
+    "Configuración Fábrica":                    { "main": [[{ "node": "DeepSeek: Generar Ideas de Artículos",      "type": "main", "index": 0 }, { "node": "DeepSeek: Analizar Mercado y Nichos", "type": "main", "index": 0 }]] },
+    "DeepSeek: Generar Ideas de Artículos":     { "main": [[{ "node": "Parsear Ideas y Asignar Producto",          "type": "main", "index": 0 }]] },
+    "Parsear Ideas y Asignar Producto":         { "main": [[{ "node": "DeepSeek: Generar Contenido del Artículo", "type": "main", "index": 0 }]] },
+    "DeepSeek: Generar Contenido del Artículo": { "main": [[{ "node": "Ensamblar con Monetización",               "type": "main", "index": 0 }]] },
+    "Ensamblar con Monetización":               { "main": [[{ "node": "Publicar en Blogger",                      "type": "main", "index": 0 }]] },
+    "Publicar en Blogger":                      { "main": [[{ "node": "Esperar (rate limit)",                     "type": "main", "index": 0 }]] },
+    "Esperar (rate limit)":                     { "main": [[{ "node": "Registrar en Google Sheets",               "type": "main", "index": 0 }]] },
+    "DeepSeek: Analizar Mercado y Nichos":      { "main": [[{ "node": "Parsear Análisis de Nichos",               "type": "main", "index": 0 }]] },
+    "Parsear Análisis de Nichos":               { "main": [[{ "node": "Guardar Nichos en Sheets",                 "type": "main", "index": 0 }]] },
+    "Guardar Nichos en Sheets":                 { "main": [[{ "node": "Preparar Reporte Semanal",                 "type": "main", "index": 0 }]] },
+    "Preparar Reporte Semanal":                 { "main": [[{ "node": "Enviar Reporte por Email",                 "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": ["fabrica", "autonomo", "deepseek", "blogger", "seo", "nichos", "hotmart", "adsense"],
+  "triggerCount": 0
+}
