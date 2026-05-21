@@ -1,0 +1,108 @@
+{
+  "name": "07 - Blogs de Leyes: Inyectar Leads + AdSense",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "start",
+      "name": "Inicio Manual",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n// BLOGS DE LEYES/ABOGADOS (IDs reales del Google Sheet)\n// Estrategia: Lead capture widget + AdSense optimization\n// ============================================================\n\nconst BLOGS_LEYES = [\n  {\n    id: '4185821469969358370',\n    nombre: 'Abogados bienes raíces USA',\n    nicho: 'real-estate',\n    cta_texto: 'Free Consultation',\n    cta_subtitulo: 'Real Estate Attorney',\n    telefono: '+1 (800) 000-0000',\n    color: { grad: '135deg,#1a2a6c,#2d5fa6', text: '#1a2a6c', bg: '#eaf0fb' }\n  },\n  {\n    id: '6030388327366455376',\n    nombre: 'Abogados de accidente Orlando',\n    nicho: 'accidente-orlando',\n    cta_texto: 'Free Consultation',\n    cta_subtitulo: 'Car Accident Attorney · Orlando, FL',\n    telefono: '+1 (407) 000-0000',\n    color: { grad: '135deg,#7d0000,#c0392b', text: '#7d0000', bg: '#fdf0f0' }\n  },\n  {\n    id: '3503300865393838043',\n    nombre: 'Abogados de familia USA',\n    nicho: 'familia',\n    cta_texto: 'Consulta Gratis',\n    cta_subtitulo: 'Abogado de Familia',\n    telefono: '+1 (800) 000-0000',\n    color: { grad: '135deg,#1a6c3c,#27ae60', text: '#1a6c3c', bg: '#eafaf1' }\n  },\n  {\n    id: '3388695765945711848',\n    nombre: 'Litigios USA',\n    nicho: 'litigios',\n    cta_texto: 'Free Case Review',\n    cta_subtitulo: 'Litigation Attorney',\n    telefono: '+1 (800) 000-0000',\n    color: { grad: '135deg,#2c3e50,#34495e', text: '#2c3e50', bg: '#f0f3f4' }\n  }\n];\n\nconst MAX_POSTS = 10;\nreturn BLOGS_LEYES.map(blog => ({ json: { blog, MAX_POSTS } }));"
+      },
+      "id": "config-leyes",
+      "name": "Config Blogs de Leyes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.blog.id }}/posts?maxResults={{ $json.MAX_POSTS }}&status=LIVE",
+        "options": {}
+      },
+      "id": "get-posts-leyes",
+      "name": "Obtener Posts del Blog de Leyes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 400],
+      "credentials": { "oAuth2Api": { "id": "BLOGGER_OAUTH2_CREDENTIAL_ID", "name": "Google Blogger OAuth2" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.item.json;\nconst blog = $('Config Blogs de Leyes').item.json.blog;\n\n// Solo procesar posts que NO tengan ya el widget de leads\nconst posts = (response.items || []).filter(p =>\n  !(p.content||'').includes('LEAD-WIDGET') &&\n  !(p.content||'').includes('ADSENSE-SLOT')\n);\n\nreturn posts.map(post => {\n  const contenido = post.content || '';\n  const c = blog.color;\n\n  // -------------------------------------------------------\n  // 1. WIDGET DE LEAD CAPTURE (arriba del contenido)\n  // -------------------------------------------------------\n  const leadWidget = `\n<!-- LEAD-WIDGET: ${blog.nicho} -->\n<div style=\"background:linear-gradient(${c.grad});border-radius:14px;padding:24px 28px;margin:0 0 32px;font-family:Arial,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.15);max-width:700px\">\n  <div style=\"display:flex;align-items:center;gap:16px;flex-wrap:wrap\">\n    <div style=\"font-size:44px;flex-shrink:0\">⚖️</div>\n    <div style=\"flex:1;min-width:200px\">\n      <p style=\"color:rgba(255,255,255,.8);font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 4px\">Habla con un experto</p>\n      <h3 style=\"color:#fff;font-size:19px;font-weight:800;margin:0 0 6px;line-height:1.3\">${blog.cta_subtitulo}</h3>\n      <p style=\"color:rgba(255,255,255,.85);font-size:13px;margin:0\">Consulta confidencial sin costo. Respuesta en 24 horas.</p>\n    </div>\n    <div style=\"display:flex;flex-direction:column;gap:8px;flex-shrink:0\">\n      <a href=\"tel:${blog.telefono.replace(/[^+\\d]/g,'')}\" style=\"display:inline-block;background:#fff;color:${c.text};font-weight:800;font-size:14px;padding:11px 22px;border-radius:8px;text-decoration:none;text-align:center\">\n        📞 Llamar ahora\n      </a>\n      <a href=\"https://wa.me/${blog.telefono.replace(/[^\\d]/g,'')}?text=Hola%2C%20necesito%20una%20consulta\" target=\"_blank\" rel=\"noopener\"\n         style=\"display:inline-block;background:#25d366;color:#fff;font-weight:800;font-size:13px;padding:10px 22px;border-radius:8px;text-decoration:none;text-align:center\">\n        💬 WhatsApp\n      </a>\n    </div>\n  </div>\n</div>\n<!-- FIN LEAD-WIDGET -->`;\n\n  // -------------------------------------------------------\n  // 2. ADSENSE SLOT PLACEHOLDER (medio del artículo)\n  // Reemplaza data-ad-slot con tu slot real de AdSense\n  // -------------------------------------------------------\n  const adsenseMid = `\n<!-- ADSENSE-SLOT: mid-article -->\n<div style=\"margin:32px 0;text-align:center\">\n  <ins class=\"adsbygoogle\"\n       style=\"display:block\"\n       data-ad-client=\"ca-pub-TUCODIGO_ADSENSE\"\n       data-ad-slot=\"SLOT_MID_ARTICLE\"\n       data-ad-format=\"auto\"\n       data-full-width-responsive=\"true\"></ins>\n  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>\n</div>\n<!-- FIN ADSENSE-SLOT -->`;\n\n  // -------------------------------------------------------\n  // 3. LEAD CAPTURE FINAL (al pie del artículo)\n  // -------------------------------------------------------\n  const leadBottom = `\n<!-- LEAD-WIDGET-BOTTOM: ${blog.nicho} -->\n<div style=\"background:${c.bg};border:2px solid ${c.text};border-radius:14px;padding:28px;margin:40px 0 0;font-family:Arial,sans-serif;max-width:700px\">\n  <h3 style=\"color:${c.text};font-size:20px;font-weight:800;margin:0 0 8px\">¿Necesitas asesoría legal? 📋</h3>\n  <p style=\"color:#444;font-size:14px;margin:0 0 16px;line-height:1.6\">Completa el formulario y un abogado especializado se pondrá en contacto contigo en menos de 24 horas. <strong>Primera consulta sin costo.</strong></p>\n  <div style=\"display:flex;gap:10px;flex-wrap:wrap\">\n    <a href=\"tel:${blog.telefono.replace(/[^+\\d]/g,'')}\" style=\"flex:1;min-width:160px;display:inline-block;background:${c.text};color:#fff;font-weight:800;font-size:14px;padding:13px 20px;border-radius:8px;text-decoration:none;text-align:center\">📞 ${blog.cta_texto}</a>\n    <a href=\"https://wa.me/${blog.telefono.replace(/[^\\d]/g,'')}\" target=\"_blank\" rel=\"noopener\" style=\"flex:1;min-width:160px;display:inline-block;background:#25d366;color:#fff;font-weight:800;font-size:14px;padding:13px 20px;border-radius:8px;text-decoration:none;text-align:center\">💬 WhatsApp</a>\n  </div>\n  <p style=\"color:#aaa;font-size:11px;margin:12px 0 0\">Confidencial · Sin compromiso · Respuesta en 24h</p>\n</div>\n<!-- FIN LEAD-WIDGET-BOTTOM -->`;\n\n  // Insertar AdSense a mitad del contenido\n  const mitad = Math.floor(contenido.length / 2);\n  const corte = contenido.indexOf('</p>', mitad);\n  const punto = corte > 0 ? corte + 4 : mitad;\n  const contenidoConAds = contenido.slice(0, punto) + adsenseMid + contenido.slice(punto);\n\n  return {\n    json: {\n      blogId: blog.id,\n      blogNombre: blog.nombre,\n      postId: post.id,\n      titulo: post.title,\n      contenidoActualizado: leadWidget + contenidoConAds + leadBottom\n    }\n  };\n});"
+      },
+      "id": "inyectar-leads-adsense",
+      "name": "Inyectar Lead Widget + AdSense",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [940, 400]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "method": "PATCH",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.blogId }}/posts/{{ $json.postId }}",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ JSON.stringify({ content: $json.contenidoActualizado }) }}",
+        "options": {}
+      },
+      "id": "actualizar-blogger-leyes",
+      "name": "Actualizar Post en Blogger",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1180, 400],
+      "credentials": { "oAuth2Api": { "id": "BLOGGER_OAUTH2_CREDENTIAL_ID", "name": "Google Blogger OAuth2" } }
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "seconds"
+      },
+      "id": "wait-leyes",
+      "name": "Esperar (rate limit)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1420, 400]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": { "__rl": true, "mode": "id", "value": "14NYqDn77J9nsTjD8ZsvxzDe1lggNwmC6kUZcE3LNbJI" },
+        "sheetName":  { "__rl": true, "mode": "name", "value": "Leyes Leads Log" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha":       "={{ new Date().toISOString() }}",
+            "blog":        "={{ $('Inyectar Lead Widget + AdSense').item.json.blogNombre }}",
+            "post_titulo": "={{ $('Inyectar Lead Widget + AdSense').item.json.titulo }}",
+            "post_url":    "={{ $json.url }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "log-sheets-leyes",
+      "name": "Registrar en Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [1660, 400],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "GOOGLE_SHEETS_CREDENTIAL_ID", "name": "Google Sheets OAuth2" } }
+    }
+  ],
+  "connections": {
+    "Inicio Manual":                    { "main": [[{ "node": "Config Blogs de Leyes",              "type": "main", "index": 0 }]] },
+    "Config Blogs de Leyes":            { "main": [[{ "node": "Obtener Posts del Blog de Leyes",    "type": "main", "index": 0 }]] },
+    "Obtener Posts del Blog de Leyes":  { "main": [[{ "node": "Inyectar Lead Widget + AdSense",     "type": "main", "index": 0 }]] },
+    "Inyectar Lead Widget + AdSense":   { "main": [[{ "node": "Actualizar Post en Blogger",         "type": "main", "index": 0 }]] },
+    "Actualizar Post en Blogger":       { "main": [[{ "node": "Esperar (rate limit)",               "type": "main", "index": 0 }]] },
+    "Esperar (rate limit)":             { "main": [[{ "node": "Registrar en Google Sheets",         "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": ["leyes","abogados","leads","adsense","blogger"],
+  "triggerCount": 0
+}

@@ -1,0 +1,109 @@
+{
+  "name": "06 - MAESTRO: Monetizar TODOS los Blogs (Hotmart + Leads + AdSense)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "start",
+      "name": "Inicio Manual",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================================\n// CONFIGURACIÓN MAESTRA DE TODOS LOS BLOGS\n// Datos extraídos del Google Sheet ID: 14NYqDn77J9nsTjD8ZsvxzDe1lggNwmC6kUZcE3LNbJI\n// ============================================================\n\nconst PRODUCTOS = {\n  'dieta-natural':          { nombre: 'Dieta Natural para Perros y Gatos',      link: 'https://go.hotmart.com/X103617747C',      imagen: 'https://static-media.hotmart.com/KNdDfZogqE2CWDv4nqEsswzDFjc=/300x300/filters:quality(100)/hotmart/product_pictures/ecbf6914-08bb-4682-aa5b-1990b80b5afb/postinstagrampatitas.png', tipo: 'Guía',       color: { grad:'135deg,#1a7a4a,#2ecc71', text:'#1a7a4a' } },\n  'snack-barf':             { nombre: 'Snack BARF en Minutos',                  link: 'https://go.hotmart.com/R103617833Q',      imagen: 'https://static-media.hotmart.com/XusqQYSq_oAB8-EO0Iwr3xVnPMk=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/aaef333c-c030-4c46-a0e7-0c1b780837fe/snackbarf600x600.png?w=920', tipo: 'Recetas',    color: { grad:'135deg,#1a7a4a,#27ae60', text:'#1a7a4a' } },\n  'adiestramiento':         { nombre: 'Adiestramiento Canino Profesional',      link: 'https://go.hotmart.com/D104257979A',      imagen: 'https://hotmart.s3.amazonaws.com/product_pictures/141a3c3d-a535-40f5-99e1-a275199b7e98/Portadahotmart5.png',                                                                                                             tipo: 'Curso',      color: { grad:'135deg,#1a5276,#2980b9', text:'#1a5276' } },\n  'entiende-gato':          { nombre: 'Entiende a tu Gato: Guía Práctica',     link: 'https://go.hotmart.com/F104226854F',      imagen: 'https://d1yei2z3i6k35z.cloudfront.net/11998843/683bb259ca94a_CopiadeSint%C3%ADtulo1.png',                                                                                                                          tipo: 'Guía',       color: { grad:'135deg,#6c3483,#a569bd', text:'#6c3483' } },\n  'mascotas-sanas':         { nombre: 'Mascotas Sanas',                         link: 'https://go.hotmart.com/L104257678P?dp=1', imagen: 'https://static-media.hotmart.com/9H3NJb3S4H61OsufTjZpXLy-8KY=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/78592f13-96f1-4724-9b6a-2640aadcf606/MasterSello20211116T162945331.jpg?w=920', tipo: 'Curso',      color: { grad:'135deg,#1a7a4a,#2ecc71', text:'#1a7a4a' } },\n  'vital-pet':              { nombre: 'Vital Pet System',                       link: 'https://go.hotmart.com/W104257847B',      imagen: 'https://static-media.hotmart.com/F3PzytJIAVCectZMFSnvMHJFV5g=/filters:background_color(white)/hotmart/product_pictures/a801721c-590d-4a30-ab01-5fe5eb532e8f/PORTADAVITALPET.png',                                                      tipo: 'Sistema',    color: { grad:'135deg,#1a7a4a,#27ae60', text:'#1a7a4a' } },\n  'calculadora':            { nombre: 'Calculadora de Alimentación Cocida',     link: 'https://go.hotmart.com/B104226750N',      imagen: 'https://static-media.hotmart.com/Gt9GpGBSzCdG8hfSbvKgGuXEhFY=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/5f151330-675e-4498-8764-1fba21c4b505/Calculadoradealimentacioncocidaparaperrosygatos.png?w=920', tipo: 'Herramienta', color: { grad:'135deg,#1a7a4a,#27ae60', text:'#1a7a4a' } },\n  '101-recetas-diabeticos': { nombre: '101 Recetas Saludables para Diabéticos', link: 'https://go.hotmart.com/S104258050O',      imagen: 'https://static-media.hotmart.com/EbTb3aQIURTRGGIiuAGCZrrR6sk=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/48ca379d-a33d-4e0d-bea7-d8d375784e2d/_dca15be1487946e9bbd84e59e20a9d46.jpg?w=920', tipo: 'Recetario',  color: { grad:'135deg,#c0392b,#e74c3c', text:'#c0392b' } }\n};\n\n// ============================================================\n// TODOS LOS BLOGS CON HOTMART (IDs reales del Google Sheet)\n// ============================================================\nconst BLOGS_ANIMALES = [\n  { nombre: 'Alimentación para perros',  id: '6910813708926842116', productos: ['dieta-natural','snack-barf','adiestramiento','vital-pet','calculadora'] },\n  { nombre: 'Alimentación para gatos',  id: '6617865557052467517', productos: ['dieta-natural','entiende-gato','mascotas-sanas'] },\n  { nombre: 'Bulldogs Vet',             id: '7132652999311318625', productos: ['adiestramiento','mascotas-sanas','dieta-natural'] },\n  { nombre: 'Pastor alemán',            id: '7273203559821314231', productos: ['adiestramiento','mascotas-sanas'] },\n  { nombre: 'Razas de perro',           id: '7970072706943429023', productos: ['adiestramiento','mascotas-sanas','dieta-natural'] },\n  { nombre: 'Hurones',                  id: '2171262240069038424', productos: ['mascotas-sanas'] },\n  { nombre: 'Mastín tibetano',          id: '1030958178929697769', productos: ['adiestramiento','mascotas-sanas'] },\n  { nombre: 'Vet bovinos',              id: '6959662622118866680', productos: ['mascotas-sanas'] },\n  { nombre: 'Geckos leopardo',          id: '7061935825690274620', productos: ['mascotas-sanas'] },\n  { nombre: 'Reptiles',                 id: '5870777650335706589', productos: ['mascotas-sanas'] },\n  { nombre: 'Guacamayos',              id: '2381883842356306082', productos: ['mascotas-sanas'] },\n  { nombre: 'Loros',                   id: '932323301748607096',  productos: ['mascotas-sanas'] },\n  { nombre: 'Patos',                   id: '8117586046258831070', productos: ['mascotas-sanas'] },\n  { nombre: 'Periquitos',              id: '5154298280010659457', productos: ['mascotas-sanas'] },\n  { nombre: 'Chinchillas exóticas',    id: '1437877554925595070', productos: ['mascotas-sanas'] },\n  { nombre: 'Seguros de mascotas',     id: '1287626644093713914', productos: ['mascotas-sanas'] },\n  { nombre: 'Blog Vet Luis García',    id: '2772493032989228627', productos: ['mascotas-sanas','dieta-natural'] }\n];\n\n// MAX posts a procesar por blog en esta ejecución\nconst MAX_POSTS = 10;\n\nreturn BLOGS_ANIMALES.map(blog => ({ json: { blog, PRODUCTOS, MAX_POSTS } }));"
+      },
+      "id": "config-maestro",
+      "name": "Config Maestro (todos los blogs)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.blog.id }}/posts?maxResults={{ $json.MAX_POSTS }}&status=LIVE",
+        "options": {}
+      },
+      "id": "get-posts",
+      "name": "Obtener Posts del Blog",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 400],
+      "credentials": { "oAuth2Api": { "id": "BLOGGER_OAUTH2_CREDENTIAL_ID", "name": "Google Blogger OAuth2" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.item.json;\nconst config   = $('Config Maestro (todos los blogs)').item.json;\nconst { blog, PRODUCTOS } = config;\n\nconst posts = (response.items || []).filter(p => !(p.content||'').includes('go.hotmart.com'));\n\nreturn posts.map(post => {\n  // Seleccionar producto más relevante por keywords en el título\n  const titulo = (post.title || '').toLowerCase();\n  let mejorProd = blog.productos[0];\n  let mejorScore = 0;\n\n  const KEYWORDS = {\n    'dieta-natural':   ['dieta','alimentacion','comida','nutricion','natural'],\n    'snack-barf':      ['barf','snack','receta','premio','trato'],\n    'adiestramiento':  ['adiestrar','adiestramiento','entrenamiento','conducta','obediencia','comando'],\n    'entiende-gato':   ['gato','felino','comportamiento','maullar'],\n    'mascotas-sanas':  ['salud','sano','enfermedad','veterinario','vacuna'],\n    'vital-pet':       ['cocido','casero','natural','sistema'],\n    'calculadora':     ['calculadora','porcion','cantidad','medida'],\n    '101-recetas-diabeticos': ['diabetico','diabetes','receta','salud']\n  };\n\n  for (const prodId of blog.productos) {\n    const kws = KEYWORDS[prodId] || [];\n    const score = kws.filter(kw => titulo.includes(kw)).length;\n    if (score > mejorScore) { mejorScore = score; mejorProd = prodId; }\n  }\n\n  const prod = PRODUCTOS[mejorProd];\n  const banner = `\n<!-- HOTMART:${mejorProd} -->\n<div style=\"background:linear-gradient(${prod.color.grad});border-radius:14px;padding:0;margin:40px 0;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.12);font-family:Arial,sans-serif;max-width:700px\">\n  <div style=\"display:flex;align-items:stretch;flex-wrap:wrap\">\n    <img src=\"${prod.imagen}\" alt=\"${prod.nombre}\" style=\"width:150px;height:auto;object-fit:cover;flex-shrink:0\">\n    <div style=\"flex:1;min-width:180px;padding:20px;display:flex;flex-direction:column;justify-content:center\">\n      <p style=\"color:rgba(255,255,255,.8);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 5px\">${prod.tipo} recomendado</p>\n      <h3 style=\"color:#fff;font-size:17px;font-weight:800;margin:0 0 8px;line-height:1.3\">${prod.nombre}</h3>\n      <a href=\"${prod.link}\" target=\"_blank\" rel=\"noopener sponsored\" style=\"display:inline-block;background:#fff;color:${prod.color.text};font-weight:800;font-size:13px;padding:10px 20px;border-radius:8px;text-decoration:none;align-self:flex-start\">Ver ahora →</a>\n    </div>\n  </div>\n  <p style=\"color:rgba(255,255,255,.3);font-size:9px;text-align:right;padding:3px 12px;margin:0\">*Enlace de afiliado</p>\n</div>`;\n\n  return {\n    json: {\n      blogId:   blog.id,\n      blogNombre: blog.nombre,\n      postId:   post.id,\n      titulo:   post.title,\n      contenidoActualizado: (post.content || '') + banner,\n      productoUsado: mejorProd\n    }\n  };\n});"
+      },
+      "id": "inyectar-banner",
+      "name": "Seleccionar Producto e Inyectar Banner",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [940, 400]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "method": "PATCH",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.blogId }}/posts/{{ $json.postId }}",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ JSON.stringify({ content: $json.contenidoActualizado }) }}",
+        "options": {}
+      },
+      "id": "actualizar-blogger",
+      "name": "Actualizar Post en Blogger",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1180, 400],
+      "credentials": { "oAuth2Api": { "id": "BLOGGER_OAUTH2_CREDENTIAL_ID", "name": "Google Blogger OAuth2" } }
+    },
+    {
+      "parameters": {
+        "amount": 1,
+        "unit": "seconds"
+      },
+      "id": "wait",
+      "name": "Esperar (rate limit API)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1420, 400]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": { "__rl": true, "mode": "id", "value": "14NYqDn77J9nsTjD8ZsvxzDe1lggNwmC6kUZcE3LNbJI" },
+        "sheetName":  { "__rl": true, "mode": "name", "value": "Monetizacion Log" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "fecha":         "={{ new Date().toISOString() }}",
+            "blog":          "={{ $('Seleccionar Producto e Inyectar Banner').item.json.blogNombre }}",
+            "post_titulo":   "={{ $('Seleccionar Producto e Inyectar Banner').item.json.titulo }}",
+            "producto":      "={{ $('Seleccionar Producto e Inyectar Banner').item.json.productoUsado }}",
+            "post_url":      "={{ $json.url }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "log-sheets",
+      "name": "Registrar en Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [1660, 400],
+      "credentials": { "googleSheetsOAuth2Api": { "id": "GOOGLE_SHEETS_CREDENTIAL_ID", "name": "Google Sheets OAuth2" } }
+    }
+  ],
+  "connections": {
+    "Inicio Manual":                          { "main": [[{ "node": "Config Maestro (todos los blogs)",      "type": "main", "index": 0 }]] },
+    "Config Maestro (todos los blogs)":       { "main": [[{ "node": "Obtener Posts del Blog",               "type": "main", "index": 0 }]] },
+    "Obtener Posts del Blog":                 { "main": [[{ "node": "Seleccionar Producto e Inyectar Banner","type": "main", "index": 0 }]] },
+    "Seleccionar Producto e Inyectar Banner": { "main": [[{ "node": "Actualizar Post en Blogger",           "type": "main", "index": 0 }]] },
+    "Actualizar Post en Blogger":             { "main": [[{ "node": "Esperar (rate limit API)",              "type": "main", "index": 0 }]] },
+    "Esperar (rate limit API)":               { "main": [[{ "node": "Registrar en Google Sheets",           "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": ["maestro","blogger","hotmart","animales","todos"],
+  "triggerCount": 0
+}

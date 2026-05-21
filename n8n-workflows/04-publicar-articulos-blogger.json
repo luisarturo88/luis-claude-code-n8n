@@ -1,0 +1,122 @@
+{
+  "name": "04 - Publicar Artículos en Blogger (Batch + AI Content)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "start",
+      "name": "Inicio Manual",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// ============================================\n// COLA DE ARTÍCULOS A PUBLICAR\n// Agrega aquí los artículos pendientes\n// ============================================\n\nconst BLOG_IDS = {\n  animales: 'TU_BLOG_ID_ANIMALES',\n  leyes:    'TU_BLOG_ID_LEYES'\n};\n\nconst PRODUCTOS = {\n  'dieta-natural':   { nombre: 'Dieta Natural para Perros y Gatos',     link: 'https://go.hotmart.com/X103617747C',      imagen: 'https://static-media.hotmart.com/KNdDfZogqE2CWDv4nqEsswzDFjc=/300x300/filters:quality(100)/hotmart/product_pictures/ecbf6914-08bb-4682-aa5b-1990b80b5afb/postinstagrampatitas.png', tipo: 'Guía' },\n  'snack-barf':      { nombre: 'Snack BARF en Minutos',                 link: 'https://go.hotmart.com/R103617833Q',      imagen: 'https://static-media.hotmart.com/XusqQYSq_oAB8-EO0Iwr3xVnPMk=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/aaef333c-c030-4c46-a0e7-0c1b780837fe/snackbarf600x600.png?w=920', tipo: 'Recetas' },\n  'adiestramiento':  { nombre: 'Adiestramiento Canino Profesional',     link: 'https://go.hotmart.com/D104257979A',      imagen: 'https://hotmart.s3.amazonaws.com/product_pictures/141a3c3d-a535-40f5-99e1-a275199b7e98/Portadahotmart5.png', tipo: 'Curso' },\n  'entiende-gato':   { nombre: 'Entiende a tu Gato: Guía Práctica',    link: 'https://go.hotmart.com/F104226854F',      imagen: 'https://d1yei2z3i6k35z.cloudfront.net/11998843/683bb259ca94a_CopiadeSint%C3%ADtulo1.png', tipo: 'Guía' },\n  'mascotas-sanas':  { nombre: 'Mascotas Sanas',                        link: 'https://go.hotmart.com/L104257678P?dp=1', imagen: 'https://static-media.hotmart.com/9H3NJb3S4H61OsufTjZpXLy-8KY=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/78592f13-96f1-4724-9b6a-2640aadcf606/MasterSello20211116T162945331.jpg?w=920', tipo: 'Curso' },\n  'vital-pet':       { nombre: 'Vital Pet System',                      link: 'https://go.hotmart.com/W104257847B',      imagen: 'https://static-media.hotmart.com/F3PzytJIAVCectZMFSnvMHJFV5g=/filters:background_color(white)/hotmart/product_pictures/a801721c-590d-4a30-ab01-5fe5eb532e8f/PORTADAVITALPET.png', tipo: 'Sistema' },\n  'calculadora':     { nombre: 'Calculadora de Alimentación Cocida',    link: 'https://go.hotmart.com/B104226750N',      imagen: 'https://static-media.hotmart.com/Gt9GpGBSzCdG8hfSbvKgGuXEhFY=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/5f151330-675e-4498-8764-1fba21c4b505/Calculadoradealimentacioncocidaparaperrosygatos.png?w=920', tipo: 'Herramienta' }\n};\n\nconst ARTICULOS = [\n  // === CLUSTER 1: ALIMENTACIÓN NATURAL ===\n  {\n    blogId: BLOG_IDS.animales,\n    titulo: 'Cómo iniciar la dieta BARF en perros: guía paso a paso',\n    labels: ['alimentacion', 'barf', 'dieta-natural', 'perros'],\n    slug: 'como-iniciar-dieta-barf-perros',\n    pillarUrl: '/p/guia-completa-alimentacion-natural-mascotas.html',\n    pillarTitulo: 'Guía Completa de Alimentación Natural para Mascotas',\n    producto: 'snack-barf',\n    prompt: 'Escribe un artículo SEO en español sobre cómo iniciar la dieta BARF en perros. Explica qué es BARF, proporciones recomendadas (70% carne, 10% huesos, 10% vísceras, 10% vegetales), ventajas, riesgos y cómo hacer la transición gradual. 800-1000 palabras. Incluye lista de alimentos BARF permitidos y tabla de porciones por peso del perro.'\n  },\n  {\n    blogId: BLOG_IDS.animales,\n    titulo: 'Alimentos prohibidos para perros y gatos: lista completa 2025',\n    labels: ['alimentacion', 'toxicos', 'perros', 'gatos'],\n    slug: 'alimentos-prohibidos-perros-gatos',\n    pillarUrl: '/p/guia-completa-alimentacion-natural-mascotas.html',\n    pillarTitulo: 'Guía Completa de Alimentación Natural para Mascotas',\n    producto: 'dieta-natural',\n    prompt: 'Escribe un artículo SEO en español sobre alimentos prohibidos para perros y gatos. Lista completa con: chocolate, uvas, cebolla, ajo, xilitol, etc. Explica por qué son tóxicos y síntomas de intoxicación. 800-1000 palabras. Formato con tabla y listas fáciles de escanear.'\n  },\n  {\n    blogId: BLOG_IDS.animales,\n    titulo: 'Recetas caseras saludables para tu mascota: fáciles y económicas',\n    labels: ['recetas', 'alimentacion', 'casero', 'mascotas'],\n    slug: 'recetas-caseras-saludables-mascotas',\n    pillarUrl: '/p/guia-completa-alimentacion-natural-mascotas.html',\n    pillarTitulo: 'Guía Completa de Alimentación Natural para Mascotas',\n    producto: 'snack-barf',\n    prompt: 'Escribe un artículo SEO en español con 5 recetas caseras saludables para perros y 3 para gatos. Cada receta debe incluir ingredientes, proporciones, preparación y valor nutricional aproximado. 800-1000 palabras. Tono amigable y práctico.'\n  },\n  {\n    blogId: BLOG_IDS.animales,\n    titulo: 'Dieta natural cocida para mascotas: cómo prepararla correctamente',\n    labels: ['dieta-cocida', 'alimentacion', 'casero', 'mascotas'],\n    slug: 'dieta-natural-cocida-mascotas',\n    pillarUrl: '/p/guia-completa-alimentacion-natural-mascotas.html',\n    pillarTitulo: 'Guía Completa de Alimentación Natural para Mascotas',\n    producto: 'vital-pet',\n    prompt: 'Escribe un artículo SEO en español sobre la dieta natural cocida para perros y gatos. Diferencias con BARF, ventajas, cómo calcular porciones, ingredientes base, suplementos necesarios y cómo conservar la comida preparada. 800-1000 palabras.'\n  },\n  // === CLUSTER 2: ADIESTRAMIENTO ===\n  {\n    blogId: BLOG_IDS.animales,\n    titulo: 'Comandos básicos que todo perro debe aprender: guía completa',\n    labels: ['adiestramiento', 'comandos', 'educacion', 'perros'],\n    slug: 'comandos-basicos-perro',\n    pillarUrl: '/p/adiestramiento-canino-guia-definitiva.html',\n    pillarTitulo: 'Adiestramiento Canino: Guía Definitiva para Educar a tu Perro',\n    producto: 'adiestramiento',\n    prompt: 'Escribe un artículo SEO en español sobre los comandos básicos que todo perro debe aprender: siéntate, quieto, ven, échate, suelta, lugar. Para cada comando explica la técnica paso a paso, duración del entrenamiento y errores comunes. 800-1000 palabras.'\n  },\n  {\n    blogId: BLOG_IDS.animales,\n    titulo: 'Cómo corregir la agresividad en perros: causas y soluciones',\n    labels: ['adiestramiento', 'agresividad', 'comportamiento', 'perros'],\n    slug: 'corregir-agresividad-perros',\n    pillarUrl: '/p/adiestramiento-canino-guia-definitiva.html',\n    pillarTitulo: 'Adiestramiento Canino: Guía Definitiva para Educar a tu Perro',\n    producto: 'adiestramiento',\n    prompt: 'Escribe un artículo SEO en español sobre cómo corregir la agresividad en perros. Tipos de agresividad (territorial, por miedo, redirigida), señales de alerta, técnicas de modificación de conducta, cuándo acudir a un profesional. 800-1000 palabras. Tono empático y responsable.'\n  },\n  {\n    blogId: BLOG_IDS.animales,\n    titulo: 'Adiestramiento con refuerzo positivo: qué es y cómo aplicarlo',\n    labels: ['adiestramiento', 'refuerzo-positivo', 'educacion', 'perros'],\n    slug: 'adiestramiento-refuerzo-positivo',\n    pillarUrl: '/p/adiestramiento-canino-guia-definitiva.html',\n    pillarTitulo: 'Adiestramiento Canino: Guía Definitiva para Educar a tu Perro',\n    producto: 'adiestramiento',\n    prompt: 'Escribe un artículo SEO en español sobre el adiestramiento con refuerzo positivo en perros. Qué es, base científica, diferencia con el castigo, cómo usar premios correctamente, clicker training, y ejemplos prácticos. 800-1000 palabras.'\n  },\n  {\n    blogId: BLOG_IDS.animales,\n    titulo: 'Cómo enseñar a tu perro a no ladrar en exceso: 6 técnicas efectivas',\n    labels: ['adiestramiento', 'ladridos', 'comportamiento', 'perros'],\n    slug: 'perro-no-ladrar-exceso',\n    pillarUrl: '/p/adiestramiento-canino-guia-definitiva.html',\n    pillarTitulo: 'Adiestramiento Canino: Guía Definitiva para Educar a tu Perro',\n    producto: 'adiestramiento',\n    prompt: 'Escribe un artículo SEO en español sobre cómo enseñar a un perro a no ladrar en exceso. Causas del ladrido excesivo, 6 técnicas específicas, qué NO hacer, y cuándo el ladrido es señal de problema de salud. 800-1000 palabras.'\n  },\n  // === CLUSTER 3: GATOS ===\n  {\n    blogId: BLOG_IDS.animales,\n    titulo: 'Qué significan los maullidos de tu gato: guía del lenguaje felino',\n    labels: ['gatos', 'comportamiento', 'comunicacion', 'felinos'],\n    slug: 'significado-maullidos-gato',\n    pillarUrl: '/p/guia-completa-cuidar-gato.html',\n    pillarTitulo: 'Guía Completa para Entender y Cuidar a tu Gato',\n    producto: 'entiende-gato',\n    prompt: 'Escribe un artículo SEO en español sobre el significado de los maullidos del gato. Tipos de maullidos (corto, largo, trino, chillido, ronroneo), qué comunica cada uno, diferencias por raza y edad, y cómo responder correctamente. 800-1000 palabras.'\n  },\n  {\n    blogId: BLOG_IDS.animales,\n    titulo: 'Por qué los gatos amasan: el comportamiento de hacer pan',\n    labels: ['gatos', 'comportamiento', 'felinos'],\n    slug: 'por-que-gatos-amasan',\n    pillarUrl: '/p/guia-completa-cuidar-gato.html',\n    pillarTitulo: 'Guía Completa para Entender y Cuidar a tu Gato',\n    producto: 'entiende-gato',\n    prompt: 'Escribe un artículo SEO en español sobre por qué los gatos amasan (hacer pan). Origen del comportamiento, qué significa, cuando lo hacen más, si hay algún problema si no lo hacen, y otros comportamientos felinos curiosos relacionados. 700-900 palabras. Tono amigable y curioso.'\n  },\n  {\n    blogId: BLOG_IDS.animales,\n    titulo: 'Enfermedades comunes en gatos y cómo prevenirlas',\n    labels: ['gatos', 'salud', 'enfermedades', 'felinos'],\n    slug: 'enfermedades-comunes-gatos',\n    pillarUrl: '/p/guia-completa-cuidar-gato.html',\n    pillarTitulo: 'Guía Completa para Entender y Cuidar a tu Gato',\n    producto: 'mascotas-sanas',\n    prompt: 'Escribe un artículo SEO en español sobre enfermedades comunes en gatos: panleucemia, rinotraqueitis, FIV, FeLV, toxoplasmosis, problemas renales y dentales. Para cada una: síntomas, prevención, tratamiento. Tabla resumen al final. 900-1100 palabras.'\n  }\n];\n\nreturn ARTICULOS.map(a => ({ json: { ...a, PRODUCTOS } }));"
+      },
+      "id": "cola-articulos",
+      "name": "Cola de Artículos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "resource": "chat",
+        "modelId": { "__rl": true, "mode": "id", "value": "gpt-4o-mini" },
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "Eres un experto en SEO y redacción de contenido para blogs de mascotas en español (Latinoamérica). Escribes artículos completos, informativos y optimizados para Google. Siempre usas HTML inline con estilos modernos. No uses markdown, solo HTML puro listo para Blogger."
+            },
+            {
+              "role": "user",
+              "content": "={{ $json.prompt + '\\n\\nIMPORTANTE: Devuelve SOLO el HTML del artículo, sin explicaciones, sin markdown. El artículo debe ser en HTML con CSS inline, listo para pegar en Blogger.' }}"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 3000,
+          "temperature": 0.7
+        }
+      },
+      "id": "generar-contenido-ai",
+      "name": "Generar Contenido con IA",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1.4,
+      "position": [700, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const item = $input.item;\nconst articulo = $('Cola de Artículos').item.json;\nconst PRODUCTOS = articulo.PRODUCTOS;\nconst prod = PRODUCTOS[articulo.producto];\n\n// Contenido generado por IA\nconst contenidoIA = item.json.message?.content || item.json.choices?.[0]?.message?.content || '';\n\n// Color según cluster\nconst colores = {\n  'snack-barf':     { grad: '135deg,#1a7a4a 0%,#2ecc71 100%', text: '#1a7a4a', bg: '#f0faf4' },\n  'dieta-natural':  { grad: '135deg,#1a7a4a 0%,#2ecc71 100%', text: '#1a7a4a', bg: '#f0faf4' },\n  'vital-pet':      { grad: '135deg,#1a7a4a 0%,#27ae60 100%', text: '#1a7a4a', bg: '#f0faf4' },\n  'calculadora':    { grad: '135deg,#1a7a4a 0%,#27ae60 100%', text: '#1a7a4a', bg: '#f0faf4' },\n  'adiestramiento': { grad: '135deg,#1a5276 0%,#2980b9 100%', text: '#1a5276', bg: '#eaf4fb' },\n  'mascotas-sanas': { grad: '135deg,#1a5276 0%,#2980b9 100%', text: '#1a5276', bg: '#eaf4fb' },\n  'entiende-gato':  { grad: '135deg,#6c3483 0%,#a569bd 100%', text: '#6c3483', bg: '#f9f0ff' }\n};\n\nconst c = colores[articulo.producto] || colores['mascotas-sanas'];\n\nconst breadcrumb = `\n<div style=\"background:${c.bg};border-left:4px solid ${c.text};border-radius:8px;padding:12px 16px;margin:0 0 28px;font-family:Arial,sans-serif\">\n  <p style=\"margin:0;font-size:13px;color:#666\">Parte de la guía completa:</p>\n  <a href=\"${articulo.pillarUrl}\" style=\"color:${c.text};font-weight:700;font-size:14px;text-decoration:none\">→ ${articulo.pillarTitulo}</a>\n</div>`;\n\nconst banner = `\n<!-- BANNER HOTMART -->\n<div style=\"background:linear-gradient(${c.grad});border-radius:14px;padding:0;margin:40px 0;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.12);font-family:Arial,sans-serif;max-width:700px\">\n  <div style=\"display:flex;align-items:stretch;flex-wrap:wrap\">\n    <img src=\"${prod.imagen}\" alt=\"${prod.nombre}\" style=\"width:150px;height:auto;object-fit:cover;flex-shrink:0\">\n    <div style=\"flex:1;min-width:180px;padding:20px;display:flex;flex-direction:column;justify-content:center\">\n      <p style=\"color:rgba(255,255,255,.8);font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 5px\">${prod.tipo} recomendado</p>\n      <h3 style=\"color:#fff;font-size:17px;font-weight:800;margin:0 0 8px;line-height:1.3\">${prod.nombre}</h3>\n      <a href=\"${prod.link}\" target=\"_blank\" rel=\"noopener sponsored\" style=\"display:inline-block;background:#fff;color:${c.text};font-weight:800;font-size:13px;padding:10px 20px;border-radius:8px;text-decoration:none;align-self:flex-start\">\n        Ver ahora →\n      </a>\n    </div>\n  </div>\n  <p style=\"color:rgba(255,255,255,.3);font-size:9px;text-align:right;padding:3px 12px;margin:0\">*Enlace de afiliado</p>\n</div>`;\n\nconst htmlFinal = breadcrumb + contenidoIA + banner;\n\nreturn [{\n  json: {\n    blogId: articulo.blogId,\n    titulo: articulo.titulo,\n    labels: articulo.labels,\n    slug: articulo.slug,\n    contenido: htmlFinal,\n    isDraft: false\n  }\n}];"
+      },
+      "id": "ensamblar-articulo",
+      "name": "Ensamblar Artículo Final",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [940, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "method": "POST",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.blogId }}/posts",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "={{ JSON.stringify({ title: $json.titulo, content: $json.contenido, labels: $json.labels, isDraft: $json.isDraft }) }}",
+        "options": {}
+      },
+      "id": "publicar-blogger",
+      "name": "Publicar en Blogger",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1180, 300],
+      "credentials": {
+        "oAuth2Api": {
+          "id": "BLOGGER_OAUTH2_CREDENTIAL_ID",
+          "name": "Google Blogger OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 3,
+        "unit": "seconds"
+      },
+      "id": "wait-rate-limit",
+      "name": "Esperar (rate limit)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1420, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const post = $input.item.json;\nconsole.log(`✅ Publicado: ${post.title} → ${post.url}`);\nreturn [{ json: { titulo: post.title, url: post.url, id: post.id, publicado: new Date().toISOString() } }];"
+      },
+      "id": "log-publicado",
+      "name": "Registrar Publicado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1660, 300]
+    }
+  ],
+  "connections": {
+    "Inicio Manual":          { "main": [[{ "node": "Cola de Artículos",          "type": "main", "index": 0 }]] },
+    "Cola de Artículos":      { "main": [[{ "node": "Generar Contenido con IA",   "type": "main", "index": 0 }]] },
+    "Generar Contenido con IA": { "main": [[{ "node": "Ensamblar Artículo Final", "type": "main", "index": 0 }]] },
+    "Ensamblar Artículo Final": { "main": [[{ "node": "Publicar en Blogger",      "type": "main", "index": 0 }]] },
+    "Publicar en Blogger":    { "main": [[{ "node": "Esperar (rate limit)",        "type": "main", "index": 0 }]] },
+    "Esperar (rate limit)":   { "main": [[{ "node": "Registrar Publicado",         "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": ["blogger", "hotmart", "publicar", "ia", "seo"],
+  "triggerCount": 0
+}

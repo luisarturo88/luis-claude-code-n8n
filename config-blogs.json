@@ -1,0 +1,70 @@
+{
+  "_doc": "Configuración maestra de todos los blogs - generada desde Google Sheets",
+  "_sheets_id": "14NYqDn77J9nsTjD8ZsvxzDe1lggNwmC6kUZcE3LNbJI",
+  "_n8n_url": "https://vmi3096105.contaboserver.net",
+
+  "blogs": {
+    "animales": [
+      { "nombre": "Alimentación para perros",   "id": "6910813708926842116", "activo": false, "productos_hotmart": ["dieta-natural","snack-barf","adiestramiento","vital-pet","calculadora"] },
+      { "nombre": "Alimentación para gatos",    "id": "6617865557052467517", "activo": false, "productos_hotmart": ["dieta-natural","entiende-gato","mascotas-sanas"] },
+      { "nombre": "Bulldogs Vet",               "id": "7132652999311318625", "activo": false, "productos_hotmart": ["adiestramiento","mascotas-sanas","dieta-natural"] },
+      { "nombre": "Pastor alemán",              "id": "7273203559821314231", "activo": false, "productos_hotmart": ["adiestramiento","mascotas-sanas"] },
+      { "nombre": "Razas de perro",             "id": "7970072706943429023", "activo": false, "productos_hotmart": ["adiestramiento","mascotas-sanas","dieta-natural"] },
+      { "nombre": "Hurones",                    "id": "2171262240069038424", "activo": true,  "productos_hotmart": ["mascotas-sanas"] },
+      { "nombre": "Mastín tibetano",            "id": "1030958178929697769", "activo": false, "productos_hotmart": ["adiestramiento","mascotas-sanas"] },
+      { "nombre": "Vet bovinos",                "id": "6959662622118866680", "activo": true,  "productos_hotmart": ["mascotas-sanas"] },
+      { "nombre": "Geckos leopardo",            "id": "7061935825690274620", "activo": false, "productos_hotmart": ["mascotas-sanas"] },
+      { "nombre": "Reptiles",                   "id": "5870777650335706589", "activo": false, "productos_hotmart": ["mascotas-sanas"] },
+      { "nombre": "Guacamayos",                 "id": "2381883842356306082", "activo": false, "productos_hotmart": ["mascotas-sanas"] },
+      { "nombre": "Loros",                      "id": "932323301748607096",  "activo": false, "productos_hotmart": ["mascotas-sanas"] },
+      { "nombre": "Patos",                      "id": "8117586046258831070", "activo": false, "productos_hotmart": ["mascotas-sanas"] },
+      { "nombre": "Periquitos",                 "id": "5154298280010659457", "activo": false, "productos_hotmart": ["mascotas-sanas"] },
+      { "nombre": "Chinchillas exóticas",       "id": "1437877554925595070", "activo": false, "productos_hotmart": ["mascotas-sanas"] },
+      { "nombre": "Seguros de mascotas",        "id": "1287626644093713914", "activo": false, "productos_hotmart": ["mascotas-sanas"] },
+      { "nombre": "Acuarios biotipo",           "id": "1046955419669262222", "activo": false, "productos_hotmart": [] },
+      { "nombre": "Acuarios nano",              "id": "9122316601756150316", "activo": false, "productos_hotmart": [] },
+      { "nombre": "Camarones de acuario",       "id": "8843241826530577023", "activo": false, "productos_hotmart": [] },
+      { "nombre": "Pez betta",                  "id": "7526481980453525353", "activo": false, "productos_hotmart": [] },
+      { "nombre": "Pez guppy",                  "id": "4179896246386175424", "activo": false, "productos_hotmart": [] },
+      { "nombre": "Pez platty",                 "id": "6472588556005643863", "activo": false, "productos_hotmart": [] },
+      { "nombre": "Langostino y langosta",      "id": "8038121926828334078", "activo": false, "productos_hotmart": [] }
+    ],
+    "leyes": [
+      { "nombre": "Abogados bienes raíces USA",       "id": "4185821469969358370", "activo": true,  "productos_hotmart": [] },
+      { "nombre": "Abogados de accidente Orlando",    "id": "6030388327366455376", "activo": true,  "productos_hotmart": [] },
+      { "nombre": "Abogados de familia USA",          "id": "3503300865393838043", "activo": true,  "productos_hotmart": [] },
+      { "nombre": "Litigios USA",                     "id": "3388695765945711848", "activo": true,  "productos_hotmart": [] },
+      { "nombre": "Impuestos en USA",                 "id": "1977134253598268505", "activo": false, "productos_hotmart": [] },
+      { "nombre": "Multas y permisos laborales USA",  "id": "7904190967942615231", "activo": false, "productos_hotmart": [] },
+      { "nombre": "Abogados accidente USA",           "id": "4771412328831507137", "activo": false, "productos_hotmart": [] }
+    ],
+    "salud": [
+      { "nombre": "Hipertensión arterial",      "id": "6257184429407355034", "activo": false, "productos_hotmart": ["101-recetas-diabeticos"] },
+      { "nombre": "Esclerosis múltiple",        "id": "2524001519825376565", "activo": false, "productos_hotmart": ["101-recetas-diabeticos"] },
+      { "nombre": "Blog Veterinario Luis García","id": "2772493032989228627", "activo": false, "productos_hotmart": ["mascotas-sanas","dieta-natural"] },
+      { "nombre": "Baumanómetros digitales",    "id": "8052591155706275029", "activo": false, "productos_hotmart": [] },
+      { "nombre": "Tensiómetro",                "id": "7021059855008053005", "activo": false, "productos_hotmart": [] },
+      { "nombre": "Técnicas anti estrés",       "id": "5549247981721112976", "activo": false, "productos_hotmart": [] }
+    ],
+    "otros": [
+      { "nombre": "Emprendimientos desde casa", "id": "9117849898746202073", "activo": false, "productos_hotmart": [] },
+      { "nombre": "Comunidad Life of Blog",     "id": "8261318698672106643", "activo": false, "productos_hotmart": [] }
+    ]
+  },
+
+  "productos_hotmart": {
+    "dieta-natural":         { "nombre": "Dieta Natural para Perros y Gatos",      "link": "https://go.hotmart.com/X103617747C",      "imagen": "https://static-media.hotmart.com/KNdDfZogqE2CWDv4nqEsswzDFjc=/300x300/filters:quality(100)/hotmart/product_pictures/ecbf6914-08bb-4682-aa5b-1990b80b5afb/postinstagrampatitas.png", "tipo": "Guía" },
+    "snack-barf":            { "nombre": "Snack BARF en Minutos",                  "link": "https://go.hotmart.com/R103617833Q",      "imagen": "https://static-media.hotmart.com/XusqQYSq_oAB8-EO0Iwr3xVnPMk=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/aaef333c-c030-4c46-a0e7-0c1b780837fe/snackbarf600x600.png?w=920", "tipo": "Recetas" },
+    "adiestramiento":        { "nombre": "Adiestramiento Canino Profesional",      "link": "https://go.hotmart.com/D104257979A",      "imagen": "https://hotmart.s3.amazonaws.com/product_pictures/141a3c3d-a535-40f5-99e1-a275199b7e98/Portadahotmart5.png", "tipo": "Curso" },
+    "entiende-gato":         { "nombre": "Entiende a tu Gato: Guía Práctica",     "link": "https://go.hotmart.com/F104226854F",      "imagen": "https://d1yei2z3i6k35z.cloudfront.net/11998843/683bb259ca94a_CopiadeSint%C3%ADtulo1.png", "tipo": "Guía" },
+    "mascotas-sanas":        { "nombre": "Mascotas Sanas",                         "link": "https://go.hotmart.com/L104257678P?dp=1", "imagen": "https://static-media.hotmart.com/9H3NJb3S4H61OsufTjZpXLy-8KY=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/78592f13-96f1-4724-9b6a-2640aadcf606/MasterSello20211116T162945331.jpg?w=920", "tipo": "Curso" },
+    "vital-pet":             { "nombre": "Vital Pet System",                       "link": "https://go.hotmart.com/W104257847B",      "imagen": "https://static-media.hotmart.com/F3PzytJIAVCectZMFSnvMHJFV5g=/filters:background_color(white)/hotmart/product_pictures/a801721c-590d-4a30-ab01-5fe5eb532e8f/PORTADAVITALPET.png", "tipo": "Sistema" },
+    "calculadora":           { "nombre": "Calculadora de Alimentación Cocida",     "link": "https://go.hotmart.com/B104226750N",      "imagen": "https://static-media.hotmart.com/Gt9GpGBSzCdG8hfSbvKgGuXEhFY=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/5f151330-675e-4498-8764-1fba21c4b505/Calculadoradealimentacioncocidaparaperrosygatos.png?w=920", "tipo": "Herramienta" },
+    "101-recetas-diabeticos":{ "nombre": "101 Recetas Saludables para Diabéticos", "link": "https://go.hotmart.com/S104258050O",      "imagen": "https://static-media.hotmart.com/EbTb3aQIURTRGGIiuAGCZrrR6sk=/300x300/smart/filters:format(webp):background_color(white)/hotmart/product_pictures/48ca379d-a33d-4e0d-bea7-d8d375784e2d/_dca15be1487946e9bbd84e59e20a9d46.jpg?w=920", "tipo": "Recetario" }
+  },
+
+  "google_sheets": {
+    "sheets_id": "14NYqDn77J9nsTjD8ZsvxzDe1lggNwmC6kUZcE3LNbJI",
+    "tab_html_generados": "HTMLs Generados"
+  }
+}
