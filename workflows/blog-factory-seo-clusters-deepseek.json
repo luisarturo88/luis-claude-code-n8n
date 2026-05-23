@@ -2,16 +2,16 @@
   "name": "Blog Factory — SEO Clusters + Popups + CTA [DeepSeek]",
   "nodes": [
     {
-      "id": "sticky-instrucciones",
-      "name": "📋 INSTRUCCIONES",
+      "id": "sticky-leyes",
+      "name": "⚖️ LAS 2 LEYES + SETUP",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [200, 60],
+      "position": [180, 60],
       "parameters": {
-        "content": "## 🏭 Blog Factory — Un solo workflow\n\n**Lo que hace:**\n1. Lista todos tus posts publicados en Blogger\n2. Agrupa automáticamente por clusters (via labels)\n3. Llama a DeepSeek para generar HTML creativo:\n   - 📦 Bloque cluster→pilar con emoji temático + imagen cuadrada\n   - 💰 Cajón CTA de ventas con oferta y botón\n4. Inyecta el HTML en cada post via API\n5. Actualiza Blogger\n\n**Configura el nodo ⚙️ CONFIG antes de ejecutar:**\n- `BLOG_ID` → tu ID de Blogger\n- `LABEL_PILAR` → etiqueta de posts pilar (ej: `pilar`)\n- `DEEPSEEK_API_KEY` → tu API key de DeepSeek\n- `SYSTEME_URL` → tu funnel de systeme.io\n- `BRAND_COLOR` → color hex de tu marca (ej: `#2563eb`)\n- `BRAND_NAME` → nombre de tu sitio/marca\n\n**Credencial Google:** Selecciona tu OAuth2 en los nodos HTTP que apuntan a Blogger.\n\n**Se ejecuta:** manualmente O cada domingo 4am automático.",
-        "height": 360,
-        "width": 500,
-        "color": 5
+        "content": "## ⚖️ LEY 1 — DeepSeek NO modifica nada\nDeepSeek recibe SOLO el título y la etiqueta del post.\nNUNCA recibe ni devuelve el contenido original.\nSu única función es **generar 2 bloques HTML nuevos**.\nEl código de inyección SOLO hace append en posiciones fijas.\nEl artículo original es **intocable**.\n\n## ⚖️ LEY 2 — Si ya existe, skip total\nAntes de llamar a DeepSeek, se revisa si el post\nya tiene `<!-- CLUSTER_BLOCK -->` Y `<!-- CTA_BLOCK -->`.\nSi ambos existen → el post se **salta completamente**.\nSi falta uno → solo se genera el que falta.\n\n---\n## ⚙️ CONFIGURA el nodo CONFIG:\n- `BLOG_ID` → ID numérico de tu Blogger\n- `LABEL_PILAR` → etiqueta de pilares (ej: `pilar`)\n- `DEEPSEEK_API_KEY` → tu key de platform.deepseek.com\n- `SYSTEME_URL` → tu funnel de systeme.io\n- `BRAND_COLOR` → hex de tu color (ej: `#2563eb`)\n- `BRAND_NAME` → nombre de tu blog\n- `MAX_CLUSTER_POR_GRUPO` → 5 a 10 (posts por cluster)\n\n## 📌 Credencial Blogger:\nEn los nodos **Blogger**, selecciona credencial tipo\n**Blogger OAuth2** (scope: `auth/blogger`).",
+        "height": 480,
+        "width": 520,
+        "color": 3
       }
     },
     {
@@ -19,14 +19,14 @@
       "name": "▶ Ejecutar Ahora",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
-      "position": [200, 480]
+      "position": [180, 600]
     },
     {
       "id": "trigger-schedule",
       "name": "⏰ Domingo 4am",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [200, 620],
+      "position": [180, 740],
       "parameters": {
         "rule": {
           "interval": [
@@ -46,79 +46,98 @@
       "name": "⚙️ CONFIG",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [460, 540],
+      "position": [460, 660],
       "parameters": {
         "mode": "manual",
         "assignments": {
           "assignments": [
-            { "id": "c1", "name": "BLOG_ID",          "value": "TU_BLOG_ID_AQUI",                           "type": "string" },
-            { "id": "c2", "name": "LABEL_PILAR",       "value": "pilar",                                     "type": "string" },
-            { "id": "c3", "name": "DEEPSEEK_API_KEY",  "value": "sk-TU_DEEPSEEK_KEY_AQUI",                  "type": "string" },
-            { "id": "c4", "name": "SYSTEME_URL",        "value": "https://tu-cuenta.systeme.io/tu-funnel",   "type": "string" },
-            { "id": "c5", "name": "BRAND_COLOR",        "value": "#2563eb",                                  "type": "string" },
-            { "id": "c6", "name": "BRAND_NAME",         "value": "Tu Marca",                                 "type": "string" },
-            { "id": "c7", "name": "MAX_POSTS_POR_BATCH","value": 1,                                          "type": "number" }
+            { "id": "c1", "name": "BLOG_ID",              "value": "TU_BLOG_ID_AQUI",                          "type": "string"  },
+            { "id": "c2", "name": "LABEL_PILAR",           "value": "pilar",                                    "type": "string"  },
+            { "id": "c3", "name": "DEEPSEEK_API_KEY",      "value": "sk-TU_DEEPSEEK_KEY_AQUI",                 "type": "string"  },
+            { "id": "c4", "name": "SYSTEME_URL",           "value": "https://tu-cuenta.systeme.io/tu-funnel",  "type": "string"  },
+            { "id": "c5", "name": "BRAND_COLOR",           "value": "#2563eb",                                 "type": "string"  },
+            { "id": "c6", "name": "BRAND_NAME",            "value": "Tu Marca",                                "type": "string"  },
+            { "id": "c7", "name": "MAX_CLUSTER_POR_GRUPO", "value": 10,                                        "type": "number"  }
           ]
         },
         "options": {}
       }
     },
     {
-      "id": "node-get-posts",
-      "name": "📥 Obtener Posts de Blogger",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [720, 540],
+      "id": "node-blogger-get",
+      "name": "📋 Blogger: Listar Posts",
+      "type": "n8n-nodes-base.blogger",
+      "typeVersion": 1,
+      "position": [720, 660],
       "parameters": {
-        "method": "GET",
-        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.BLOG_ID }}/posts",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "googleApi",
-        "sendQuery": true,
-        "queryParameters": {
-          "parameters": [
-            { "name": "maxResults",   "value": "500" },
-            { "name": "status",       "value": "live" },
-            { "name": "fetchBodies",  "value": "true" }
-          ]
-        },
-        "options": {}
+        "resource": "post",
+        "operation": "getAll",
+        "blogId": "={{ $('⚙️ CONFIG').first().json.BLOG_ID }}",
+        "returnAll": true,
+        "additionalFields": {
+          "status": "live"
+        }
       },
       "credentials": {
-        "googleApi": { "id": "SELECCIONA_TU_CREDENCIAL_GOOGLE", "name": "Google Blogger API" }
+        "bloggerOAuth2Api": {
+          "id": "SELECCIONA_TU_CREDENCIAL_BLOGGER",
+          "name": "Blogger OAuth2"
+        }
       }
     },
     {
       "id": "node-mapear",
-      "name": "🗺️ Mapear Clusters y Pilares",
+      "name": "🗺️ Mapear Clusters + Samplear (1 pilar + máx 10)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [980, 540],
+      "position": [980, 660],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "// Recibe todos los posts de Blogger y construye el mapa cluster→pilar\nconst config = $('⚙️ CONFIG').first().json;\nconst LABEL_PILAR = config.LABEL_PILAR.toLowerCase().trim();\n\nconst raw = $input.first().json;\nconst allPosts = raw.items || [];\n\nif (allPosts.length === 0) {\n  return [{ json: { error: 'No se encontraron posts publicados en el blog.' } }];\n}\n\n// Mapa id → post con labels normalizadas\nconst byId = {};\nallPosts.forEach(p => {\n  byId[p.id] = {\n    id: p.id,\n    title: p.title,\n    url: p.url,\n    labels: (p.labels || []).map(l => l.toLowerCase().trim())\n  };\n});\n\n// Enriquecer cada post con su contexto de cluster\nconst enriched = allPosts.map(post => {\n  const labels = (post.labels || []).map(l => l.toLowerCase().trim());\n  const isPilar = labels.includes(LABEL_PILAR);\n\n  // Buscar el pilar relacionado (comparte label temática + tiene label pilar)\n  const topicLabels = labels.filter(l => l !== LABEL_PILAR);\n  const pillar = Object.values(byId).find(p =>\n    p.id !== post.id &&\n    p.labels.includes(LABEL_PILAR) &&\n    topicLabels.some(l => p.labels.includes(l))\n  ) || null;\n\n  // Posts hermanos en el mismo cluster\n  const siblings = Object.values(byId)\n    .filter(p =>\n      p.id !== post.id &&\n      !p.labels.includes(LABEL_PILAR) &&\n      topicLabels.some(l => p.labels.includes(l))\n    )\n    .slice(0, 3);\n\n  return {\n    json: {\n      id: post.id,\n      title: post.title,\n      url: post.url,\n      labels,\n      content: post.content || '',\n      isPilar,\n      isCluster: !isPilar && !!pillar,\n      pillarTitle: pillar?.title || null,\n      pillarUrl: pillar?.url || null,\n      siblings: siblings.map(s => ({ title: s.title, url: s.url })),\n      // Pasar config para usarla en los nodos siguientes\n      BLOG_ID: config.BLOG_ID,\n      DEEPSEEK_API_KEY: config.DEEPSEEK_API_KEY,\n      SYSTEME_URL: config.SYSTEME_URL,\n      BRAND_COLOR: config.BRAND_COLOR,\n      BRAND_NAME: config.BRAND_NAME\n    }\n  };\n});\n\nreturn enriched;\n"
+        "jsCode": "// ================================================================\n// LEY 2: Revisa si el post ya fue procesado antes de incluirlo\n// Solo se procesa lo que realmente necesita actualización\n// ================================================================\n\nconst config = $('⚙️ CONFIG').first().json;\nconst LABEL_PILAR = config.LABEL_PILAR.toLowerCase().trim();\nconst MAX_PER_GRUPO = config.MAX_CLUSTER_POR_GRUPO || 10;\n\nconst allPosts = $input.all().map(item => ({\n  id:      item.json.id,\n  title:   item.json.title,\n  url:     item.json.url,\n  labels:  (item.json.labels || []).map(l => l.toLowerCase().trim()),\n  content: item.json.content || ''\n}));\n\nif (allPosts.length === 0) {\n  return [{ json: { _error: 'No se encontraron posts publicados.' } }];\n}\n\n// --- Agrupar por label temática ---\n// Clave del grupo: la primera label que NO sea la de pilar\nconst grupos = {};\nfor (const post of allPosts) {\n  const topicLabels = post.labels.filter(l => l !== LABEL_PILAR);\n  if (topicLabels.length === 0) continue;\n  const key = topicLabels[0]; // primera label temática como clave de grupo\n  if (!grupos[key]) grupos[key] = { pilar: null, clusters: [] };\n  if (post.labels.includes(LABEL_PILAR)) {\n    grupos[key].pilar = post;\n  } else {\n    grupos[key].clusters.push(post);\n  }\n}\n\n// --- Samplear y enriquecer ---\nconst resultado = [];\n\nfor (const [topico, grupo] of Object.entries(grupos)) {\n  if (!grupo.pilar) continue; // Skip grupos sin pilar identificado\n\n  const pilar = grupo.pilar;\n\n  // Shuffle de clusters para variedad en cada ejecución\n  const shuffled = [...grupo.clusters].sort(() => Math.random() - 0.5);\n  const seleccionados = shuffled.slice(0, MAX_PER_GRUPO);\n\n  const enriquecer = (post, isPilar) => {\n    const hasCluster = post.content.includes('<!-- CLUSTER_BLOCK -->');\n    const hasCTA     = post.content.includes('<!-- CTA_BLOCK -->');\n\n    // ⚖️ LEY 2: Si ya tiene ambos bloques → skip total\n    const yaCompleto = isPilar ? hasCTA : (hasCluster && hasCTA);\n\n    return {\n      id:            post.id,\n      title:         post.title,\n      url:           post.url,\n      labels:        post.labels,\n      content:       post.content,   // Contenido original (solo para lectura)\n      isPilar,\n      isCluster:     !isPilar,\n      pillarTitle:   isPilar ? null : pilar.title,\n      pillarUrl:     isPilar ? null : pilar.url,\n      topico,\n      // Flags de qué bloques faltan\n      needsCluster:  !isPilar && !hasCluster,\n      needsCTA:      !hasCTA,\n      // Flag de skip total (Ley 2)\n      _skip:         yaCompleto,\n      _skipReason:   yaCompleto ? 'Ya tiene ambos bloques (Ley 2)' : null,\n      // Pasar config\n      BLOG_ID:           config.BLOG_ID,\n      DEEPSEEK_API_KEY:  config.DEEPSEEK_API_KEY,\n      SYSTEME_URL:       config.SYSTEME_URL,\n      BRAND_COLOR:       config.BRAND_COLOR,\n      BRAND_NAME:        config.BRAND_NAME\n    };\n  };\n\n  resultado.push({ json: enriquecer(pilar, true) });\n  for (const cp of seleccionados) {\n    resultado.push({ json: enriquecer(cp, false) });\n  }\n}\n\nreturn resultado;\n"
+      }
+    },
+    {
+      "id": "node-filter-skip",
+      "name": "⚖️ LEY 2: Filtrar Ya Procesados",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [1240, 660],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            {
+              "id": "cond-skip",
+              "leftValue": "={{ $json._skip }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "false" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
       }
     },
     {
       "id": "node-loop",
-      "name": "🔄 Loop Posts",
+      "name": "🔄 Loop Posts (1 a la vez)",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
-      "position": [1240, 540],
+      "position": [1500, 660],
       "parameters": {
         "batchSize": 1,
         "options": { "reset": false }
       }
     },
     {
-      "id": "node-build-prompt",
+      "id": "node-prompt",
       "name": "🧠 Construir Prompt DeepSeek",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1500, 400],
+      "position": [1760, 520],
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const p = $input.item.json;\n\nconst labelsText = p.labels.filter(l => l !== 'pilar' && l !== 'pillar').join(', ') || 'blog';\nconst isCluster = p.isCluster && !!p.pillarTitle;\n\nconst systemMsg = `Eres un diseñador HTML/CSS experto en blogs hispanohablantes y marketing de conversión.\nSiempre respondes ÚNICAMENTE con JSON válido, sin markdown, sin texto adicional.\nTus diseños son mobile-first, creativos, con emojis temáticos (nunca ✅❌), y CSS 100% inline.`;\n\nconst userMsg = `Genera 2 bloques HTML para este post:\n\n📝 POST: \"${p.title}\"\n🏷️ Temas: ${labelsText}\n${isCluster\n  ? `📌 Es post de CLUSTER. Pilar: \"${p.pillarTitle}\" → ${p.pillarUrl}`\n  : `🏆 Es post PILAR (no necesita bloque de cluster, deja clusterBlock vacío)`\n}\n🔗 Funnel ventas: ${p.SYSTEME_URL}\n🎨 Color marca: ${p.BRAND_COLOR} | Marca: ${p.BRAND_NAME}\n\nResponde SOLO este JSON:\n{\"clusterBlock\": \"...\", \"ctaBlock\": \"...\"}\n\n━━━━━━━━━━━━━━━━\n🔷 BLOQUE 1 — clusterBlock (vacío \"\" si es pilar):\n• Caja 100% ancho, display:flex, flex-wrap:wrap, gap:16px, align-items:center\n• Imagen izquierda: div 78x78px cuadrado, border-radius:12px,\n  background: gradient 135deg de variaciones del color ${p.BRAND_COLOR},\n  display:flex, align-items:center, justify-content:center,\n  font-size:36px con 1 emoji relevante al tema (NO genérico)\n• Texto derecho: flex:1, min-width:200px\n  - Párrafo con 2 emojis del nicho + texto que diga que hay más en el pilar (2 líneas)\n  - Ej: \"💡🔍 ¿Quieres dominar ${labelsText} de verdad? Esta es solo una pieza del rompecabezas.\"\n  - Link bold → color ${p.BRAND_COLOR}, text-decoration:none:\n    \"Leer la guía completa: ${isCluster ? p.pillarTitle : ''} →\"\n• Estilos caja: background:#f8faff, border-left:5px solid ${p.BRAND_COLOR},\n  border-radius:0 10px 10px 0, padding:20px, margin:28px 0\n• Marcadores: inicia con <!-- CLUSTER_BLOCK --> termina con <!-- /CLUSTER_BLOCK -->\n\n━━━━━━━━━━━━━━━━\n🔶 BLOQUE 2 — ctaBlock (siempre presente):\n• Contenedor: background gradient 135deg ${p.BRAND_COLOR} hacia versión oscurecida,\n  border-radius:14px, padding:28px 24px, margin:32px 0,\n  text-align:center, box-shadow:0 8px 30px rgba(0,0,0,0.18)\n• Imagen cuadrada arriba centrada: 90x90px, border-radius:14px,\n  background:gradient contrastante (blanco semitransparente), display:inline-flex,\n  align-items:center, justify-content:center,\n  font-size:44px con emoji del nicho ${labelsText}, margin:0 auto 16px\n• Título: 1 línea, color:#fff, font-weight:800, font-size:1.35em,\n  margin:0 0 10px, con emoji de urgencia/valor al inicio (🔥 💡 🎯 o relacionado al nicho)\n• 2 bullets: lista sin viñetas, color:rgba(255,255,255,0.88), font-size:0.95em,\n  cada línea empieza con emoji específico del nicho (no checkmarks)\n• Botón: display:inline-block, background:#fff, color:${p.BRAND_COLOR},\n  padding:14px 36px, border-radius:50px, font-weight:800, font-size:1.05em,\n  text-decoration:none, margin-top:20px,\n  box-shadow:0 4px 18px rgba(0,0,0,0.2),\n  href=\"${p.SYSTEME_URL}\", texto: acción concreta y específica del nicho\n• Marcadores: inicia con <!-- CTA_BLOCK --> termina con <!-- /CTA_BLOCK -->`;\n\nreturn {\n  json: {\n    ...p,\n    _deepseekBody: JSON.stringify({\n      model: 'deepseek-chat',\n      messages: [\n        { role: 'system', content: systemMsg },\n        { role: 'user',   content: userMsg   }\n      ],\n      max_tokens: 2500,\n      temperature: 0.75,\n      response_format: { type: 'json_object' }\n    })\n  }\n};\n"
+        "jsCode": "// ================================================================\n// LEY 1: DeepSeek NO recibe el contenido del artículo.\n// Solo recibe: título, tema/labels, datos del pilar, config de marca.\n// Solo debe devolver 2 bloques HTML. Nunca el artículo original.\n// ================================================================\n\nconst p = $input.item.json;\n\nconst labelsText = p.labels\n  .filter(l => l !== 'pilar' && l !== 'pillar')\n  .join(', ') || 'blog';\n\n// Sistema: reglas absolutas para DeepSeek\nconst systemMsg =\n`Eres un diseñador HTML/CSS experto en blogs y marketing de conversión en español.\n\n⚠️ REGLAS ABSOLUTAS — sin excepciones:\n1. NUNCA incluyas, reproduzcas, modifiques ni hagas referencia al contenido del artículo. No lo recibes y no lo necesitas.\n2. Tu ÚNICA salida es un objeto JSON con 2 claves: clusterBlock y ctaBlock.\n3. Todo el CSS debe ser 100% inline (atributo style=\"...\"). Sin clases externas.\n4. Diseños mobile-first, creativos, con emojis temáticos del nicho (NUNCA ✅❌☑️).\n5. Responde ÚNICAMENTE con el JSON. Sin markdown, sin explicaciones, sin texto adicional.`;\n\n// Usuario: datos mínimos necesarios (sin contenido del artículo)\nconst userMsg =\n`Genera 2 bloques HTML para un post de blog con estos datos:\n\n📝 Título del post: \"${p.title}\"\n🏷️ Tema/nicho: ${labelsText}\n${p.isCluster\n  ? `📌 Tipo: CLUSTER — su pilar es: \"${p.pillarTitle}\" → ${p.pillarUrl}`\n  : `🏆 Tipo: PILAR — (clusterBlock debe ser string vacío \"\")`\n}\n🔗 URL funnel: ${p.SYSTEME_URL}\n🎨 Color de marca: ${p.BRAND_COLOR}\n🏢 Nombre del sitio: ${p.BRAND_NAME}\n\n${p.isCluster && p.needsCluster\n  ? `⚡ Se necesita el clusterBlock.`\n  : `ℹ️ clusterBlock = \"\" (no requerido para este post).`\n}\n${p.needsCTA\n  ? `⚡ Se necesita el ctaBlock.`\n  : `ℹ️ ctaBlock = \"\" (ya existe en el post).`\n}\n\nResponde SOLO este JSON:\n{\"clusterBlock\": \"...\", \"ctaBlock\": \"...\"}\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n🔷 SPECS clusterBlock (solo si es CLUSTER y se necesita):\n• Wrapper: display:flex; flex-wrap:wrap; gap:16px; align-items:center;\n  background:#f0f7ff; border-left:5px solid ${p.BRAND_COLOR};\n  border-radius:0 12px 12px 0; padding:20px 22px; margin:28px 0;\n  box-shadow:0 2px 12px rgba(0,0,0,0.07)\n• Imagen izquierda — div 78×78px:\n  background: gradient 135deg variaciones del color ${p.BRAND_COLOR};\n  border-radius:12px; display:flex; align-items:center;\n  justify-content:center; font-size:36px; flex-shrink:0;\n  pon 1 emoji ESPECÍFICO del tema \"${labelsText}\" (no genérico)\n• Texto derecho — div flex:1; min-width:180px:\n  - párrafo pequeño: font-size:0.93em; color:#374151; margin:0 0 10px;\n    2 emojis del nicho + frase que diga que el pilar tiene TODO completo\n    (ej: para nicho \"finanzas\": \"💰📊 Esto es solo una parte. El panorama completo...\")\n  - link bold: color:${p.BRAND_COLOR}; text-decoration:none; font-weight:700;\n    font-size:0.97em; href=\"${p.pillarUrl || ''}\";\n    texto: \"Ver guía completa: ${p.pillarTitle || ''} →\"\n• Marcadores OBLIGATORIOS: empieza con <!-- CLUSTER_BLOCK --> termina con <!-- /CLUSTER_BLOCK -->\n• Adaptable: en pantallas <500px el flex se envuelve (flex-wrap:wrap ya lo maneja)\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n🔶 SPECS ctaBlock (si se necesita):\n• Wrapper: background: gradient 135deg ${p.BRAND_COLOR} a su versión 20% más oscura;\n  border-radius:16px; padding:32px 26px; margin:36px 0;\n  text-align:center; box-shadow:0 10px 35px rgba(0,0,0,0.18);\n  font-family:inherit\n• Imagen superior centrada — div 88×88px inline-flex:\n  border-radius:14px; background:rgba(255,255,255,0.18);\n  align-items:center; justify-content:center;\n  font-size:44px; margin:0 auto 18px; display:flex;\n  pon 1 emoji del nicho \"${labelsText}\" en grande\n• Título: h3 o p bold, color:#fff; font-size:1.35em; font-weight:800;\n  margin:0 0 12px; 1 emoji de urgencia/valor del nicho al inicio\n• 2 bullets: lista sin viñetas (ul list-style:none; padding:0; margin:0 0 22px);\n  cada li: color:rgba(255,255,255,0.88); font-size:0.94em; margin:6px 0;\n  emoji del nicho específico + beneficio concreto (no genérico)\n• Botón CTA: a display:inline-block; background:#fff; color:${p.BRAND_COLOR};\n  padding:14px 40px; border-radius:50px; font-weight:800; font-size:1.05em;\n  text-decoration:none; box-shadow:0 4px 18px rgba(0,0,0,0.22);\n  href=\"${p.SYSTEME_URL}\"; texto: acción específica del nicho en imperativo\n• Marcadores OBLIGATORIOS: empieza con <!-- CTA_BLOCK --> termina con <!-- /CTA_BLOCK -->`;\n\nreturn {\n  json: {\n    ...p,\n    _deepseekBody: JSON.stringify({\n      model: 'deepseek-chat',\n      messages: [\n        { role: 'system', content: systemMsg },\n        { role: 'user',   content: userMsg   }\n      ],\n      max_tokens: 2600,\n      temperature: 0.78,\n      response_format: { type: 'json_object' }\n    })\n  }\n};\n"
       }
     },
     {
@@ -126,7 +145,7 @@
       "name": "🤖 DeepSeek: Generar HTML",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1760, 400],
+      "position": [2020, 520],
       "parameters": {
         "method": "POST",
         "url": "https://api.deepseek.com/chat/completions",
@@ -140,51 +159,79 @@
         "sendBody": true,
         "specifyBody": "string",
         "body": "={{ $json._deepseekBody }}",
-        "options": {
-          "timeout": 60000
-        }
+        "options": { "timeout": 60000 }
       }
     },
     {
       "id": "node-inject",
-      "name": "💉 Parsear AI e Inyectar HTML",
+      "name": "💉 Inyección Segura (Ley 1)",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2020, 400],
+      "position": [2280, 520],
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "// DeepSeek response está en el item actual\n// Datos originales del post están en el nodo 'Construir Prompt DeepSeek'\nconst dsItem = $input.item.json;\nconst postData = $('🧠 Construir Prompt DeepSeek').item.json;\n\n// --- Parsear respuesta de DeepSeek ---\nlet rawContent = '';\ntry {\n  rawContent = dsItem.choices[0].message.content || '';\n} catch(e) {\n  rawContent = '';\n}\n\n// Limpiar posible markdown\nconst cleaned = rawContent\n  .replace(/```json\\s*/gi, '')\n  .replace(/```\\s*/gi, '')\n  .trim();\n\nlet clusterBlock = '';\nlet ctaBlock = '';\n\ntry {\n  const parsed = JSON.parse(cleaned);\n  clusterBlock = (parsed.clusterBlock || '').trim();\n  ctaBlock     = (parsed.ctaBlock     || '').trim();\n} catch(e) {\n  // Fallback: extraer por marcadores si el JSON falló\n  const cm = cleaned.match(/<!-- CLUSTER_BLOCK -->[\\s\\S]*?<!-- \\/CLUSTER_BLOCK -->/);\n  const tm = cleaned.match(/<!-- CTA_BLOCK -->[\\s\\S]*?<!-- \\/CTA_BLOCK -->/);\n  clusterBlock = cm ? cm[0] : '';\n  ctaBlock     = tm ? tm[0] : '';\n}\n\n// --- Inyectar en el contenido del post ---\nlet content = postData.content || '';\n\n// Helper: reemplazar o insertar bloque\nfunction upsertBlock(html, content, startTag, endTag, insertAtPosition) {\n  if (!html) return content;\n  const regex = new RegExp(startTag.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&') + '[\\\\s\\\\S]*?' + endTag.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&'), 'g');\n  if (content.includes(startTag)) {\n    return content.replace(regex, html);\n  }\n  // Insertar en posición calculada\n  if (insertAtPosition === 'end') {\n    return content + '\\n' + html;\n  }\n  // Para clusterBlock: insertar al 65% del contenido\n  const cutIdx = Math.floor(content.length * 0.65);\n  const anchor = content.lastIndexOf('</p>', cutIdx);\n  const insertAt = anchor > 0 ? anchor + 4 : cutIdx;\n  return content.slice(0, insertAt) + '\\n' + html + '\\n' + content.slice(insertAt);\n}\n\n// 1. Bloque cluster→pilar (al 65% del artículo)\ncontent = upsertBlock(clusterBlock, content, '<!-- CLUSTER_BLOCK -->', '<!-- /CLUSTER_BLOCK -->', 'middle');\n\n// 2. CTA de ventas (al final)\ncontent = upsertBlock(ctaBlock, content, '<!-- CTA_BLOCK -->', '<!-- /CTA_BLOCK -->', 'end');\n\nreturn {\n  json: {\n    id:         postData.id,\n    title:      postData.title,\n    BLOG_ID:    postData.BLOG_ID,\n    newContent: content,\n    isCluster:  postData.isCluster,\n    isPilar:    postData.isPilar,\n    hasCluster: clusterBlock.length > 0,\n    hasCTA:     ctaBlock.length > 0\n  }\n};\n"
+        "jsCode": "// ================================================================\n// LEY 1 APLICADA EN CÓDIGO:\n// - El contenido original del post NUNCA se modifica\n// - Solo se AÑADEN bloques en posiciones calculadas\n// - Si el marcador ya existe → se preserva el bloque existente (no se sobreescribe)\n// - Se usa el contenido original del nodo 'Construir Prompt' (antes de DeepSeek)\n// ================================================================\n\nconst dsResponse  = $input.item.json;\nconst postData    = $('🧠 Construir Prompt DeepSeek').item.json;\n\n// --- Parsear respuesta de DeepSeek ---\nlet rawContent = '';\ntry {\n  rawContent = dsResponse.choices[0].message.content || '';\n} catch(e) { rawContent = ''; }\n\n// Limpiar posible markdown\nconst cleaned = rawContent\n  .replace(/```json\\s*/gi, '')\n  .replace(/```\\s*/gi, '')\n  .trim();\n\nlet clusterBlock = '';\nlet ctaBlock     = '';\n\ntry {\n  const parsed = JSON.parse(cleaned);\n  clusterBlock = (parsed.clusterBlock || '').trim();\n  ctaBlock     = (parsed.ctaBlock     || '').trim();\n} catch(e) {\n  // Fallback por marcadores\n  const cm = cleaned.match(/<!-- CLUSTER_BLOCK -->[\\s\\S]*?<!-- \\/CLUSTER_BLOCK -->/);\n  const tm = cleaned.match(/<!-- CTA_BLOCK -->[\\s\\S]*?<!-- \\/CTA_BLOCK -->/);\n  clusterBlock = cm ? cm[0] : '';\n  ctaBlock     = tm ? tm[0] : '';\n}\n\n// ⚖️ LEY 1: El contenido original es intocable\n// Se trabaja sobre una COPIA para solo hacer operaciones de inserción\nlet content = postData.content; // STRING original — solo lectura hasta aquí\n\n// --- Función de inserción segura ---\n// NUNCA modifica el texto original. Solo concatena en posición segura.\nfunction appendBlockSafe(html, originalContent, marker, position) {\n  if (!html || !html.includes(marker)) return originalContent;\n\n  // Ley 2 dentro de la inyección: si el marcador ya está en el contenido, NO hacer nada\n  if (originalContent.includes(marker)) {\n    return originalContent; // bloque ya existe, respetar el original\n  }\n\n  if (position === 'end') {\n    return originalContent + '\\n' + html;\n  }\n\n  // Para clusterBlock: insertar al 65% del artículo, después del </p> más cercano\n  const cutIdx   = Math.floor(originalContent.length * 0.65);\n  const anchor   = originalContent.lastIndexOf('</p>', cutIdx);\n  const insertAt = anchor > 0 ? anchor + 4 : cutIdx;\n\n  return originalContent.slice(0, insertAt) + '\\n' + html + '\\n' + originalContent.slice(insertAt);\n}\n\n// --- Solo insertar lo que falta (Ley 2 final) ---\nif (postData.needsCluster && clusterBlock) {\n  content = appendBlockSafe(clusterBlock, content, '<!-- CLUSTER_BLOCK -->', 'middle');\n}\n\nif (postData.needsCTA && ctaBlock) {\n  content = appendBlockSafe(ctaBlock, content, '<!-- CTA_BLOCK -->', 'end');\n}\n\n// Verificar que algo cambió realmente\nconst huboInsercion = content !== postData.content;\n\nreturn {\n  json: {\n    id:           postData.id,\n    title:        postData.title,\n    BLOG_ID:      postData.BLOG_ID,\n    newContent:   content,\n    isCluster:    postData.isCluster,\n    isPilar:      postData.isPilar,\n    topico:       postData.topico,\n    addedCluster: postData.needsCluster && clusterBlock.length > 0,\n    addedCTA:     postData.needsCTA     && ctaBlock.length > 0,\n    _noChange:    !huboInsercion\n  }\n};\n"
       }
     },
     {
-      "id": "node-update",
-      "name": "📤 Actualizar Post en Blogger",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [2280, 400],
+      "id": "node-filter-nochange",
+      "name": "🔍 Solo Posts Con Cambios",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [2540, 520],
       "parameters": {
-        "method": "PATCH",
-        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.BLOG_ID }}/posts/{{ $json.id }}",
-        "authentication": "predefinedCredentialType",
-        "nodeCredentialType": "googleApi",
-        "sendBody": true,
-        "specifyBody": "json",
-        "jsonBody": "={\n  \"content\": {{ JSON.stringify($json.newContent) }}\n}",
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            {
+              "id": "cond-nochange",
+              "leftValue": "={{ $json._noChange }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "false" }
+            }
+          ],
+          "combinator": "and"
+        },
         "options": {}
+      }
+    },
+    {
+      "id": "node-blogger-update",
+      "name": "📤 Blogger: Actualizar Post",
+      "type": "n8n-nodes-base.blogger",
+      "typeVersion": 1,
+      "position": [2800, 520],
+      "parameters": {
+        "resource": "post",
+        "operation": "update",
+        "blogId": "={{ $json.BLOG_ID }}",
+        "postId": "={{ $json.id }}",
+        "title":  "={{ $json.title }}",
+        "content":"={{ $json.newContent }}"
       },
       "credentials": {
-        "googleApi": { "id": "SELECCIONA_TU_CREDENCIAL_GOOGLE", "name": "Google Blogger API" }
+        "bloggerOAuth2Api": {
+          "id": "SELECCIONA_TU_CREDENCIAL_BLOGGER",
+          "name": "Blogger OAuth2"
+        }
       }
+    },
+    {
+      "id": "node-loop-back",
+      "name": "↩️ Volver al Loop",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [3060, 520]
     },
     {
       "id": "node-summary",
       "name": "✅ Resumen Final",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1500, 700],
+      "position": [1760, 820],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const items = $input.all();\nconst total = items.length;\nreturn [{\n  json: {\n    status: '✅ Blog Factory completado',\n    postsAnalizados: total,\n    timestamp: new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City' }),\n    nota: `${total} posts procesados. Bloques cluster + CTA inyectados via DeepSeek.`\n  }\n}];\n"
+        "jsCode": "const items = $input.all();\nreturn [{\n  json: {\n    status:           '✅ Blog Factory completado',\n    postsAnalizados:  items.length,\n    timestamp:        new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City' }),\n    nota:             `Ley 1 activa: DeepSeek nunca modificó contenido original. Ley 2 activa: posts ya procesados fueron saltados.`\n  }\n}];\n"
       }
     }
   ],
@@ -196,31 +243,40 @@
       "main": [[{ "node": "⚙️ CONFIG", "type": "main", "index": 0 }]]
     },
     "⚙️ CONFIG": {
-      "main": [[{ "node": "📥 Obtener Posts de Blogger", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "📋 Blogger: Listar Posts", "type": "main", "index": 0 }]]
     },
-    "📥 Obtener Posts de Blogger": {
-      "main": [[{ "node": "🗺️ Mapear Clusters y Pilares", "type": "main", "index": 0 }]]
+    "📋 Blogger: Listar Posts": {
+      "main": [[{ "node": "🗺️ Mapear Clusters + Samplear (1 pilar + máx 10)", "type": "main", "index": 0 }]]
     },
-    "🗺️ Mapear Clusters y Pilares": {
-      "main": [[{ "node": "🔄 Loop Posts", "type": "main", "index": 0 }]]
+    "🗺️ Mapear Clusters + Samplear (1 pilar + máx 10)": {
+      "main": [[{ "node": "⚖️ LEY 2: Filtrar Ya Procesados", "type": "main", "index": 0 }]]
     },
-    "🔄 Loop Posts": {
+    "⚖️ LEY 2: Filtrar Ya Procesados": {
+      "main": [[{ "node": "🔄 Loop Posts (1 a la vez)", "type": "main", "index": 0 }]]
+    },
+    "🔄 Loop Posts (1 a la vez)": {
       "main": [
         [{ "node": "🧠 Construir Prompt DeepSeek", "type": "main", "index": 0 }],
-        [{ "node": "✅ Resumen Final",            "type": "main", "index": 0 }]
+        [{ "node": "✅ Resumen Final",             "type": "main", "index": 0 }]
       ]
     },
     "🧠 Construir Prompt DeepSeek": {
       "main": [[{ "node": "🤖 DeepSeek: Generar HTML", "type": "main", "index": 0 }]]
     },
     "🤖 DeepSeek: Generar HTML": {
-      "main": [[{ "node": "💉 Parsear AI e Inyectar HTML", "type": "main", "index": 0 }]]
+      "main": [[{ "node": "💉 Inyección Segura (Ley 1)", "type": "main", "index": 0 }]]
     },
-    "💉 Parsear AI e Inyectar HTML": {
-      "main": [[{ "node": "📤 Actualizar Post en Blogger", "type": "main", "index": 0 }]]
+    "💉 Inyección Segura (Ley 1)": {
+      "main": [[{ "node": "🔍 Solo Posts Con Cambios", "type": "main", "index": 0 }]]
     },
-    "📤 Actualizar Post en Blogger": {
-      "main": [[{ "node": "🔄 Loop Posts", "type": "main", "index": 0 }]]
+    "🔍 Solo Posts Con Cambios": {
+      "main": [[{ "node": "📤 Blogger: Actualizar Post", "type": "main", "index": 0 }]]
+    },
+    "📤 Blogger: Actualizar Post": {
+      "main": [[{ "node": "↩️ Volver al Loop", "type": "main", "index": 0 }]]
+    },
+    "↩️ Volver al Loop": {
+      "main": [[{ "node": "🔄 Loop Posts (1 a la vez)", "type": "main", "index": 0 }]]
     }
   },
   "active": false,
@@ -229,7 +285,7 @@
     "saveManualExecutions": true,
     "callerPolicy": "workflowsFromSameOwner"
   },
-  "versionId": "d4e5f6a7-4444-4444-4444-dddddddddddd",
+  "versionId": "e5f6a7b8-5555-5555-5555-eeeeeeeeeeee",
   "meta": {
     "templateCredsSetupCompleted": false,
     "instanceId": ""
