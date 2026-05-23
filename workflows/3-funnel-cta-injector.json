@@ -1,0 +1,275 @@
+{
+  "name": "3 - Funnel CTA Injector (Blogger + Systeme.io)",
+  "nodes": [
+    {
+      "id": "node-sticky-funnel",
+      "name": "SOBRE ESTE WORKFLOW",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [240, 80],
+      "parameters": {
+        "content": "## 💰 Funnel CTA Injector\n\nEste workflow agrega automáticamente una **caja de CTA** al final de cada post de Blogger, enlazando a tus funnels de systeme.io.\n\n**Lógica de CTAs por tipo de contenido:**\n- Posts con label `pilar` → CTA de producto premium\n- Posts con label `cluster` → CTA de lead magnet / recurso gratis\n- Posts sin label especial → CTA de newsletter\n\n**¿Duplica el CTA?** No. Detecta si ya existe `<div class=\"funnel-cta\">`\n\n**Cuándo ejecutar:**\n- Manualmente después de publicar posts nuevos\n- O activa el schedule (cada 48h)",
+        "height": 300,
+        "width": 440,
+        "color": 4
+      }
+    },
+    {
+      "id": "node-manual-funnel",
+      "name": "Ejecutar Manualmente",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 420],
+      "parameters": {}
+    },
+    {
+      "id": "node-schedule-funnel",
+      "name": "Cada 48 Horas",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [240, 560],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 48
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "node-funnel-config",
+      "name": "Configuracion Funnels",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [480, 480],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f-blog-id",
+              "name": "BLOG_ID",
+              "value": "TU_BLOG_ID_AQUI",
+              "type": "string"
+            },
+            {
+              "id": "f-pilar-url",
+              "name": "FUNNEL_PILAR_URL",
+              "value": "https://tu-cuenta.systeme.io/producto-premium",
+              "type": "string"
+            },
+            {
+              "id": "f-pilar-title",
+              "name": "FUNNEL_PILAR_TITULO",
+              "value": "🚀 Accede al Programa Completo",
+              "type": "string"
+            },
+            {
+              "id": "f-pilar-desc",
+              "name": "FUNNEL_PILAR_DESC",
+              "value": "Lleva tu conocimiento al siguiente nivel con nuestro programa paso a paso. Más de 500 estudiantes ya lo están aplicando.",
+              "type": "string"
+            },
+            {
+              "id": "f-pilar-cta",
+              "name": "FUNNEL_PILAR_CTA",
+              "value": "Ver el Programa →",
+              "type": "string"
+            },
+            {
+              "id": "f-cluster-url",
+              "name": "FUNNEL_CLUSTER_URL",
+              "value": "https://tu-cuenta.systeme.io/recurso-gratis",
+              "type": "string"
+            },
+            {
+              "id": "f-cluster-title",
+              "name": "FUNNEL_CLUSTER_TITULO",
+              "value": "🎁 Descarga el Recurso Gratuito",
+              "type": "string"
+            },
+            {
+              "id": "f-cluster-desc",
+              "name": "FUNNEL_CLUSTER_DESC",
+              "value": "Hemos preparado una guía descargable que complementa este artículo. Sin costo, sin tarjeta de crédito.",
+              "type": "string"
+            },
+            {
+              "id": "f-cluster-cta",
+              "name": "FUNNEL_CLUSTER_CTA",
+              "value": "Descargar Gratis →",
+              "type": "string"
+            },
+            {
+              "id": "f-general-url",
+              "name": "FUNNEL_GENERAL_URL",
+              "value": "https://tu-cuenta.systeme.io/newsletter",
+              "type": "string"
+            },
+            {
+              "id": "f-general-title",
+              "name": "FUNNEL_GENERAL_TITULO",
+              "value": "📩 Únete a nuestra comunidad",
+              "type": "string"
+            },
+            {
+              "id": "f-general-desc",
+              "name": "FUNNEL_GENERAL_DESC",
+              "value": "Recibe semanalmente los mejores tips directamente en tu correo. Más de 5,000 suscriptores ya están dentro.",
+              "type": "string"
+            },
+            {
+              "id": "f-general-cta",
+              "name": "FUNNEL_GENERAL_CTA",
+              "value": "Suscribirme Gratis →",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-get-posts-funnel",
+      "name": "Obtener Posts de Blogger",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 480],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.BLOG_ID }}/posts",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "maxResults", "value": "500" },
+            { "name": "status", "value": "live" }
+          ]
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleApi": {
+          "id": "SELECCIONA_TU_CREDENCIAL_GOOGLE",
+          "name": "Google Blogger API"
+        }
+      }
+    },
+    {
+      "id": "node-inject-cta",
+      "name": "Inyectar CTA en Posts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, 480],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const httpResponse = $input.first().json;\nconst config = $('Configuracion Funnels').first().json;\n\nconst posts = httpResponse.items || [];\nconst results = [];\n\nfor (const post of posts) {\n  const labels = post.labels || [];\n  const content = post.content || '';\n  \n  // Si ya tiene CTA, saltar\n  if (content.includes('<div class=\"funnel-cta\"')) {\n    results.push({ json: { id: post.id, title: post.title, skipped: true, reason: 'Ya tiene CTA' } });\n    continue;\n  }\n  \n  // Determinar tipo de funnel según labels\n  const isPilar = labels.includes('pilar') || labels.includes('pillar');\n  const isCluster = labels.includes('cluster') || labels.some(l => l.includes('cluster'));\n  \n  let ctaTitle, ctaDesc, ctaText, ctaUrl, bgGradient;\n  \n  if (isPilar) {\n    ctaTitle = config.FUNNEL_PILAR_TITULO;\n    ctaDesc = config.FUNNEL_PILAR_DESC;\n    ctaText = config.FUNNEL_PILAR_CTA;\n    ctaUrl = config.FUNNEL_PILAR_URL;\n    bgGradient = 'linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%)';\n  } else if (isCluster) {\n    ctaTitle = config.FUNNEL_CLUSTER_TITULO;\n    ctaDesc = config.FUNNEL_CLUSTER_DESC;\n    ctaText = config.FUNNEL_CLUSTER_CTA;\n    ctaUrl = config.FUNNEL_CLUSTER_URL;\n    bgGradient = 'linear-gradient(135deg, #064e3b 0%, #10b981 100%)';\n  } else {\n    ctaTitle = config.FUNNEL_GENERAL_TITULO;\n    ctaDesc = config.FUNNEL_GENERAL_DESC;\n    ctaText = config.FUNNEL_GENERAL_CTA;\n    ctaUrl = config.FUNNEL_GENERAL_URL;\n    bgGradient = 'linear-gradient(135deg, #4c1d95 0%, #7c3aed 100%)';\n  }\n  \n  const ctaHTML = `\n<div class=\"funnel-cta\" style=\"background:${bgGradient};color:#fff;padding:32px 28px;margin:40px 0;border-radius:12px;text-align:center;font-family:inherit;\">\n  <h3 style=\"margin:0 0 12px;font-size:1.4em;font-weight:700;color:#fff;\">${ctaTitle}</h3>\n  <p style=\"margin:0 0 24px;font-size:1em;opacity:0.92;line-height:1.6;\">${ctaDesc}</p>\n  <a href=\"${ctaUrl}\" rel=\"noopener\" style=\"display:inline-block;background:#fff;color:#1a1a2e;padding:14px 36px;border-radius:50px;font-weight:700;font-size:1.05em;text-decoration:none;transition:transform 0.2s;\" onmouseover=\"this.style.transform='scale(1.05)'\" onmouseout=\"this.style.transform='scale(1)'\">${ctaText}</a>\n</div>`;\n  \n  const newContent = content + ctaHTML;\n  \n  results.push({\n    json: {\n      id: post.id,\n      title: post.title,\n      BLOG_ID: config.BLOG_ID,\n      newContent,\n      skipped: false,\n      ctaType: isPilar ? 'pilar' : (isCluster ? 'cluster' : 'general'),\n      labels\n    }\n  });\n}\n\nreturn results;\n"
+      }
+    },
+    {
+      "id": "node-filter-funnel",
+      "name": "Solo Posts Para Actualizar",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [1200, 480],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "cond-funnel-skip",
+              "leftValue": "={{ $json.skipped }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "false"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-update-funnel",
+      "name": "Actualizar Post con CTA",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1440, 480],
+      "parameters": {
+        "method": "PATCH",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $json.BLOG_ID }}/posts/{{ $json.id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": {{ JSON.stringify($json.newContent) }}\n}",
+        "options": {}
+      },
+      "credentials": {
+        "googleApi": {
+          "id": "SELECCIONA_TU_CREDENCIAL_GOOGLE",
+          "name": "Google Blogger API"
+        }
+      }
+    },
+    {
+      "id": "node-funnel-summary",
+      "name": "Resumen CTAs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1680, 480],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const items = $input.all();\nreturn [{\n  json: {\n    message: '✅ Funnel CTA Injector completado',\n    postsConCTANuevo: items.length,\n    timestamp: new Date().toISOString()\n  }\n}];\n"
+      }
+    }
+  ],
+  "connections": {
+    "Ejecutar Manualmente": {
+      "main": [[{ "node": "Configuracion Funnels", "type": "main", "index": 0 }]]
+    },
+    "Cada 48 Horas": {
+      "main": [[{ "node": "Configuracion Funnels", "type": "main", "index": 0 }]]
+    },
+    "Configuracion Funnels": {
+      "main": [[{ "node": "Obtener Posts de Blogger", "type": "main", "index": 0 }]]
+    },
+    "Obtener Posts de Blogger": {
+      "main": [[{ "node": "Inyectar CTA en Posts", "type": "main", "index": 0 }]]
+    },
+    "Inyectar CTA en Posts": {
+      "main": [[{ "node": "Solo Posts Para Actualizar", "type": "main", "index": 0 }]]
+    },
+    "Solo Posts Para Actualizar": {
+      "main": [[{ "node": "Actualizar Post con CTA", "type": "main", "index": 0 }]]
+    },
+    "Actualizar Post con CTA": {
+      "main": [[{ "node": "Resumen CTAs", "type": "main", "index": 0 }]]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true
+  },
+  "versionId": "c3d4e5f6-3333-3333-3333-cccccccccccc",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": ""
+  },
+  "id": "funnel-cta-workflow-003",
+  "tags": [
+    { "createdAt": "2026-01-01", "updatedAt": "2026-01-01", "id": "tag-funnel", "name": "Funnel" },
+    { "createdAt": "2026-01-01", "updatedAt": "2026-01-01", "id": "tag-systeme", "name": "systeme.io" }
+  ]
+}
