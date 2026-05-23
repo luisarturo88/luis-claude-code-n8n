@@ -1,87 +1,129 @@
-# Setup — Blog Factory SEO Clusters + DeepSeek
+# Blog Factory Autopilot — Setup Guide
 
-## Importar en tu n8n (Contabo)
+## Lo que hace este workflow (TODO automático)
 
-1. n8n → Workflows → **Import from file**
-2. Selecciona: `workflows/blog-factory-seo-clusters-deepseek.json`
-
----
-
-## ⚖️ Las 2 Leyes (ya están en el código)
-
-### Ley 1 — DeepSeek NO modifica el contenido
-- DeepSeek **no recibe** el texto del artículo
-- Solo recibe: título del post, tema/labels, datos del pilar, color de marca
-- Solo puede **generar 2 bloques HTML nuevos**
-- El código de inyección usa solo `append` en posiciones fijas — nunca `.replace()` sobre el artículo original
-
-### Ley 2 — Si ya existe, skip total
-- Antes de llamar a DeepSeek se revisa si el post ya tiene `<!-- CLUSTER_BLOCK -->` y `<!-- CTA_BLOCK -->`
-- Si ambos existen → el post **se salta completamente** (no se llama a DeepSeek)
-- Si falta uno → solo se genera el que falta
-- La inyección tiene un segundo chequeo: si el marcador ya está en el contenido, no inserta nada
+```
+Diario 3am
+  → Lee tu Google Sheet con todos los blogs
+  → Elige el blog menos procesado (rotación automática)
+  → Detecta si es ANIMALES o ABOGADOS/LEGAL
+  → Obtiene sus posts de Blogger
+  → Agrupa por cluster: 1 pilar + máx 10 cluster posts
+  → Filtra posts que ya tienen los 3 bloques (Ley 2)
+  → Para cada post nuevo:
+      → DeepSeek genera 3 bloques HTML creativos
+      → Inyecta sin tocar el contenido original (Ley 1)
+      → Actualiza el post en Blogger
+  → Marca el blog en el Sheet con timestamp
+  → Mañana → siguiente blog en rotación
+```
 
 ---
 
-## Configurar (nodo ⚙️ CONFIG)
+## PASO 1 — Agregar columna al Google Sheet
 
-| Campo | Qué poner |
-|-------|-----------|
-| `BLOG_ID` | ID numérico de tu blog (en la URL del panel de Blogger) |
-| `LABEL_PILAR` | Etiqueta que usas para posts pilar, ej: `pilar` |
+En tu Sheet (`1Vq8TuyqI22C3_Ffth-GsGdDRuXfHORpdAGOiowLxIpk`), agrega estas columnas al final:
+
+| Columna | Tipo | Para qué sirve |
+|---------|------|----------------|
+| `CLUSTERS_ULTIMO_PROCESO` | Texto/Fecha | El workflow actualiza esto automáticamente para saber qué blog procesar siguiente |
+| `ESTRATEGIA` | Texto (opcional) | Si lo dejas vacío, se auto-detecta por el nombre del nicho. Puedes forzar: `animales_productos` o `lead_abogados` |
+
+---
+
+## PASO 2 — Configurar el nodo ⚙️ CONFIG
+
+| Campo | Valor |
+|-------|-------|
+| `SHEET_ID` | Ya está configurado con tu Sheet ID |
+| `HOJA_BLOGS` | Nombre de la pestaña con el listado de blogs (ej: "Blogs", "Sheet1") |
 | `DEEPSEEK_API_KEY` | Tu API key de platform.deepseek.com |
-| `SYSTEME_URL` | URL de tu funnel en systeme.io |
-| `BRAND_COLOR` | Hex de tu color principal, ej: `#2563eb` |
-| `BRAND_NAME` | Nombre de tu blog/marca |
-| `MAX_CLUSTER_POR_GRUPO` | 5 a 10 (máx posts cluster procesados por grupo) |
+| `LABEL_PILAR` | Etiqueta que usas en posts pilar (ej: `pilar`) |
+| `MAX_CLUSTER_POR_GRUPO` | 5–10 (posts cluster por grupo por run) |
+| `FUNNEL_ANIMALES` | URL de systeme.io para blogs de animales (si el blog no tiene LEAD_MAGNET_URL) |
+| `FUNNEL_ABOGADOS` | URL de systeme.io para captación de leads legales |
+| `BRAND_COLOR_ANIMALES` | Color hex para blogs de animales (ej: `#16a34a`) |
+| `BRAND_COLOR_ABOGADOS` | Color hex para blogs de abogados (ej: `#1e40af`) |
+
+**Nota:** Si un blog ya tiene `LEAD_MAGNET_URL` en el Sheet, se usa ese URL. Los globales son el respaldo.
 
 ---
 
-## Credencial de Blogger (nodo comunitario)
+## PASO 3 — Credenciales en n8n
 
-En los nodos `📋 Blogger: Listar Posts` y `📤 Blogger: Actualizar Post`:
-1. Tipo de credencial: **Blogger OAuth2** (`bloggerOAuth2Api`)
-2. Scope requerido: `https://www.googleapis.com/auth/blogger`
-3. Si no aparece el tipo, instala el nodo Blogger desde la tienda de n8n
+### Google Sheets OAuth2
+En nodos `📊 Google Sheets: Leer Blogs` y `📊 Sheets: Marcar Blog Procesado`:
+- Tipo: **Google Sheets OAuth2** (`googleSheetsOAuth2Api`)
 
----
-
-## Estructura de labels en Blogger
-
-```
-Post PILAR:   labels → ["pilar", "seo"]
-Post CLUSTER: labels → ["seo", "keyword-research"]
-Post CLUSTER: labels → ["seo", "link-building"]
-```
-
-El workflow detecta automáticamente: posts que tengan `pilar` + una label temática = pilar del cluster. Posts que solo tengan la label temática (sin `pilar`) = cluster posts.
+### Blogger OAuth2
+En nodos `📋 Blogger: Listar Posts` y `📤 Blogger: Actualizar Post`:
+- Tipo: **Blogger OAuth2** (`bloggerOAuth2Api`)
+- Scope: `https://www.googleapis.com/auth/blogger`
 
 ---
 
-## Qué procesa en cada ejecución (con 1500 posts)
+## Detección automática de estrategia
 
-- Agrupa todos los posts por label temática
-- Por cada grupo: toma **1 pilar + máx 10 cluster** (aleatorio cada vez)
-- Filtra los que ya tienen ambos bloques (Ley 2) → solo procesa lo nuevo
-- Llama a DeepSeek solo para los que necesitan actualización
+El workflow lee el `NICHO` de cada blog y detecta automáticamente:
 
-Con el tiempo, todos los posts van siendo cubiertos en sucesivas ejecuciones dominicales.
+**→ `lead_abogados`** si el nicho contiene: `abog`, `litig`, `legal`, `impuesto`, `multa`, `accidente`, `bienes ra`, `familia usa`, `herencia`, `divorcio`, `demanda`, `delito`
+
+Blogs detectados como legales en tu Sheet:
+- Abogados bienes raíces USA
+- Abogados de accidente Orlando
+- Abogados de familia USA
+- Impuestos en USA
+- Multas y permisos laborales USA
+- Abogados accidente USA
+- Litigios USA
+
+**→ `animales_productos`** para el resto (animales, veterinaria, salud, etc.)
 
 ---
 
-## Qué genera DeepSeek para cada post
+## Qué genera DeepSeek por cada post
 
-**Bloque cluster → pilar** (solo en cluster posts, al 65% del artículo):
-- Caja con borde izquierdo del color de marca
-- Imagen cuadrada 78×78px CSS (gradient + emoji temático del nicho)
-- Texto con 2 emojis del nicho que invitan a leer el pilar
-- Link "Ver guía completa: [título pilar] →"
-- Marcado con `<!-- CLUSTER_BLOCK -->..<!-- /CLUSTER_BLOCK -->`
+### Para blogs de ANIMALES/VETERINARIA:
 
-**Cajón CTA de ventas** (en TODOS los posts, al final):
-- Fondo gradient del color de marca
-- Imagen cuadrada 88×88px con emoji del nicho
-- Título con emoji de urgencia/valor específico del nicho
-- 2 bullets de beneficios con emojis del tema
-- Botón redondeado → tu funnel de systeme.io
-- Marcado con `<!-- CTA_BLOCK -->..<!-- /CTA_BLOCK -->`
+| Bloque | Posición | Contenido |
+|--------|----------|-----------|
+| `CLUSTER_BLOCK` | Al 65% del artículo | Caja con emoji de la especie, imagen cuadrada CSS, link al pilar |
+| `CTA_BLOCK` | Al final | Cajón de conversión con imagen, bullets y botón al funnel |
+| `POPUP_BLOCK` | Al final | Modal con JS inline: se activa al 40% scroll, exit intent o 10s |
+
+### Para blogs de ABOGADOS/LEGAL:
+
+| Bloque | Posición | Contenido |
+|--------|----------|-----------|
+| `CLUSTER_BLOCK` | Al 65% del artículo | Caja con emojis legales (⚖️🏛️📜), texto que conecta al pilar legal |
+| `CTA_BLOCK` | Al final | Cajón de captación: "¿Necesitas ayuda legal? Consulta GRATIS" → tu form |
+| `POPUP_BLOCK` | Al final | Modal urgente con JS: urgencia legal, botón al formulario de lead |
+
+---
+
+## Rotación automática de blogs
+
+Con 35 blogs activos y ejecución diaria:
+- Cada blog se procesa una vez cada 35 días
+- Con `MAX_CLUSTER_POR_GRUPO = 10`: 11 posts por run (1 pilar + 10 cluster)
+- Para 1500 posts en un blog: necesita ~137 ciclos = ~13 años completos
+
+**Recomendación:** Aumenta `MAX_CLUSTER_POR_GRUPO` a 50 para procesar 51 posts por run.
+Con 51 posts/run y rotación de 35 días: 1500 posts / 51 = ~30 ciclos = ~3 años.
+
+O activa el schedule 2× por día para duplicar la velocidad.
+
+---
+
+## Las 2 Leyes (ya implementadas en el código)
+
+### ⚖️ Ley 1 — DeepSeek NO modifica el contenido original
+- DeepSeek recibe SOLO: título del post, labels, datos del pilar, especie/nicho, URLs
+- NUNCA recibe el HTML del artículo
+- El código de inyección usa solo `slice() + append` nunca `.replace()` en el original
+- Doble verificación: si el marcador ya existe → no se sobreescribe
+
+### ⚖️ Ley 2 — Si ya tiene los 3 bloques → skip total
+- Antes del loop se revisa si el post tiene `<!-- CLUSTER_BLOCK -->`, `<!-- CTA_BLOCK -->` y `<!-- POPUP_BLOCK -->`
+- Si los 3 existen → el post no entra al loop (no se llama a DeepSeek)
+- Revisión adicional en el código de inyección como segunda barrera
