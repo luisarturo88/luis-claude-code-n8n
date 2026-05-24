@@ -1,5 +1,5 @@
 {
-  "name": "Lead Premium Receiver — Webhook systeme.io → Google Sheet",
+  "name": "Lead Premium Receiver + SMS Warmer [Twilio]",
   "nodes": [
     {
       "id": "sticky-note",
@@ -8,9 +8,9 @@
       "typeVersion": 1,
       "position": [180, 60],
       "parameters": {
-        "content": "## 📥 Receptor de Leads Premium ($250)\n\n**Flujo:**\n1. systeme.io llama este webhook cuando alguien completa el formulario de calificación premium\n2. El webhook extrae: email, nombre, teléfono, blog_id, blog_name, nicho\n3. Busca la fila del blog en Google Sheet\n4. Actualiza el Sheet marcando la conversión premium\n5. Responde 200 OK a systeme.io\n\n---\n**Columnas que escribe en Sheet:**\n- `ULTIMO_LEAD_PREMIUM` — timestamp ISO\n- `LEADS_PREMIUM_TOTAL` — contador acumulado\n- `ULTIMO_LEAD_EMAIL` — email del lead\n\n---\n**URL del webhook (configura en systeme.io):**\n`https://TU_N8N.contabo.com/webhook/lead-premium`\n\n**Parámetros POST que debe enviar systeme.io:**\n- `email` (requerido)\n- `first_name`\n- `phone`\n- `blog_id` — ID del blog de Blogger (para mapear al Sheet)\n- `blog_name` — Nombre del blog (fallback)\n- `lead_value` — Valor declarado (opcional, default 250)",
-        "height": 460,
-        "width": 480,
+        "content": "## 📥 Lead Premium + Secuencia SMS/WhatsApp (Twilio)\n\n**Flujo principal (webhook systeme.io):**\n1. Recibe lead premium desde systeme.io\n2. Busca el blog en el Sheet → actualiza contadores + teléfono\n3. Responde 200 OK a systeme.io (inmediato)\n4. Inicia secuencia de SMS/WhatsApp:\n   - **Fase 1 (inmediato):** Bienvenida + enlace audio 2 min\n   - **Fase 2 (+1h hábil):** Recordatorio si no respondió\n   - **Fase 3 (+5h hábil):** Anuncia la llamada del abogado\n   - **Fase 4 (15 min antes de llamada):** Recordatorio prellamada\n\n**Flujo de respuestas Twilio (/webhook/twilio-reply):**\n- Recibe mensajes/fotos del lead\n- Guarda en Sheet: INFO_RECOLECTADA, CONFIRMADO, FASE\n\n---\n**Nuevas columnas en Sheet:**\n- `LEAD_PREMIUM_TELEFONO` — número del lead\n- `LEAD_PREMIUM_FASE` — 0=nuevo, 1-4=progreso, -1=sin teléfono\n- `LEAD_PREMIUM_INFO_RECOLECTADA` — mensajes del lead\n- `LEAD_PREMIUM_ULTIMO_MENSAJE` — timestamp\n- `LEAD_PREMIUM_CONFIRMADO` — TRUE si confirmó la llamada\n\n---\n**CONFIG a editar:**\n- TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN\n- TWILIO_FROM: tu número Twilio (ej: +12125551234)\n- TWILIO_CHANNEL: 'sms' o 'whatsapp'\n- AUDIO_URL: URL pública de tu audio MP3",
+        "height": 600,
+        "width": 560,
         "color": 5
       }
     },
@@ -19,7 +19,7 @@
       "name": "🔔 Webhook: Lead Premium",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [180, 580],
+      "position": [180, 740],
       "parameters": {
         "httpMethod": "POST",
         "path": "lead-premium",
@@ -32,14 +32,19 @@
       "name": "⚙️ CONFIG Lead Premium",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [460, 580],
+      "position": [460, 740],
       "parameters": {
         "mode": "manual",
         "assignments": {
           "assignments": [
-            { "id": "lp01", "name": "SHEET_ID",   "value": "1Vq8TuyqI22C3_Ffth-GsGdDRuXfHORpdAGOiowLxIpk", "type": "string" },
-            { "id": "lp02", "name": "HOJA_BLOGS", "value": "Blogs",                                            "type": "string" },
-            { "id": "lp03", "name": "LEAD_VALUE_DEFAULT", "value": 250,                                        "type": "number" }
+            { "id": "lp01", "name": "SHEET_ID",            "value": "1Vq8TuyqI22C3_Ffth-GsGdDRuXfHORpdAGOiowLxIpk", "type": "string" },
+            { "id": "lp02", "name": "HOJA_BLOGS",          "value": "Blogs",                                            "type": "string" },
+            { "id": "lp03", "name": "LEAD_VALUE_DEFAULT",  "value": 250,                                                "type": "number" },
+            { "id": "lp04", "name": "TWILIO_ACCOUNT_SID",  "value": "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxx",                   "type": "string" },
+            { "id": "lp05", "name": "TWILIO_AUTH_TOKEN",   "value": "TU_AUTH_TOKEN_AQUI",                              "type": "string" },
+            { "id": "lp06", "name": "TWILIO_FROM",         "value": "+12125551234",                                     "type": "string" },
+            { "id": "lp07", "name": "TWILIO_CHANNEL",      "value": "sms",                                              "type": "string" },
+            { "id": "lp08", "name": "AUDIO_URL",           "value": "https://tuservidor.com/audio-bienvenida.mp3",      "type": "string" }
           ]
         },
         "options": {}
@@ -50,7 +55,7 @@
       "name": "🔍 Extraer Datos del Lead",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [720, 580],
+      "position": [720, 740],
       "parameters": {
         "mode": "runOnceForEachItem",
         "jsCode": "const body  = $input.item.json.body || $input.item.json;\nconst cfg   = $('⚙️ CONFIG Lead Premium').first().json;\n\nconst email     = (body.email || '').trim().toLowerCase();\nconst firstName = (body.first_name || body.firstName || body.nombre || '').trim();\nconst phone     = (body.phone || body.telefono || '').trim();\nconst blogId    = String(body.blog_id || body.blogId || '').trim();\nconst blogName  = (body.blog_name || body.blogName || '').trim();\nconst leadValue = parseFloat(body.lead_value || body.leadValue || cfg.LEAD_VALUE_DEFAULT);\n\nif (!email) {\n  return { json: { _error: 'Email requerido', received: body } };\n}\n\nreturn { json: {\n  email, firstName, phone, blogId, blogName, leadValue,\n  timestamp: new Date().toISOString(),\n  SHEET_ID:   cfg.SHEET_ID,\n  HOJA_BLOGS: cfg.HOJA_BLOGS\n}};\n"
@@ -61,18 +66,11 @@
       "name": "❓ ¿Datos Válidos?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [980, 580],
+      "position": [980, 740],
       "parameters": {
         "conditions": {
           "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
-          "conditions": [
-            {
-              "id": "v1",
-              "leftValue": "={{ $json._error }}",
-              "rightValue": "",
-              "operator": { "type": "string", "operation": "empty" }
-            }
-          ],
+          "conditions": [{ "id": "v1", "leftValue": "={{ $json._error }}", "rightValue": "", "operator": { "type": "string", "operation": "empty" } }],
           "combinator": "and"
         },
         "options": {}
@@ -83,7 +81,7 @@
       "name": "📊 Leer Sheet para Localizar Blog",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.4,
-      "position": [1240, 460],
+      "position": [1240, 620],
       "parameters": {
         "operation": "getAll",
         "documentId": { "__rl": true, "value": "={{ $('🔍 Extraer Datos del Lead').first().json.SHEET_ID }}", "mode": "id" },
@@ -91,19 +89,17 @@
         "returnAll": true,
         "options": {}
       },
-      "credentials": {
-        "googleSheetsOAuth2Api": { "id": "SHEETS_CREDENTIAL", "name": "Google Sheets OAuth2" }
-      }
+      "credentials": { "googleSheetsOAuth2Api": { "id": "SHEETS_CREDENTIAL", "name": "Google Sheets OAuth2" } }
     },
     {
       "id": "node-find-row",
       "name": "🗺️ Localizar Fila del Blog",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1500, 460],
+      "position": [1500, 620],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const leadData  = $('🔍 Extraer Datos del Lead').first().json;\nconst sheetRows = $input.all().map(i => i.json);\n\nlet matchRow = null;\n\n// Buscar por BLOG_ID exacto primero\nif (leadData.blogId) {\n  matchRow = sheetRows.find(r => String(r.BLOG_ID).trim() === leadData.blogId);\n}\n\n// Fallback: buscar por nombre del blog (case-insensitive partial)\nif (!matchRow && leadData.blogName) {\n  const bn = leadData.blogName.toLowerCase();\n  matchRow = sheetRows.find(r =>\n    (r.BLOG_NAME || '').toLowerCase().includes(bn) ||\n    bn.includes((r.BLOG_NAME || '').toLowerCase())\n  );\n}\n\nif (!matchRow) {\n  return [{ json: {\n    _noMatch: true,\n    message: `No se encontró blog para blog_id=${leadData.blogId} / blog_name=${leadData.blogName}`,\n    leadData\n  }}];\n}\n\nconst currentTotal = parseInt(matchRow.LEADS_PREMIUM_TOTAL || 0);\n\nreturn [{ json: {\n  _noMatch: false,\n  rowNumber: matchRow._rowNumber,\n  BLOG_NAME: matchRow.BLOG_NAME,\n  BLOG_ID:   matchRow.BLOG_ID,\n  newTotal:  currentTotal + 1,\n  ...leadData\n}}];\n"
+        "jsCode": "const leadData  = $('🔍 Extraer Datos del Lead').first().json;\nconst sheetRows = $input.all().map(i => i.json);\n\nlet matchRow = null;\nif (leadData.blogId) {\n  matchRow = sheetRows.find(r => String(r.BLOG_ID).trim() === leadData.blogId);\n}\nif (!matchRow && leadData.blogName) {\n  const bn = leadData.blogName.toLowerCase();\n  matchRow = sheetRows.find(r =>\n    (r.BLOG_NAME || '').toLowerCase().includes(bn) ||\n    bn.includes((r.BLOG_NAME || '').toLowerCase())\n  );\n}\n\nif (!matchRow) {\n  return [{ json: {\n    _noMatch: true,\n    message: `No se encontró blog para blog_id=${leadData.blogId} / blog_name=${leadData.blogName}`,\n    leadData\n  }}];\n}\n\nconst currentTotal = parseInt(matchRow.LEADS_PREMIUM_TOTAL || 0);\n\nreturn [{ json: {\n  _noMatch:  false,\n  rowNumber: matchRow._rowNumber,\n  BLOG_NAME: matchRow.BLOG_NAME,\n  BLOG_ID:   matchRow.BLOG_ID,\n  newTotal:  currentTotal + 1,\n  ...leadData\n}}];\n"
       }
     },
     {
@@ -111,18 +107,11 @@
       "name": "❓ ¿Blog Encontrado?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2,
-      "position": [1760, 460],
+      "position": [1760, 620],
       "parameters": {
         "conditions": {
           "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
-          "conditions": [
-            {
-              "id": "m1",
-              "leftValue": "={{ $json._noMatch }}",
-              "rightValue": true,
-              "operator": { "type": "boolean", "operation": "false" }
-            }
-          ],
+          "conditions": [{ "id": "m1", "leftValue": "={{ $json._noMatch }}", "rightValue": true, "operator": { "type": "boolean", "operation": "false" } }],
           "combinator": "and"
         },
         "options": {}
@@ -133,7 +122,7 @@
       "name": "📊 Actualizar Sheet: Lead Premium",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.4,
-      "position": [2020, 360],
+      "position": [2020, 520],
       "parameters": {
         "operation": "update",
         "documentId": { "__rl": true, "value": "={{ $json.SHEET_ID }}", "mode": "id" },
@@ -141,29 +130,29 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "row_number": "={{ $json.rowNumber }}",
-            "ULTIMO_LEAD_PREMIUM":  "={{ $json.timestamp }}",
-            "LEADS_PREMIUM_TOTAL":  "={{ $json.newTotal }}",
-            "ULTIMO_LEAD_EMAIL":    "={{ $json.email }}"
+            "row_number":              "={{ $json.rowNumber }}",
+            "ULTIMO_LEAD_PREMIUM":     "={{ $json.timestamp }}",
+            "LEADS_PREMIUM_TOTAL":     "={{ $json.newTotal }}",
+            "ULTIMO_LEAD_EMAIL":       "={{ $json.email }}",
+            "LEAD_PREMIUM_TELEFONO":   "={{ $json.phone }}",
+            "LEAD_PREMIUM_FASE":       "0"
           },
           "matchingColumns": ["row_number"],
           "schema": []
         },
         "options": {}
       },
-      "credentials": {
-        "googleSheetsOAuth2Api": { "id": "SHEETS_CREDENTIAL", "name": "Google Sheets OAuth2" }
-      }
+      "credentials": { "googleSheetsOAuth2Api": { "id": "SHEETS_CREDENTIAL", "name": "Google Sheets OAuth2" } }
     },
     {
       "id": "node-respond-ok",
       "name": "✅ Responder 200 OK",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [2280, 360],
+      "position": [2280, 520],
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({ success: true, blog: $('🗺️ Localizar Fila del Blog').first().json.BLOG_NAME, lead: $('🔍 Extraer Datos del Lead').first().json.email, leadValue: $('🔍 Extraer Datos del Lead').first().json.leadValue, total_premium: $('🗺️ Localizar Fila del Blog').first().json.newTotal, ts: new Date().toISOString() }) }}",
+        "responseBody": "={{ JSON.stringify({ success: true, blog: $('🗺️ Localizar Fila del Blog').first().json.BLOG_NAME, lead: $('🔍 Extraer Datos del Lead').first().json.email, ts: new Date().toISOString() }) }}",
         "options": { "responseCode": 200 }
       }
     },
@@ -172,10 +161,10 @@
       "name": "⚠️ Responder 207 (Sin Match)",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [2020, 560],
+      "position": [2020, 720],
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({ success: false, reason: $json.message, received_blog_id: $json.leadData.blogId, received_blog_name: $json.leadData.blogName }) }}",
+        "responseBody": "={{ JSON.stringify({ success: false, reason: $json.message }) }}",
         "options": { "responseCode": 207 }
       }
     },
@@ -184,11 +173,477 @@
       "name": "❌ Responder 400 (Error)",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
-      "position": [980, 760],
+      "position": [980, 920],
       "parameters": {
         "respondWith": "json",
         "responseBody": "={{ JSON.stringify({ success: false, error: $json._error }) }}",
         "options": { "responseCode": 400 }
+      }
+    },
+    {
+      "id": "node-prep-sms",
+      "name": "📞 Preparar SMS",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2540, 520],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const data = $('🔍 Extraer Datos del Lead').first().json;\nconst blog = $('🗺️ Localizar Fila del Blog').first().json;\nconst cfg  = $('⚙️ CONFIG Lead Premium').first().json;\n\n// ── Formatear teléfono para Twilio ───────────────────────────────────────────\nlet raw = (data.phone || '').replace(/\\D/g, '');\nif (raw.length === 10) raw = '1' + raw;\nconst validPhone = /^1\\d{10}$/.test(raw);\nconst phone = '+' + raw;\n\n// ── Calcular offset Eastern Time (con DST automático) ────────────────────────\nfunction getETOffset(d) {\n  const y = d.getUTCFullYear();\n  const m1 = new Date(Date.UTC(y, 2, 1));\n  const dstStart = new Date(Date.UTC(y, 2, 8 + (7 - m1.getUTCDay()) % 7));\n  const n1 = new Date(Date.UTC(y, 10, 1));\n  const dstEnd   = new Date(Date.UTC(y, 10, 1 + (7 - n1.getUTCDay()) % 7));\n  return (d >= dstStart && d < dstEnd) ? -4 : -5;\n}\n\n// ── Recalibrar al siguiente momento hábil (9am-6pm ET, L-V) ──────────────────\nfunction clampBusiness(d) {\n  const off = getETOffset(d);\n  const et  = new Date(d.getTime() + off * 3600000);\n  const h   = et.getUTCHours();\n  const dow = et.getUTCDay();\n  if (dow === 0 || dow === 6) {\n    et.setUTCDate(et.getUTCDate() + (dow === 0 ? 1 : 2));\n    et.setUTCHours(9, 0, 0, 0);\n  } else if (h < 9) {\n    et.setUTCHours(9, 0, 0, 0);\n  } else if (h >= 18) {\n    et.setUTCDate(et.getUTCDate() + (dow === 5 ? 3 : 1));\n    et.setUTCHours(9, 0, 0, 0);\n  } else {\n    return d; // dentro del horario laboral, sin cambio\n  }\n  return new Date(et.getTime() - off * 3600000);\n}\n\nconst now = new Date();\nconst off = getETOffset(now);\n\n// Cita: próximo día hábil a las 10am ET\nconst etNow = new Date(now.getTime() + off * 3600000);\netNow.setUTCDate(etNow.getUTCDate() + 1);\netNow.setUTCHours(10, 0, 0, 0);\nconst dow0 = etNow.getUTCDay();\nif (dow0 === 0) etNow.setUTCDate(etNow.getUTCDate() + 1); // Dom → Lun\nif (dow0 === 6) etNow.setUTCDate(etNow.getUTCDate() + 2); // Sáb → Lun\nconst appointmentUTC = new Date(etNow.getTime() - off * 3600000);\n\n// Tiempos de espera (respetando horario laboral)\nconst wait1hUTC       = clampBusiness(new Date(now.getTime() + 3600000));\nconst announcementUTC = clampBusiness(new Date(wait1hUTC.getTime() + 4 * 3600000));\nconst preCallUTC      = new Date(appointmentUTC.getTime() - 15 * 60000);\n\n// Nombre del día de la cita en español\nconst days = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];\nconst apptET  = new Date(appointmentUTC.getTime() + off * 3600000);\nconst apptH   = apptET.getUTCHours();\nconst apptDay = days[apptET.getUTCDay()];\nconst apptTimeStr = `${apptH % 12 || 12}:00 ${apptH >= 12 ? 'PM' : 'AM'} ET`;\n\n// Configurar canal Twilio\nconst channel = cfg.TWILIO_CHANNEL || 'sms';\nconst from    = cfg.TWILIO_FROM;\nconst fromFmt = channel === 'whatsapp' ? `whatsapp:${from}` : from;\nconst toFmt   = channel === 'whatsapp' ? `whatsapp:${phone}` : phone;\nconst name    = data.firstName || 'estimado/a';\nconst audioUrl = cfg.AUDIO_URL || 'https://tuservidor.com/audio-bienvenida.mp3';\n\n// Generar header de autenticación Basic para Twilio\nconst auth = Buffer.from(`${cfg.TWILIO_ACCOUNT_SID}:${cfg.TWILIO_AUTH_TOKEN}`).toString('base64');\n\nreturn { json: {\n  phone, toFmt, fromFmt, validPhone,\n  TWILIO_URL:         `https://api.twilio.com/2010-04-01/Accounts/${cfg.TWILIO_ACCOUNT_SID}/Messages.json`,\n  TWILIO_AUTH_HEADER: `Basic ${auth}`,\n  msgBienvenida:   `Hola ${name}, hemos recibido tu caso. 🎧 Escucha este audio de 2 min con los próximos pasos:\\n${audioUrl}\\n\\nResponde con los detalles: tipo de caso, fecha, descripción y fotos si tienes.`,\n  msgRecordatorio: `Hola ${name}, solo un recordatorio: aún esperamos los detalles de tu caso para que el abogado llegue preparado. Responde con texto o fotos cuando puedas.`,\n  msgLlamada:      `Estimado/a ${name}, el ${apptDay} a las ${apptTimeStr} un abogado especialista te llamará al número registrado.\\n\\nResponde SÍ para confirmar tu disponibilidad, o NO si necesitas reagendar.`,\n  msgPrellamada:   `${name}, tu llamada con el abogado comienza en 15 minutos ⏰. Ten a mano cualquier documento relevante. Responde LISTO cuando estés preparado/a.`,\n  wait1hUntil:       wait1hUTC.toISOString(),\n  announcementUntil: announcementUTC.toISOString(),\n  preCallUntil:      preCallUTC.toISOString(),\n  appointmentUTC:    appointmentUTC.toISOString(),\n  apptDay, apptTimeStr,\n  rowNumber:  blog.rowNumber,\n  SHEET_ID:   blog.SHEET_ID,\n  HOJA_BLOGS: blog.HOJA_BLOGS,\n  firstName:  name,\n  email:      data.email\n}};\n"
+      }
+    },
+    {
+      "id": "node-if-phone",
+      "name": "❓ ¿Teléfono Válido?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [2800, 520],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [{ "id": "ph1", "leftValue": "={{ $json.validPhone }}", "rightValue": true, "operator": { "type": "boolean", "operation": "equals" } }],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-mark-no-phone",
+      "name": "📵 Sheet: Sin Teléfono (Fase -1)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [2800, 700],
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "={{ $json.SHEET_ID }}", "mode": "id" },
+        "sheetName":  { "__rl": true, "value": "={{ $json.HOJA_BLOGS }}", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number":                "={{ $json.rowNumber }}",
+            "LEAD_PREMIUM_FASE":         "-1",
+            "LEAD_PREMIUM_ULTIMO_MENSAJE": "={{ new Date().toISOString() }}"
+          },
+          "matchingColumns": ["row_number"],
+          "schema": []
+        },
+        "options": {}
+      },
+      "credentials": { "googleSheetsOAuth2Api": { "id": "SHEETS_CREDENTIAL", "name": "Google Sheets OAuth2" } }
+    },
+    {
+      "id": "node-sms-bienvenida",
+      "name": "📱 SMS: Bienvenida (Fase 1)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3060, 440],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.TWILIO_URL }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "={{ $json.TWILIO_AUTH_HEADER }}" },
+            { "name": "Content-Type",  "value": "application/x-www-form-urlencoded" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "To",   "value": "={{ $json.toFmt }}" },
+            { "name": "From", "value": "={{ $json.fromFmt }}" },
+            { "name": "Body", "value": "={{ $json.msgBienvenida }}" }
+          ]
+        },
+        "options": { "timeout": 10000 }
+      }
+    },
+    {
+      "id": "node-sheet-fase1",
+      "name": "📊 Sheet: Actualizar Fase 1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [3320, 440],
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "={{ $('📞 Preparar SMS').first().json.SHEET_ID }}", "mode": "id" },
+        "sheetName":  { "__rl": true, "value": "={{ $('📞 Preparar SMS').first().json.HOJA_BLOGS }}", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number":                  "={{ $('📞 Preparar SMS').first().json.rowNumber }}",
+            "LEAD_PREMIUM_FASE":           "1",
+            "LEAD_PREMIUM_ULTIMO_MENSAJE":  "={{ new Date().toISOString() }}"
+          },
+          "matchingColumns": ["row_number"],
+          "schema": []
+        },
+        "options": {}
+      },
+      "credentials": { "googleSheetsOAuth2Api": { "id": "SHEETS_CREDENTIAL", "name": "Google Sheets OAuth2" } }
+    },
+    {
+      "id": "node-pack-wait1",
+      "name": "📦 Pack: Espera 1h",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3580, 440],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const p = $('📞 Preparar SMS').first().json;\nreturn [{ json: { ...p, waitUntil: p.wait1hUntil } }];\n"
+      }
+    },
+    {
+      "id": "node-wait-1h",
+      "name": "⏰ Esperar 1h Hábil",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [3840, 440],
+      "parameters": {
+        "resume": "specificTime",
+        "dateTime": "={{ $json.waitUntil }}"
+      }
+    },
+    {
+      "id": "node-sms-recordatorio",
+      "name": "📱 SMS: Recordatorio Info (Fase 2)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [4100, 440],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.TWILIO_URL }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "={{ $json.TWILIO_AUTH_HEADER }}" },
+            { "name": "Content-Type",  "value": "application/x-www-form-urlencoded" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "To",   "value": "={{ $json.toFmt }}" },
+            { "name": "From", "value": "={{ $json.fromFmt }}" },
+            { "name": "Body", "value": "={{ $json.msgRecordatorio }}" }
+          ]
+        },
+        "options": { "timeout": 10000 }
+      }
+    },
+    {
+      "id": "node-sheet-fase2",
+      "name": "📊 Sheet: Actualizar Fase 2",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [4360, 440],
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "={{ $('📦 Pack: Espera 1h').first().json.SHEET_ID }}", "mode": "id" },
+        "sheetName":  { "__rl": true, "value": "={{ $('📦 Pack: Espera 1h').first().json.HOJA_BLOGS }}", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number":                  "={{ $('📦 Pack: Espera 1h').first().json.rowNumber }}",
+            "LEAD_PREMIUM_FASE":           "2",
+            "LEAD_PREMIUM_ULTIMO_MENSAJE":  "={{ new Date().toISOString() }}"
+          },
+          "matchingColumns": ["row_number"],
+          "schema": []
+        },
+        "options": {}
+      },
+      "credentials": { "googleSheetsOAuth2Api": { "id": "SHEETS_CREDENTIAL", "name": "Google Sheets OAuth2" } }
+    },
+    {
+      "id": "node-pack-anuncio",
+      "name": "📦 Pack: Anuncio Llamada",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [4620, 440],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const p = $('📦 Pack: Espera 1h').first().json;\nreturn [{ json: { ...p, waitUntil: p.announcementUntil } }];\n"
+      }
+    },
+    {
+      "id": "node-wait-anuncio",
+      "name": "⏰ Esperar hasta Anuncio",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [4880, 440],
+      "parameters": {
+        "resume": "specificTime",
+        "dateTime": "={{ $json.waitUntil }}"
+      }
+    },
+    {
+      "id": "node-sms-llamada",
+      "name": "📱 SMS: Anunciar Llamada (Fase 3)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [5140, 440],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.TWILIO_URL }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "={{ $json.TWILIO_AUTH_HEADER }}" },
+            { "name": "Content-Type",  "value": "application/x-www-form-urlencoded" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "To",   "value": "={{ $json.toFmt }}" },
+            { "name": "From", "value": "={{ $json.fromFmt }}" },
+            { "name": "Body", "value": "={{ $json.msgLlamada }}" }
+          ]
+        },
+        "options": { "timeout": 10000 }
+      }
+    },
+    {
+      "id": "node-sheet-fase3",
+      "name": "📊 Sheet: Actualizar Fase 3",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [5400, 440],
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "={{ $('📦 Pack: Anuncio Llamada').first().json.SHEET_ID }}", "mode": "id" },
+        "sheetName":  { "__rl": true, "value": "={{ $('📦 Pack: Anuncio Llamada').first().json.HOJA_BLOGS }}", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number":                  "={{ $('📦 Pack: Anuncio Llamada').first().json.rowNumber }}",
+            "LEAD_PREMIUM_FASE":           "3",
+            "LEAD_PREMIUM_ULTIMO_MENSAJE":  "={{ new Date().toISOString() }}"
+          },
+          "matchingColumns": ["row_number"],
+          "schema": []
+        },
+        "options": {}
+      },
+      "credentials": { "googleSheetsOAuth2Api": { "id": "SHEETS_CREDENTIAL", "name": "Google Sheets OAuth2" } }
+    },
+    {
+      "id": "node-pack-prellamada",
+      "name": "📦 Pack: Pre-llamada",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [5660, 440],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const p = $('📦 Pack: Anuncio Llamada').first().json;\nreturn [{ json: { ...p, waitUntil: p.preCallUntil } }];\n"
+      }
+    },
+    {
+      "id": "node-wait-prellamada",
+      "name": "⏰ Esperar hasta Pre-llamada",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [5920, 440],
+      "parameters": {
+        "resume": "specificTime",
+        "dateTime": "={{ $json.waitUntil }}"
+      }
+    },
+    {
+      "id": "node-sms-prellamada",
+      "name": "📱 SMS: Recordatorio Pre-llamada (Fase 4)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [6180, 440],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.TWILIO_URL }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "={{ $json.TWILIO_AUTH_HEADER }}" },
+            { "name": "Content-Type",  "value": "application/x-www-form-urlencoded" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "To",   "value": "={{ $json.toFmt }}" },
+            { "name": "From", "value": "={{ $json.fromFmt }}" },
+            { "name": "Body", "value": "={{ $json.msgPrellamada }}" }
+          ]
+        },
+        "options": { "timeout": 10000 }
+      }
+    },
+    {
+      "id": "node-sheet-fase4",
+      "name": "📊 Sheet: Actualizar Fase 4",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [6440, 440],
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "={{ $('📦 Pack: Pre-llamada').first().json.SHEET_ID }}", "mode": "id" },
+        "sheetName":  { "__rl": true, "value": "={{ $('📦 Pack: Pre-llamada').first().json.HOJA_BLOGS }}", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number":                  "={{ $('📦 Pack: Pre-llamada').first().json.rowNumber }}",
+            "LEAD_PREMIUM_FASE":           "4",
+            "LEAD_PREMIUM_ULTIMO_MENSAJE":  "={{ new Date().toISOString() }}"
+          },
+          "matchingColumns": ["row_number"],
+          "schema": []
+        },
+        "options": {}
+      },
+      "credentials": { "googleSheetsOAuth2Api": { "id": "SHEETS_CREDENTIAL", "name": "Google Sheets OAuth2" } }
+    },
+    {
+      "id": "node-reply-webhook",
+      "name": "🔔 Webhook: Respuestas Twilio",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [180, 1220],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "twilio-reply",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "node-reply-init",
+      "name": "⚙️ CONFIG Twilio Reply",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [440, 1220],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            { "id": "ri01", "name": "SHEET_ID",   "value": "1Vq8TuyqI22C3_Ffth-GsGdDRuXfHORpdAGOiowLxIpk", "type": "string" },
+            { "id": "ri02", "name": "HOJA_BLOGS", "value": "Blogs",                                            "type": "string" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-reply-parse",
+      "name": "📞 Parsear Respuesta Twilio",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 1220],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Twilio envía POST con Content-Type: application/x-www-form-urlencoded\n// n8n parsea los campos directamente en $json (o en $json.body según versión)\nconst wh  = $('🔔 Webhook: Respuestas Twilio').first().json;\nconst cfg = $('⚙️ CONFIG Twilio Reply').first().json;\nconst body = wh.body || wh;\n\nconst fromPhone = (body.From || '').replace(/\\D/g, '');\nconst msgBody   = (body.Body || '').trim();\nconst mediaUrl  = body.MediaUrl0 || '';\nconst isConfirm = /^(s[ií]|yes|ok|listo|confirmado|confirmo)/i.test(msgBody);\nconst isDecline = /^(no|cancel|reagend)/i.test(msgBody);\n\nreturn { json: {\n  fromPhone, msgBody, mediaUrl, isConfirm, isDecline,\n  rawFrom: body.From || '',\n  SHEET_ID:   cfg.SHEET_ID,\n  HOJA_BLOGS: cfg.HOJA_BLOGS\n}};\n"
+      }
+    },
+    {
+      "id": "node-reply-read-sheet",
+      "name": "📊 Sheet: Leer Leads por Teléfono",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [960, 1220],
+      "parameters": {
+        "operation": "getAll",
+        "documentId": { "__rl": true, "value": "={{ $json.SHEET_ID }}", "mode": "id" },
+        "sheetName":  { "__rl": true, "value": "={{ $json.HOJA_BLOGS }}", "mode": "name" },
+        "returnAll": true,
+        "options": {}
+      },
+      "credentials": { "googleSheetsOAuth2Api": { "id": "SHEETS_CREDENTIAL", "name": "Google Sheets OAuth2" } }
+    },
+    {
+      "id": "node-reply-find-row",
+      "name": "🗺️ Localizar Lead por Teléfono",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1220, 1220],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const parsed    = $('📞 Parsear Respuesta Twilio').first().json;\nconst rows      = $input.all().map(i => i.json);\nconst fromPhone = parsed.fromPhone;\n\n// Buscar por teléfono en columna LEAD_PREMIUM_TELEFONO\nconst match = rows.find(r => {\n  const p = (r.LEAD_PREMIUM_TELEFONO || '').replace(/\\D/g, '');\n  return p === fromPhone || p === fromPhone.replace(/^1/, '') || '1' + p === fromPhone;\n});\n\nif (!match) {\n  return [{ json: { _noMatch: true, fromPhone, ...parsed } }];\n}\n\n// Construir nuevo contenido de INFO_RECOLECTADA\nconst now = new Date();\nconst ts  = now.toLocaleString('es-MX', { timeZone: 'America/New_York' });\nconst infoActual = match.LEAD_PREMIUM_INFO_RECOLECTADA || '';\nconst newMsg  = `[${ts} ET] ${parsed.msgBody}${parsed.mediaUrl ? '\\nFoto: ' + parsed.mediaUrl : ''}`;\nconst newInfo = infoActual ? infoActual + '\\n' + newMsg : newMsg;\n\n// Determinar fase según respuesta\nlet newFase = match.LEAD_PREMIUM_FASE || '1';\nif (parsed.isConfirm) newFase = '4';\n\nreturn [{ json: {\n  _noMatch: false,\n  rowNumber: match._rowNumber,\n  LEAD_PREMIUM_INFO_RECOLECTADA: newInfo,\n  LEAD_PREMIUM_CONFIRMADO:       parsed.isConfirm ? 'TRUE' : '',\n  LEAD_PREMIUM_FASE:             newFase,\n  SHEET_ID:   parsed.SHEET_ID,\n  HOJA_BLOGS: parsed.HOJA_BLOGS,\n  fromPhone,\n  email: match.ULTIMO_LEAD_EMAIL || ''\n}}];\n"
+      }
+    },
+    {
+      "id": "node-reply-if-found",
+      "name": "❓ ¿Lead Encontrado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1480, 1220],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [{ "id": "rf1", "leftValue": "={{ $json._noMatch }}", "rightValue": true, "operator": { "type": "boolean", "operation": "false" } }],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-reply-update-sheet",
+      "name": "📊 Sheet: Guardar Respuesta del Lead",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [1740, 1120],
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "={{ $json.SHEET_ID }}", "mode": "id" },
+        "sheetName":  { "__rl": true, "value": "={{ $json.HOJA_BLOGS }}", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number":                         "={{ $json.rowNumber }}",
+            "LEAD_PREMIUM_INFO_RECOLECTADA":      "={{ $json.LEAD_PREMIUM_INFO_RECOLECTADA }}",
+            "LEAD_PREMIUM_CONFIRMADO":            "={{ $json.LEAD_PREMIUM_CONFIRMADO }}",
+            "LEAD_PREMIUM_FASE":                  "={{ $json.LEAD_PREMIUM_FASE }}",
+            "LEAD_PREMIUM_ULTIMO_MENSAJE":         "={{ new Date().toISOString() }}"
+          },
+          "matchingColumns": ["row_number"],
+          "schema": []
+        },
+        "options": {}
+      },
+      "credentials": { "googleSheetsOAuth2Api": { "id": "SHEETS_CREDENTIAL", "name": "Google Sheets OAuth2" } }
+    },
+    {
+      "id": "node-reply-twiml",
+      "name": "✅ Responder TwiML (Recibido)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2000, 1120],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response></Response>",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [{ "name": "Content-Type", "value": "text/xml" }]
+          }
+        }
+      }
+    },
+    {
+      "id": "node-reply-notfound",
+      "name": "⚠️ Responder TwiML (No Encontrado)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1740, 1320],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<?xml version=\"1.0\" encoding=\"UTF-8\"?><Response></Response>",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [{ "name": "Content-Type", "value": "text/xml" }]
+          }
+        }
       }
     }
   ],
@@ -222,6 +677,81 @@
     },
     "📊 Actualizar Sheet: Lead Premium": {
       "main": [[{ "node": "✅ Responder 200 OK", "type": "main", "index": 0 }]]
+    },
+    "✅ Responder 200 OK": {
+      "main": [[{ "node": "📞 Preparar SMS", "type": "main", "index": 0 }]]
+    },
+    "📞 Preparar SMS": {
+      "main": [[{ "node": "❓ ¿Teléfono Válido?", "type": "main", "index": 0 }]]
+    },
+    "❓ ¿Teléfono Válido?": {
+      "main": [
+        [{ "node": "📱 SMS: Bienvenida (Fase 1)", "type": "main", "index": 0 }],
+        [{ "node": "📵 Sheet: Sin Teléfono (Fase -1)", "type": "main", "index": 0 }]
+      ]
+    },
+    "📱 SMS: Bienvenida (Fase 1)": {
+      "main": [[{ "node": "📊 Sheet: Actualizar Fase 1", "type": "main", "index": 0 }]]
+    },
+    "📊 Sheet: Actualizar Fase 1": {
+      "main": [[{ "node": "📦 Pack: Espera 1h", "type": "main", "index": 0 }]]
+    },
+    "📦 Pack: Espera 1h": {
+      "main": [[{ "node": "⏰ Esperar 1h Hábil", "type": "main", "index": 0 }]]
+    },
+    "⏰ Esperar 1h Hábil": {
+      "main": [[{ "node": "📱 SMS: Recordatorio Info (Fase 2)", "type": "main", "index": 0 }]]
+    },
+    "📱 SMS: Recordatorio Info (Fase 2)": {
+      "main": [[{ "node": "📊 Sheet: Actualizar Fase 2", "type": "main", "index": 0 }]]
+    },
+    "📊 Sheet: Actualizar Fase 2": {
+      "main": [[{ "node": "📦 Pack: Anuncio Llamada", "type": "main", "index": 0 }]]
+    },
+    "📦 Pack: Anuncio Llamada": {
+      "main": [[{ "node": "⏰ Esperar hasta Anuncio", "type": "main", "index": 0 }]]
+    },
+    "⏰ Esperar hasta Anuncio": {
+      "main": [[{ "node": "📱 SMS: Anunciar Llamada (Fase 3)", "type": "main", "index": 0 }]]
+    },
+    "📱 SMS: Anunciar Llamada (Fase 3)": {
+      "main": [[{ "node": "📊 Sheet: Actualizar Fase 3", "type": "main", "index": 0 }]]
+    },
+    "📊 Sheet: Actualizar Fase 3": {
+      "main": [[{ "node": "📦 Pack: Pre-llamada", "type": "main", "index": 0 }]]
+    },
+    "📦 Pack: Pre-llamada": {
+      "main": [[{ "node": "⏰ Esperar hasta Pre-llamada", "type": "main", "index": 0 }]]
+    },
+    "⏰ Esperar hasta Pre-llamada": {
+      "main": [[{ "node": "📱 SMS: Recordatorio Pre-llamada (Fase 4)", "type": "main", "index": 0 }]]
+    },
+    "📱 SMS: Recordatorio Pre-llamada (Fase 4)": {
+      "main": [[{ "node": "📊 Sheet: Actualizar Fase 4", "type": "main", "index": 0 }]]
+    },
+    "🔔 Webhook: Respuestas Twilio": {
+      "main": [[{ "node": "⚙️ CONFIG Twilio Reply", "type": "main", "index": 0 }]]
+    },
+    "⚙️ CONFIG Twilio Reply": {
+      "main": [[{ "node": "📞 Parsear Respuesta Twilio", "type": "main", "index": 0 }]]
+    },
+    "📞 Parsear Respuesta Twilio": {
+      "main": [[{ "node": "📊 Sheet: Leer Leads por Teléfono", "type": "main", "index": 0 }]]
+    },
+    "📊 Sheet: Leer Leads por Teléfono": {
+      "main": [[{ "node": "🗺️ Localizar Lead por Teléfono", "type": "main", "index": 0 }]]
+    },
+    "🗺️ Localizar Lead por Teléfono": {
+      "main": [[{ "node": "❓ ¿Lead Encontrado?", "type": "main", "index": 0 }]]
+    },
+    "❓ ¿Lead Encontrado?": {
+      "main": [
+        [{ "node": "📊 Sheet: Guardar Respuesta del Lead", "type": "main", "index": 0 }],
+        [{ "node": "⚠️ Responder TwiML (No Encontrado)", "type": "main", "index": 0 }]
+      ]
+    },
+    "📊 Sheet: Guardar Respuesta del Lead": {
+      "main": [[{ "node": "✅ Responder TwiML (Recibido)", "type": "main", "index": 0 }]]
     }
   },
   "settings": {
@@ -231,8 +761,8 @@
     "errorWorkflow": ""
   },
   "staticData": null,
-  "tags": ["blog-factory", "leads", "systeme.io"],
-  "triggerCount": 1,
+  "tags": ["blog-factory", "leads", "twilio", "sms"],
+  "triggerCount": 2,
   "updatedAt": "2026-05-24T00:00:00.000Z",
-  "versionId": "lead-premium-v1"
+  "versionId": "lead-premium-v2-sms"
 }
