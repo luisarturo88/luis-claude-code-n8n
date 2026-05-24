@@ -1,0 +1,372 @@
+{
+  "name": "Blog Factory Autopilot v2 — Silos + CTAs + Popups [DeepSeek]",
+  "nodes": [
+    {
+      "id": "sticky-main",
+      "name": "📋 SETUP + LEYES",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [180, 60],
+      "parameters": {
+        "content": "## 🤖 PILOTO AUTOMÁTICO — 1 post cada 5 min\n\n**Flujo por ejecución:**\n1. Lee Sheet → elige blog menos procesado\n2. Obtiene posts pilares del blog (para mapear silos)\n3. Obtiene página de 10 posts cluster (con pageToken)\n4. Selecciona el PRIMER post sin `<!-- EARLY_CTA -->`\n5. DeepSeek genera 6 bloques HTML/JS\n6. Inyecta todo respetando Ley 1 y Ley 2\n7. Actualiza Blogger + Sheet\n\n**Bloques inyectados por post:**\n- 🔗 Hiperenlaces contextuales tipo silo (20-30%)\n- 🎯 CTA temprano con lead capture (30%)\n- 🛒 Bloque comercial tabla/checklist (50%)\n- 🔥 Segundo CTA urgente (65%)\n- 🎭 2 popups con JS inline y sessionStorage\n- 📊 FAQ Schema JSON-LD\n\n---\n## ⚖️ LEY 1: DeepSeek NUNCA recibe el HTML del artículo\n## ⚖️ LEY 2: Si el marcador existe → skip ese bloque\n\n---\n## COLUMNAS A AGREGAR EN TU SHEET:\n- `CLUSTERS_ULTIMO_PROCESO` — timestamp\n- `NEXT_PAGE_TOKEN` — paginación Blogger\n- `PREMIUM_FORM_URL` — URL form calificación premium\n- `BRAND_COLOR` — hex por blog (opcional)",
+        "height": 500,
+        "width": 520,
+        "color": 3
+      }
+    },
+    {
+      "id": "trigger-manual",
+      "name": "▶ Ejecutar Ahora",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [180, 640]
+    },
+    {
+      "id": "trigger-schedule",
+      "name": "⏰ Cada 5 Minutos",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [180, 780],
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "minutes", "minutesInterval": 5 }]
+        }
+      }
+    },
+    {
+      "id": "node-config",
+      "name": "⚙️ CONFIG",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 700],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            { "id": "c01", "name": "SHEET_ID",            "value": "1Vq8TuyqI22C3_Ffth-GsGdDRuXfHORpdAGOiowLxIpk", "type": "string" },
+            { "id": "c02", "name": "HOJA_BLOGS",           "value": "Blogs",                                            "type": "string" },
+            { "id": "c03", "name": "DEEPSEEK_API_KEY",     "value": "sk-TU_DEEPSEEK_KEY_AQUI",                         "type": "string" },
+            { "id": "c04", "name": "LABEL_PILAR",          "value": "pilar",                                           "type": "string" },
+            { "id": "c05", "name": "FUNNEL_ANIMALES",      "value": "https://tu-cuenta.systeme.io/animales",           "type": "string" },
+            { "id": "c06", "name": "FUNNEL_ABOGADOS",      "value": "https://tu-cuenta.systeme.io/consulta-legal",    "type": "string" },
+            { "id": "c07", "name": "PREMIUM_URL_DEFAULT",  "value": "https://tu-cuenta.systeme.io/lead-premium",      "type": "string" },
+            { "id": "c08", "name": "COLOR_ANIMALES",       "value": "#16a34a",                                         "type": "string" },
+            { "id": "c09", "name": "COLOR_ABOGADOS",       "value": "#1e40af",                                         "type": "string" },
+            { "id": "c10", "name": "POSTS_PER_PAGE",       "value": 10,                                                "type": "number" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-sheets-read",
+      "name": "📊 Leer Blogs (Sheet)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [720, 700],
+      "parameters": {
+        "operation": "getAll",
+        "documentId": { "__rl": true, "value": "={{ $('⚙️ CONFIG').first().json.SHEET_ID }}", "mode": "id" },
+        "sheetName":  { "__rl": true, "value": "={{ $('⚙️ CONFIG').first().json.HOJA_BLOGS }}", "mode": "name" },
+        "returnAll": true,
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "SHEETS_CREDENTIAL", "name": "Google Sheets OAuth2" }
+      }
+    },
+    {
+      "id": "node-select-blog",
+      "name": "🎯 Seleccionar Blog (Rotación)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [980, 700],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const cfg = $('⚙️ CONFIG').first().json;\nconst rows = $input.all().map(i => i.json);\n\nconst blogs = rows.filter(b =>\n  (b.ACTIVE === 'YES' || b.ACTIVE === 'yes') &&\n  b.BLOG_ID && String(b.BLOG_ID).length > 5 &&\n  !String(b.BLOG_ID).startsWith('ASSET')\n);\n\nif (!blogs.length) return [{ json: { _fatalError: 'Sin blogs activos.' } }];\n\nblogs.sort((a, b) => {\n  const da = a.CLUSTERS_ULTIMO_PROCESO ? new Date(a.CLUSTERS_ULTIMO_PROCESO) : new Date(0);\n  const db = b.CLUSTERS_ULTIMO_PROCESO ? new Date(b.CLUSTERS_ULTIMO_PROCESO) : new Date(0);\n  return da - db;\n});\n\nconst b = blogs[0];\nconst txt = ((b.NICHO || '') + ' ' + (b.BLOG_NAME || '')).toLowerCase();\nconst lkw = ['abog','litig','legal','leyes','impuesto','multa','accidente',\n              'bienes ra','familia usa','herencia','divorcio','demanda','delito'];\nconst isLegal = lkw.some(k => txt.includes(k));\nconst estrategia = b.ESTRATEGIA || (isLegal ? 'lead_abogados' : 'animales_productos');\n\nreturn [{ json: {\n  BLOG_ID:          String(b.BLOG_ID),\n  BLOG_NAME:        b.BLOG_NAME,\n  NICHO:            b.NICHO,\n  ESPECIE:          b.ESPECIE || '',\n  AMAZON_TAG:       b.AMAZON_TAG || '',\n  ESTRATEGIA:       estrategia,\n  IS_LEGAL:         isLegal,\n  FUNNEL_URL:       b.LEAD_MAGNET_URL || (isLegal ? cfg.FUNNEL_ABOGADOS : cfg.FUNNEL_ANIMALES),\n  PREMIUM_FORM_URL: b.PREMIUM_FORM_URL || cfg.PREMIUM_URL_DEFAULT,\n  BRAND_COLOR:      b.BRAND_COLOR || (isLegal ? cfg.COLOR_ABOGADOS : cfg.COLOR_ANIMALES),\n  LEAD_STD:         parseFloat(b.LEAD_VALUE_STANDARD) || 150,\n  LEAD_PREM:        parseFloat(b.LEAD_VALUE_PREMIUM) || 250,\n  PAGE_TOKEN:       b.NEXT_PAGE_TOKEN || '',\n  _row:             b._rowNumber,\n  DEEPSEEK_KEY:     cfg.DEEPSEEK_API_KEY,\n  LABEL_PILAR:      cfg.LABEL_PILAR,\n  SHEET_ID:         cfg.SHEET_ID,\n  HOJA_BLOGS:       cfg.HOJA_BLOGS,\n  MAX_PER_PAGE:     cfg.POSTS_PER_PAGE || 10\n}}];\n"
+      }
+    },
+    {
+      "id": "node-get-pilars",
+      "name": "🏛️ Obtener Posts Pilar",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1240, 560],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $('🎯 Seleccionar Blog (Rotación)').first().json.BLOG_ID }}/posts",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "labels",      "value": "={{ $('🎯 Seleccionar Blog (Rotación)').first().json.LABEL_PILAR }}" },
+            { "name": "fetchBodies", "value": "false" },
+            { "name": "maxResults",  "value": "50" },
+            { "name": "status",      "value": "live" }
+          ]
+        },
+        "options": { "timeout": 30000 }
+      },
+      "credentials": { "googleApi": { "id": "BLOGGER_CREDENTIAL", "name": "Google Blogger API" } }
+    },
+    {
+      "id": "node-get-clusters",
+      "name": "📄 Obtener Página de Clusters",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1240, 840],
+      "parameters": {
+        "method": "GET",
+        "url": "=https://www.googleapis.com/blogger/v3/blogs/{{ $('🎯 Seleccionar Blog (Rotación)').first().json.BLOG_ID }}/posts",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "fetchBodies", "value": "true" },
+            { "name": "maxResults",  "value": "={{ $('🎯 Seleccionar Blog (Rotación)').first().json.MAX_PER_PAGE }}" },
+            { "name": "status",      "value": "live" },
+            { "name": "pageToken",   "value": "={{ $('🎯 Seleccionar Blog (Rotación)').first().json.PAGE_TOKEN }}" }
+          ]
+        },
+        "options": { "timeout": 30000 }
+      },
+      "credentials": { "googleApi": { "id": "BLOGGER_CREDENTIAL", "name": "Google Blogger API" } }
+    },
+    {
+      "id": "node-select-post",
+      "name": "🔍 Seleccionar 1 Post Sin Procesar",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1500, 700],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const blogCfg   = $('🎯 Seleccionar Blog (Rotación)').first().json;\nconst pilarResp = $('🏛️ Obtener Posts Pilar').first().json;\nconst clustResp = $('📄 Obtener Página de Clusters').first().json;\n\nconst LABEL_PILAR    = blogCfg.LABEL_PILAR.toLowerCase();\nconst nextPageToken  = clustResp.nextPageToken || '';\nconst clusterPosts   = clustResp.items || [];\n\n// Construir mapa de pilares: { topicLabel → {title, url} }\nconst pilarMap = {};\nfor (const p of (pilarResp.items || [])) {\n  for (const lbl of (p.labels || [])) {\n    if (lbl.toLowerCase() !== LABEL_PILAR) {\n      pilarMap[lbl.toLowerCase()] = { title: p.title, url: p.url };\n    }\n  }\n}\n\n// Encontrar el PRIMER cluster post sin procesar\nconst unprocessed = clusterPosts.filter(post => {\n  const labels = (post.labels || []).map(l => l.toLowerCase());\n  if (labels.includes(LABEL_PILAR)) return false; // skip pilares\n  return !(post.content || '').includes('<!-- EARLY_CTA -->');\n});\n\nif (!unprocessed.length) {\n  return [{ json: {\n    _noPost: true,\n    nextPageToken,\n    BLOG_ID:    blogCfg.BLOG_ID,\n    SHEET_ID:   blogCfg.SHEET_ID,\n    HOJA_BLOGS: blogCfg.HOJA_BLOGS,\n    _row:       blogCfg._row,\n    message:    `Sin posts sin procesar en esta página. Avanzando a siguiente página.`\n  }}];\n}\n\nconst post   = unprocessed[0];\nconst labels = (post.labels || []).map(l => l.toLowerCase());\nconst topics = labels.filter(l => l !== LABEL_PILAR);\n\n// Pilar relacionado con este cluster\nlet pillarTitle = null, pillarUrl = null;\nfor (const t of topics) {\n  if (pilarMap[t]) { pillarTitle = pilarMap[t].title; pillarUrl = pilarMap[t].url; break; }\n}\n\n// Clusters hermanos en la misma página\nconst siblings = clusterPosts\n  .filter(p => p.id !== post.id && (p.labels || []).some(l => topics.includes(l.toLowerCase())))\n  .slice(0, 3)\n  .map(p => ({ title: p.title, url: p.url }));\n\n// ⚖️ LEY 2: detectar qué bloques faltan\nconst c = post.content || '';\nreturn [{ json: {\n  id:    post.id,  title: post.title,\n  url:   post.url, labels, content: c,\n  pillarTitle, pillarUrl, siblings,\n  _noPost: false, nextPageToken,\n  needsContextualLinks: !c.includes('<!-- CONTEXTUAL_LINKS -->'),\n  needsEarlyCta:        !c.includes('<!-- EARLY_CTA -->'),\n  needsCommercial:      !c.includes('<!-- COMMERCIAL_BLOCKS -->'),\n  needsSecondCta:       !c.includes('<!-- SECOND_CTA -->'),\n  needsPopup:           !c.includes('<!-- POPUP_BLOCK -->'),\n  needsFaqSchema:       !c.includes('<!-- FAQ_SCHEMA -->'),\n  ...blogCfg\n}}];\n"
+      }
+    },
+    {
+      "id": "node-if-found",
+      "name": "❓ ¿Post Encontrado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1760, 700],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json._noPost }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "false" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-prompt",
+      "name": "🧠 Prompt Multi-Estrategia",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2020, 540],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// ⚖️ LEY 1: DeepSeek NUNCA recibe el HTML del artículo.\n// Solo recibe: título, labels, especie, datos de pilar/siblings, URLs, colores.\n\nconst p = $input.item.json;\nconst isLegal = p.IS_LEGAL || p.ESTRATEGIA === 'lead_abogados';\nconst labels  = p.labels.filter(l => l !== 'pilar' && l !== 'pillar').join(', ') || p.NICHO;\nconst especie = p.ESPECIE || labels;\nconst bgLight = isLegal ? '#f0f4ff' : '#f0fff4';\nconst siblingsText = (p.siblings || []).map(s => `\"${s.title}\" → ${s.url}`).join('\\n');\n\nconst sys = `Eres un diseñador HTML/CSS experto en blogs y marketing de conversión (hispanohablante, USA).\n\n⚠️ REGLAS ABSOLUTAS:\n1. NUNCA incluyas ni reproduzcas el contenido del artículo. No lo tienes.\n2. Responde ÚNICAMENTE con JSON válido. Sin markdown.\n3. CSS 100% inline. Sin Bootstrap, jQuery ni librerías externas.\n4. Emojis ESPECÍFICOS del nicho/especie (NUNCA ✅❌☑️).\n5. Todos los bloques HTML deben tener tamaño máximo: 2KB (popups: 5KB).\n6. El JS de popups DEBE usar sessionStorage para no repetirse por sesión.\n7. El botón de cierre de los popups: font-size 28px, 40×40px, visible.`;\n\nconst siloInstr = p.pillarUrl\n  ? `Pilar del cluster: \"${p.pillarTitle}\" → ${p.pillarUrl}\nClusters hermanos:\\n${siblingsText || '(ninguno disponible)'}`\n  : `No hay pilar identificado. Usa un enlace genérico a la home del blog.`;\n\nlet estratInstr = '';\n\nif (isLegal) {\n  estratInstr = `\nESTRATEGIA: Captación de leads para abogados (hispanos en USA)\nNICHO LEGAL: ${labels}\nFunnel (standard $${p.LEAD_STD}): ${p.FUNNEL_URL}\nFormulario premium ($${p.LEAD_PREM}): ${p.PREMIUM_FORM_URL}\nColor de marca: ${p.BRAND_COLOR}\nBlog: ${p.BLOG_NAME}\n\n${p.needsContextualLinks ? `🔷 contextual_links: 2-3 hiperenlaces tipo silo.\n• Cada enlace: <span style=\"display:inline-block;background:${bgLight};padding:4px 10px;border-radius:20px;border:1px solid ${p.BRAND_COLOR}40;margin:2px;\">⚖️ <a href=\"URL\" style=\"color:${p.BRAND_COLOR};text-decoration:none;font-weight:600;\">texto ancla legal</a></span>\n• position_percentage: entre 20 y 30 (el primero al pilar, los demás a clusters hermanos)` : '🔷 contextual_links: [] (ya existe)'}\n\n${p.needsEarlyCta ? `🎯 early_cta (al 30%):\n• CTA de captación de leads. Fondo: #fff3cd. Padding:20px. Border-radius:14px. Borde 2px solid ${p.BRAND_COLOR}.\n• Emoji legal urgente grande + título \"¿Tuviste [caso legal]? Consulta GRATIS en 24h\"\n• Botón grande → ${p.FUNNEL_URL}` : '🎯 early_cta: {html:\"\"} (ya existe)'}\n\n${p.needsCommercial ? `🛒 commercial_blocks: 1 bloque tipo comparison_table o FAQ checklist legal.\n• Tabla comparativa: ¿Actuar solo vs. con abogado? o checklist de pasos legales urgentes.\n• CSS inline, sin JS, mobile-first, max 1.8KB` : '🛒 commercial_blocks: [] (ya existe)'}\n\n${p.needsSecondCta ? `🔥 second_cta (al 65%):\n• Urgencia diferente al primer CTA. Ej: \"Cupones de consulta gratuita: quedan 3 disponibles\"\n• Fondo ${p.BRAND_COLOR}, texto blanco, botón blanco con texto del color de marca\n• href → ${p.FUNNEL_URL}` : '🔥 second_cta: {html:\"\"} (ya existe)'}\n\n${p.needsPopup ? `🎭 popups: Objeto con popup_exit y popup_scroll.\n• popup_exit: título urgente legal + emoji legal + desc 1-2 líneas + ctaText + ctaUrl: ${p.FUNNEL_URL}\n• popup_scroll: título de urgencia máxima (\"Última oportunidad\") + emoji + desc + ctaText + ctaUrl: ${p.FUNNEL_URL}` : '🎭 popups: {} (ya existe)'}\n\n${p.needsFaqSchema ? `📊 faq_schema: 3-5 preguntas frecuentes MUY específicas del caso legal \"${labels}\" en USA, con respuestas útiles de 1-3 oraciones.` : '📊 faq_schema: {questions:[]} (ya existe)'}`;\n} else {\n  estratInstr = `\nESTRATEGIA: SEO clusters + venta afiliados Amazon + infoproductos para ${especie}\nNICHO: ${especie} / ${labels}\nFunnel/lead magnet: ${p.FUNNEL_URL}\nAmazon tag: ${p.AMAZON_TAG}\nColor de marca: ${p.BRAND_COLOR}\nBlog: ${p.BLOG_NAME}\n\n${p.needsContextualLinks ? `🔷 contextual_links: 2-3 hiperenlaces tipo silo.\n• Cada enlace: <span style=\"display:inline-block;background:${bgLight};padding:4px 10px;border-radius:20px;border:1px solid ${p.BRAND_COLOR}40;margin:2px;\">[emoji de ${especie}] <a href=\"URL\" style=\"color:${p.BRAND_COLOR};text-decoration:none;font-weight:600;\">texto ancla</a></span>\n• position_percentage: entre 20 y 30 (el primero al pilar, los demás a clusters hermanos)\n• Usa emojis ESPECÍFICOS de ${especie}` : '🔷 contextual_links: [] (ya existe)'}\n\n${p.needsEarlyCta ? `🎯 early_cta (al 30%):\n• CTA de producto/infoproducto para dueños de ${especie}.\n• Fondo suave relacionado al color de marca, padding:20px, borde redondeado\n• Emoji grande de ${especie} + texto gancho específico + botón → ${p.FUNNEL_URL}` : '🎯 early_cta: {html:\"\"} (ya existe)'}\n\n${p.needsCommercial ? `🛒 commercial_blocks: 1 tabla comparativa de productos para ${especie} o checklist.\n• Ej: comparativa de productos top 3 con pros/cons. Si es adecuado, incluir enlaces de afiliado con tag ${p.AMAZON_TAG}.\n• CSS inline, no JS, max 1.8KB` : '🛒 commercial_blocks: [] (ya existe)'}\n\n${p.needsSecondCta ? `🔥 second_cta (al 65%):\n• Urgencia diferente: oferta por tiempo limitado, descuento, o bonus exclusivo para ${especie}\n• Estilo contrastante al primer CTA. Fondo ${p.BRAND_COLOR}, texto blanco\n• Botón → ${p.FUNNEL_URL}` : '🔥 second_cta: {html:\"\"} (ya existe)'}\n\n${p.needsPopup ? `🎭 popups: Objeto con popup_exit y popup_scroll.\n• popup_exit: sorpresa/regalo para dueños de ${especie} + emoji + desc + ctaText + ctaUrl: ${p.FUNNEL_URL}\n• popup_scroll: oferta especial de tiempo limitado para ${especie} + emoji + desc + ctaText + ctaUrl: ${p.FUNNEL_URL}` : '🎭 popups: {} (ya existe)'}\n\n${p.needsFaqSchema ? `📊 faq_schema: 3-5 preguntas frecuentes muy específicas sobre ${especie} relacionadas al tema \"${p.title}\", con respuestas útiles.` : '📊 faq_schema: {questions:[]} (ya existe)'}`;\n}\n\nconst usr = `Genera bloques HTML para este post:\n\n📝 Título: \"${p.title}\"\n🏷️ Temas: ${labels}\n🔗 Estructura de silos:\n${siloInstr}\n\n${estratInstr}\n\nResponde SOLO este JSON (sin markdown):\n{\n  \"keyword_focus\": \"palabra clave transaccional objetivo del post\",\n  \"contextual_links\": [\n    {\"html\": \"<span>...</span>\", \"position_percentage\": 23},\n    {\"html\": \"<span>...</span>\", \"position_percentage\": 27}\n  ],\n  \"early_cta\": {\"html\": \"<div>...</div>\", \"position_percentage\": 30},\n  \"commercial_blocks\": [{\"type\": \"comparison_table\", \"html\": \"<table>...</table>\"}],\n  \"second_cta\": {\"html\": \"<div>...</div>\", \"position_percentage\": 65},\n  \"popups\": {\n    \"popup_exit\":   {\"title\": \"...\", \"description\": \"...\", \"ctaText\": \"...\", \"ctaUrl\": \"${p.FUNNEL_URL}\", \"emoji\": \"...\"},\n    \"popup_scroll\": {\"title\": \"...\", \"description\": \"...\", \"ctaText\": \"...\", \"ctaUrl\": \"${p.FUNNEL_URL}\", \"emoji\": \"...\"}\n  },\n  \"faq_schema\": {\"questions\": [{\"question\": \"...\", \"answer\": \"...\"}]}\n}`;\n\nreturn { json: {\n  ...p,\n  _dsBody: JSON.stringify({\n    model: 'deepseek-chat',\n    messages: [{ role:'system', content:sys },{ role:'user', content:usr }],\n    max_tokens: 3200, temperature: 0.76,\n    response_format: { type:'json_object' }\n  })\n}};\n"
+      }
+    },
+    {
+      "id": "node-deepseek",
+      "name": "🤖 DeepSeek API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2280, 540],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $json.DEEPSEEK_KEY }}" },
+            { "name": "Content-Type",  "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "string",
+        "body": "={{ $json._dsBody }}",
+        "options": { "timeout": 60000 }
+      }
+    },
+    {
+      "id": "node-inject",
+      "name": "💉 Inyección Multi-Bloque (Ley 1+2)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2540, 540],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// ⚖️ LEY 1: El contenido original es INTOCABLE. Solo se hacen inserciones con slice().\n// ⚖️ LEY 2: Si el marcador ya existe en el contenido → skip ese bloque.\n\nconst dsItem   = $input.item.json;\nconst post     = $('🧠 Prompt Multi-Estrategia').item.json;\n\n// --- Parsear respuesta de DeepSeek ---\nlet raw = '';\ntry { raw = dsItem.choices[0].message.content || ''; } catch(e) {}\nconst cleaned = raw.replace(/```json\\s*/gi,'').replace(/```\\s*/gi,'').trim();\n\nlet B = {};\ntry { B = JSON.parse(cleaned); } catch(e) { B = {}; }\n\n// --- Helper: insertar en % del contenido original (slice, nunca replace) ---\nfunction insertAt(content, html, pct, markerStart, markerEnd) {\n  if (!html || !html.trim()) return content;\n  if (content.includes(markerStart)) return content; // LEY 2\n  const target = Math.floor(content.length * (pct / 100));\n  // Buscar </p> más cercano ANTES del target\n  let at = content.lastIndexOf('</p>', target);\n  if (at < 0) at = content.indexOf('</p>', target); // fallback: siguiente </p>\n  const pos = at > 0 ? at + 4 : target;\n  const block = `\\n${markerStart}\\n${html}\\n${markerEnd}\\n`;\n  return content.slice(0, pos) + block + content.slice(pos);\n}\n\n// --- Construir popup HTML+JS desde los datos (plantilla segura, no generada por IA) ---\nfunction buildPopup(uid, bgColor, funnelUrl, pe, ps) {\n  const safe = s => (s || '').replace(/`/g,'').replace(/\\/script/gi,'<\\/script>');\n  const E_title = safe(pe.title   || ''); const E_desc = safe(pe.description || '');\n  const E_cta   = safe(pe.ctaText || 'Ver más'); const E_url = pe.ctaUrl || funnelUrl;\n  const E_emoji = pe.emoji || '🎯';\n  const S_title = safe(ps.title   || ''); const S_desc = safe(ps.description || '');\n  const S_cta   = safe(ps.ctaText || 'Ver más'); const S_url = ps.ctaUrl || funnelUrl;\n  const S_emoji = ps.emoji || '🔥';\n  if (!E_title && !S_title) return '';\n\n  return `<!-- POPUP_BLOCK -->\n<div id=\"${uid}e\" style=\"display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.76);z-index:2147483647;align-items:center;justify-content:center;\">\n  <div style=\"background:${bgColor};color:#fff;padding:36px 28px;max-width:460px;width:92%;border-radius:18px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5);position:relative;\">\n    <button onclick=\"document.getElementById('${uid}e').style.display='none'\" aria-label=\"Cerrar\" style=\"position:absolute;top:8px;right:10px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:28px;cursor:pointer;width:40px;height:40px;border-radius:50%;\">✕</button>\n    <div style=\"font-size:52px;margin:0 0 14px;\">${E_emoji}</div>\n    <h3 style=\"margin:0 0 12px;font-size:1.35em;font-weight:800;\">${E_title}</h3>\n    <p style=\"margin:0 0 22px;opacity:.9;line-height:1.6;font-size:.97em;\">${E_desc}</p>\n    <a href=\"${E_url}\" rel=\"noopener\" style=\"display:inline-block;background:#fff;color:${bgColor};padding:14px 34px;border-radius:50px;font-weight:800;font-size:1.05em;text-decoration:none;\">${E_cta}</a>\n    <p onclick=\"document.getElementById('${uid}e').style.display='none'\" style=\"margin:14px 0 0;font-size:.8em;opacity:.5;cursor:pointer;\">No gracias</p>\n  </div>\n</div>\n<div id=\"${uid}s\" style=\"display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.76);z-index:2147483647;align-items:center;justify-content:center;\">\n  <div style=\"background:${bgColor};color:#fff;padding:36px 28px;max-width:460px;width:92%;border-radius:18px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5);position:relative;\">\n    <button onclick=\"document.getElementById('${uid}s').style.display='none'\" aria-label=\"Cerrar\" style=\"position:absolute;top:8px;right:10px;background:rgba(255,255,255,0.2);border:none;color:#fff;font-size:28px;cursor:pointer;width:40px;height:40px;border-radius:50%;\">✕</button>\n    <div style=\"font-size:52px;margin:0 0 14px;\">${S_emoji}</div>\n    <h3 style=\"margin:0 0 12px;font-size:1.35em;font-weight:800;\">${S_title}</h3>\n    <p style=\"margin:0 0 22px;opacity:.9;line-height:1.6;font-size:.97em;\">${S_desc}</p>\n    <a href=\"${S_url}\" rel=\"noopener\" style=\"display:inline-block;background:#fff;color:${bgColor};padding:14px 34px;border-radius:50px;font-weight:800;font-size:1.05em;text-decoration:none;\">${S_cta}</a>\n    <p onclick=\"document.getElementById('${uid}s').style.display='none'\" style=\"margin:14px 0 0;font-size:.8em;opacity:.5;cursor:pointer;\">Cerrar</p>\n  </div>\n</div>\n<script>\n(function(){\n  var u='${uid}';\n  function show(id){\n    if(sessionStorage.getItem(u+id))return;\n    sessionStorage.setItem(u+id,'1');\n    var el=document.getElementById(u+id);\n    if(el)el.style.display='flex';\n  }\n  var t0=Date.now();\n  document.addEventListener('mouseleave',function(e){if(e.clientY<=0)show('e');});\n  window.addEventListener('scroll',function(){\n    var d=document.documentElement;\n    var pct=d.scrollTop/(d.scrollHeight-d.clientHeight)*100;\n    if(pct>=60)show('s');\n  },{passive:true});\n})();\n<\\/script>\n<!-- /POPUP_BLOCK -->`;\n}\n\n// --- Obtener posiciones originales (antes de cualquier inserción) ---\nlet content   = post.content;\nconst origLen = content.length;\n\n// --- Preparar todas las inserciones como lista ordenada por posición DESC ---\n// (insertar de abajo hacia arriba para no desplazar las posiciones superiores)\nconst insertions = [];\n\n// 1. Hiperenlaces contextuales tipo silo\nif (post.needsContextualLinks && B.contextual_links?.length) {\n  for (const link of B.contextual_links) {\n    if (link.html && link.position_percentage) {\n      insertions.push({\n        pct:     link.position_percentage,\n        html:    link.html,\n        marker:  null // se rastrean con el marcador agregado al final\n      });\n    }\n  }\n}\n\n// 2. Early CTA (30%)\nif (post.needsEarlyCta && B.early_cta?.html) {\n  insertions.push({\n    pct:     B.early_cta.position_percentage || 30,\n    html:    B.early_cta.html,\n    mStart:  '<!-- EARLY_CTA -->',\n    mEnd:    '<!-- /EARLY_CTA -->'\n  });\n}\n\n// 3. Commercial blocks (~50%)\nif (post.needsCommercial && B.commercial_blocks?.length) {\n  insertions.push({\n    pct:    50,\n    html:   B.commercial_blocks.map(b => b.html).join('\\n'),\n    mStart: '<!-- COMMERCIAL_BLOCKS -->',\n    mEnd:   '<!-- /COMMERCIAL_BLOCKS -->'\n  });\n}\n\n// 4. Second CTA (65%)\nif (post.needsSecondCta && B.second_cta?.html) {\n  insertions.push({\n    pct:    B.second_cta.position_percentage || 65,\n    html:   B.second_cta.html,\n    mStart: '<!-- SECOND_CTA -->',\n    mEnd:   '<!-- /SECOND_CTA -->'\n  });\n}\n\n// Ordenar de MAYOR a MENOR posición para no desplazar inserciones previas\ninsertions.sort((a, b) => b.pct - a.pct);\n\n// Aplicar inserciones de bloque (con marcadores y Ley 2)\nfor (const ins of insertions) {\n  if (!ins.html || !ins.html.trim()) continue;\n  if (ins.mStart && content.includes(ins.mStart)) continue; // LEY 2\n  const target = Math.floor(origLen * (ins.pct / 100));\n  let at = content.lastIndexOf('</p>', target);\n  if (at < 0) at = content.indexOf('</p>', target);\n  const pos = at > 0 ? at + 4 : target;\n  const block = ins.mStart\n    ? `\\n${ins.mStart}\\n${ins.html}\\n${ins.mEnd}\\n`\n    : `\\n${ins.html}\\n`;\n  content = content.slice(0, pos) + block + content.slice(pos);\n}\n\n// Si se insertaron contextual_links, agregar marcador rastreador al final\nif (post.needsContextualLinks && B.contextual_links?.length && !content.includes('<!-- CONTEXTUAL_LINKS -->')) {\n  content += '\\n<!-- CONTEXTUAL_LINKS --><!-- /CONTEXTUAL_LINKS -->';\n}\n\n// 5. FAQ Schema (JSON-LD) — al final\nif (post.needsFaqSchema && B.faq_schema?.questions?.length > 0 && !content.includes('<!-- FAQ_SCHEMA -->')) {\n  const ld = JSON.stringify({\n    '@context': 'https://schema.org',\n    '@type': 'FAQPage',\n    mainEntity: B.faq_schema.questions.map(q => ({\n      '@type': 'Question',\n      name: q.question,\n      acceptedAnswer: { '@type': 'Answer', text: q.answer }\n    }))\n  });\n  content += `\\n<!-- FAQ_SCHEMA -->\\n<script type=\"application/ld+json\">${ld}</scr` + `ipt>\\n<!-- /FAQ_SCHEMA -->`;\n}\n\n// 6. Popups (HTML+JS con template seguro) — al final\nconst popData = B.popups || {};\nif (post.needsPopup && !content.includes('<!-- POPUP_BLOCK -->')) {\n  const uid = 'p' + String(post.id).slice(-8);\n  const popHtml = buildPopup(uid, post.BRAND_COLOR, post.FUNNEL_URL,\n    popData.popup_exit  || {},\n    popData.popup_scroll || {}\n  );\n  if (popHtml) content += '\\n' + popHtml;\n}\n\nconst changed = content !== post.content;\n\nreturn { json: {\n  id:         post.id,\n  title:      post.title,\n  BLOG_ID:    post.BLOG_ID,\n  newContent: content,\n  _changed:   changed,\n  _skipped:   !changed,\n  kwFocus:    B.keyword_focus || '',\n  nextPageToken:  post.nextPageToken,\n  _row:           post._row,\n  SHEET_ID:       post.SHEET_ID,\n  HOJA_BLOGS:     post.HOJA_BLOGS,\n  BLOG_ID_SHEET:  post.BLOG_ID\n}};\n"
+      }
+    },
+    {
+      "id": "node-filter-changed",
+      "name": "✅ Solo Si Hubo Cambios",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2,
+      "position": [2800, 540],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json._changed }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-blogger-update",
+      "name": "📤 Blogger: Actualizar Post",
+      "type": "n8n-nodes-base.blogger",
+      "typeVersion": 1,
+      "position": [3060, 540],
+      "parameters": {
+        "resource": "post",
+        "operation": "update",
+        "blogId": "={{ $json.BLOG_ID }}",
+        "postId": "={{ $json.id }}",
+        "title":  "={{ $json.title }}",
+        "content":"={{ $json.newContent }}"
+      },
+      "credentials": {
+        "bloggerOAuth2Api": { "id": "BLOGGER_CREDENTIAL", "name": "Blogger OAuth2" }
+      }
+    },
+    {
+      "id": "node-sheets-update-processed",
+      "name": "📊 Sheet: Marcar Blog Procesado",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [3320, 540],
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "={{ $json.SHEET_ID }}", "mode": "id" },
+        "sheetName":  { "__rl": true, "value": "={{ $json.HOJA_BLOGS }}", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "BLOG_ID":                    "={{ $json.BLOG_ID_SHEET }}",
+            "CLUSTERS_ULTIMO_PROCESO":    "={{ new Date().toISOString() }}",
+            "LAST_UPDATED":               "={{ new Date().toISOString() }}"
+          }
+        },
+        "matchingColumns": ["BLOG_ID"],
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "SHEETS_CREDENTIAL", "name": "Google Sheets OAuth2" }
+      }
+    },
+    {
+      "id": "node-summary-ok",
+      "name": "✅ Resumen (Post Procesado)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3580, 540],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const b = $('🎯 Seleccionar Blog (Rotación)').first().json;\nconst p = $('🔍 Seleccionar 1 Post Sin Procesar').first().json;\nreturn [{ json: {\n  status:     '✅ Post procesado',\n  blog:        b.BLOG_NAME,\n  estrategia:  b.ESTRATEGIA,\n  post:        p.title,\n  kwFocus:     $('💉 Inyección Multi-Bloque (Ley 1+2)').first().json.kwFocus || '',\n  timestamp:   new Date().toLocaleString('es-MX'),\n  proxima:     'En 5 minutos: siguiente post del mismo blog o siguiente blog en rotación'\n}}];\n"
+      }
+    },
+    {
+      "id": "node-sheets-advance-page",
+      "name": "📊 Sheet: Avanzar Página",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [2020, 880],
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "={{ $json.SHEET_ID }}", "mode": "id" },
+        "sheetName":  { "__rl": true, "value": "={{ $json.HOJA_BLOGS }}", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "BLOG_ID":           "={{ $json.BLOG_ID }}",
+            "NEXT_PAGE_TOKEN":   "={{ $json.nextPageToken }}",
+            "CLUSTERS_ULTIMO_PROCESO": "={{ new Date().toISOString() }}"
+          }
+        },
+        "matchingColumns": ["BLOG_ID"],
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "SHEETS_CREDENTIAL", "name": "Google Sheets OAuth2" }
+      }
+    },
+    {
+      "id": "node-summary-skip",
+      "name": "⏭️ Resumen (Sin Post Nuevo)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2280, 880],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const b = $('🎯 Seleccionar Blog (Rotación)').first().json;\nreturn [{ json: {\n  status: '⏭️ Sin posts nuevos en esta página',\n  blog: b.BLOG_NAME,\n  nextPageToken: $input.first().json.nextPageToken || '(fin del blog)',\n  nota: 'La próxima ejecución (en 5 min) continuará desde la siguiente página o reiniciará el ciclo.'\n}}];\n"
+      }
+    }
+  ],
+  "connections": {
+    "▶ Ejecutar Ahora": { "main": [[{ "node": "⚙️ CONFIG", "type": "main", "index": 0 }]] },
+    "⏰ Cada 5 Minutos":  { "main": [[{ "node": "⚙️ CONFIG", "type": "main", "index": 0 }]] },
+    "⚙️ CONFIG":          { "main": [[{ "node": "📊 Leer Blogs (Sheet)", "type": "main", "index": 0 }]] },
+    "📊 Leer Blogs (Sheet)": { "main": [[{ "node": "🎯 Seleccionar Blog (Rotación)", "type": "main", "index": 0 }]] },
+    "🎯 Seleccionar Blog (Rotación)": {
+      "main": [[
+        { "node": "🏛️ Obtener Posts Pilar",        "type": "main", "index": 0 },
+        { "node": "📄 Obtener Página de Clusters", "type": "main", "index": 0 }
+      ]]
+    },
+    "🏛️ Obtener Posts Pilar": {
+      "main": [[{ "node": "🔍 Seleccionar 1 Post Sin Procesar", "type": "main", "index": 0 }]]
+    },
+    "📄 Obtener Página de Clusters": {
+      "main": [[{ "node": "🔍 Seleccionar 1 Post Sin Procesar", "type": "main", "index": 0 }]]
+    },
+    "🔍 Seleccionar 1 Post Sin Procesar": {
+      "main": [[{ "node": "❓ ¿Post Encontrado?", "type": "main", "index": 0 }]]
+    },
+    "❓ ¿Post Encontrado?": {
+      "main": [
+        [{ "node": "🧠 Prompt Multi-Estrategia", "type": "main", "index": 0 }],
+        [{ "node": "📊 Sheet: Avanzar Página",   "type": "main", "index": 0 }]
+      ]
+    },
+    "🧠 Prompt Multi-Estrategia": { "main": [[{ "node": "🤖 DeepSeek API",                    "type": "main", "index": 0 }]] },
+    "🤖 DeepSeek API":             { "main": [[{ "node": "💉 Inyección Multi-Bloque (Ley 1+2)", "type": "main", "index": 0 }]] },
+    "💉 Inyección Multi-Bloque (Ley 1+2)": { "main": [[{ "node": "✅ Solo Si Hubo Cambios",       "type": "main", "index": 0 }]] },
+    "✅ Solo Si Hubo Cambios":     { "main": [[{ "node": "📤 Blogger: Actualizar Post",          "type": "main", "index": 0 }]] },
+    "📤 Blogger: Actualizar Post": { "main": [[{ "node": "📊 Sheet: Marcar Blog Procesado",      "type": "main", "index": 0 }]] },
+    "📊 Sheet: Marcar Blog Procesado": { "main": [[{ "node": "✅ Resumen (Post Procesado)",      "type": "main", "index": 0 }]] },
+    "📊 Sheet: Avanzar Página": { "main": [[{ "node": "⏭️ Resumen (Sin Post Nuevo)",            "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1", "saveManualExecutions": true },
+  "versionId": "a1b2c3d4-7777-7777-7777-777777777777",
+  "meta": { "templateCredsSetupCompleted": false },
+  "id": "blog-factory-autopilot-v2",
+  "tags": [
+    { "id": "t1", "name": "SEO",      "createdAt": "2026-01-01", "updatedAt": "2026-01-01" },
+    { "id": "t2", "name": "Autopilot","createdAt": "2026-01-01", "updatedAt": "2026-01-01" },
+    { "id": "t3", "name": "DeepSeek", "createdAt": "2026-01-01", "updatedAt": "2026-01-01" },
+    { "id": "t4", "name": "Silos",    "createdAt": "2026-01-01", "updatedAt": "2026-01-01" }
+  ]
+}

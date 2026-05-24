@@ -1,0 +1,238 @@
+{
+  "name": "Lead Premium Receiver — Webhook systeme.io → Google Sheet",
+  "nodes": [
+    {
+      "id": "sticky-note",
+      "name": "📋 CÓMO FUNCIONA",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [180, 60],
+      "parameters": {
+        "content": "## 📥 Receptor de Leads Premium ($250)\n\n**Flujo:**\n1. systeme.io llama este webhook cuando alguien completa el formulario de calificación premium\n2. El webhook extrae: email, nombre, teléfono, blog_id, blog_name, nicho\n3. Busca la fila del blog en Google Sheet\n4. Actualiza el Sheet marcando la conversión premium\n5. Responde 200 OK a systeme.io\n\n---\n**Columnas que escribe en Sheet:**\n- `ULTIMO_LEAD_PREMIUM` — timestamp ISO\n- `LEADS_PREMIUM_TOTAL` — contador acumulado\n- `ULTIMO_LEAD_EMAIL` — email del lead\n\n---\n**URL del webhook (configura en systeme.io):**\n`https://TU_N8N.contabo.com/webhook/lead-premium`\n\n**Parámetros POST que debe enviar systeme.io:**\n- `email` (requerido)\n- `first_name`\n- `phone`\n- `blog_id` — ID del blog de Blogger (para mapear al Sheet)\n- `blog_name` — Nombre del blog (fallback)\n- `lead_value` — Valor declarado (opcional, default 250)",
+        "height": 460,
+        "width": 480,
+        "color": 5
+      }
+    },
+    {
+      "id": "trigger-webhook",
+      "name": "🔔 Webhook: Lead Premium",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [180, 580],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-premium",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "node-config",
+      "name": "⚙️ CONFIG Lead Premium",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 580],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            { "id": "lp01", "name": "SHEET_ID",   "value": "1Vq8TuyqI22C3_Ffth-GsGdDRuXfHORpdAGOiowLxIpk", "type": "string" },
+            { "id": "lp02", "name": "HOJA_BLOGS", "value": "Blogs",                                            "type": "string" },
+            { "id": "lp03", "name": "LEAD_VALUE_DEFAULT", "value": 250,                                        "type": "number" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-extract",
+      "name": "🔍 Extraer Datos del Lead",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [720, 580],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const body  = $input.item.json.body || $input.item.json;\nconst cfg   = $('⚙️ CONFIG Lead Premium').first().json;\n\nconst email     = (body.email || '').trim().toLowerCase();\nconst firstName = (body.first_name || body.firstName || body.nombre || '').trim();\nconst phone     = (body.phone || body.telefono || '').trim();\nconst blogId    = String(body.blog_id || body.blogId || '').trim();\nconst blogName  = (body.blog_name || body.blogName || '').trim();\nconst leadValue = parseFloat(body.lead_value || body.leadValue || cfg.LEAD_VALUE_DEFAULT);\n\nif (!email) {\n  return { json: { _error: 'Email requerido', received: body } };\n}\n\nreturn { json: {\n  email, firstName, phone, blogId, blogName, leadValue,\n  timestamp: new Date().toISOString(),\n  SHEET_ID:   cfg.SHEET_ID,\n  HOJA_BLOGS: cfg.HOJA_BLOGS\n}};\n"
+      }
+    },
+    {
+      "id": "node-check-error",
+      "name": "❓ ¿Datos Válidos?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [980, 580],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            {
+              "id": "v1",
+              "leftValue": "={{ $json._error }}",
+              "rightValue": "",
+              "operator": { "type": "string", "operation": "empty" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-read-sheet",
+      "name": "📊 Leer Sheet para Localizar Blog",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [1240, 460],
+      "parameters": {
+        "operation": "getAll",
+        "documentId": { "__rl": true, "value": "={{ $('🔍 Extraer Datos del Lead').first().json.SHEET_ID }}", "mode": "id" },
+        "sheetName":  { "__rl": true, "value": "={{ $('🔍 Extraer Datos del Lead').first().json.HOJA_BLOGS }}", "mode": "name" },
+        "returnAll": true,
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "SHEETS_CREDENTIAL", "name": "Google Sheets OAuth2" }
+      }
+    },
+    {
+      "id": "node-find-row",
+      "name": "🗺️ Localizar Fila del Blog",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1500, 460],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const leadData  = $('🔍 Extraer Datos del Lead').first().json;\nconst sheetRows = $input.all().map(i => i.json);\n\nlet matchRow = null;\n\n// Buscar por BLOG_ID exacto primero\nif (leadData.blogId) {\n  matchRow = sheetRows.find(r => String(r.BLOG_ID).trim() === leadData.blogId);\n}\n\n// Fallback: buscar por nombre del blog (case-insensitive partial)\nif (!matchRow && leadData.blogName) {\n  const bn = leadData.blogName.toLowerCase();\n  matchRow = sheetRows.find(r =>\n    (r.BLOG_NAME || '').toLowerCase().includes(bn) ||\n    bn.includes((r.BLOG_NAME || '').toLowerCase())\n  );\n}\n\nif (!matchRow) {\n  return [{ json: {\n    _noMatch: true,\n    message: `No se encontró blog para blog_id=${leadData.blogId} / blog_name=${leadData.blogName}`,\n    leadData\n  }}];\n}\n\nconst currentTotal = parseInt(matchRow.LEADS_PREMIUM_TOTAL || 0);\n\nreturn [{ json: {\n  _noMatch: false,\n  rowNumber: matchRow._rowNumber,\n  BLOG_NAME: matchRow.BLOG_NAME,\n  BLOG_ID:   matchRow.BLOG_ID,\n  newTotal:  currentTotal + 1,\n  ...leadData\n}}];\n"
+      }
+    },
+    {
+      "id": "node-if-match",
+      "name": "❓ ¿Blog Encontrado?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1760, 460],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [
+            {
+              "id": "m1",
+              "leftValue": "={{ $json._noMatch }}",
+              "rightValue": true,
+              "operator": { "type": "boolean", "operation": "false" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-update-sheet",
+      "name": "📊 Actualizar Sheet: Lead Premium",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [2020, 360],
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "={{ $json.SHEET_ID }}", "mode": "id" },
+        "sheetName":  { "__rl": true, "value": "={{ $json.HOJA_BLOGS }}", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $json.rowNumber }}",
+            "ULTIMO_LEAD_PREMIUM":  "={{ $json.timestamp }}",
+            "LEADS_PREMIUM_TOTAL":  "={{ $json.newTotal }}",
+            "ULTIMO_LEAD_EMAIL":    "={{ $json.email }}"
+          },
+          "matchingColumns": ["row_number"],
+          "schema": []
+        },
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": { "id": "SHEETS_CREDENTIAL", "name": "Google Sheets OAuth2" }
+      }
+    },
+    {
+      "id": "node-respond-ok",
+      "name": "✅ Responder 200 OK",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2280, 360],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: true, blog: $('🗺️ Localizar Fila del Blog').first().json.BLOG_NAME, lead: $('🔍 Extraer Datos del Lead').first().json.email, leadValue: $('🔍 Extraer Datos del Lead').first().json.leadValue, total_premium: $('🗺️ Localizar Fila del Blog').first().json.newTotal, ts: new Date().toISOString() }) }}",
+        "options": { "responseCode": 200 }
+      }
+    },
+    {
+      "id": "node-respond-nomatch",
+      "name": "⚠️ Responder 207 (Sin Match)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [2020, 560],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: false, reason: $json.message, received_blog_id: $json.leadData.blogId, received_blog_name: $json.leadData.blogName }) }}",
+        "options": { "responseCode": 207 }
+      }
+    },
+    {
+      "id": "node-respond-error",
+      "name": "❌ Responder 400 (Error)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [980, 760],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ success: false, error: $json._error }) }}",
+        "options": { "responseCode": 400 }
+      }
+    }
+  ],
+  "connections": {
+    "🔔 Webhook: Lead Premium": {
+      "main": [[{ "node": "⚙️ CONFIG Lead Premium", "type": "main", "index": 0 }]]
+    },
+    "⚙️ CONFIG Lead Premium": {
+      "main": [[{ "node": "🔍 Extraer Datos del Lead", "type": "main", "index": 0 }]]
+    },
+    "🔍 Extraer Datos del Lead": {
+      "main": [[{ "node": "❓ ¿Datos Válidos?", "type": "main", "index": 0 }]]
+    },
+    "❓ ¿Datos Válidos?": {
+      "main": [
+        [{ "node": "📊 Leer Sheet para Localizar Blog", "type": "main", "index": 0 }],
+        [{ "node": "❌ Responder 400 (Error)", "type": "main", "index": 0 }]
+      ]
+    },
+    "📊 Leer Sheet para Localizar Blog": {
+      "main": [[{ "node": "🗺️ Localizar Fila del Blog", "type": "main", "index": 0 }]]
+    },
+    "🗺️ Localizar Fila del Blog": {
+      "main": [[{ "node": "❓ ¿Blog Encontrado?", "type": "main", "index": 0 }]]
+    },
+    "❓ ¿Blog Encontrado?": {
+      "main": [
+        [{ "node": "📊 Actualizar Sheet: Lead Premium", "type": "main", "index": 0 }],
+        [{ "node": "⚠️ Responder 207 (Sin Match)", "type": "main", "index": 0 }]
+      ]
+    },
+    "📊 Actualizar Sheet: Lead Premium": {
+      "main": [[{ "node": "✅ Responder 200 OK", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "tags": ["blog-factory", "leads", "systeme.io"],
+  "triggerCount": 1,
+  "updatedAt": "2026-05-24T00:00:00.000Z",
+  "versionId": "lead-premium-v1"
+}
