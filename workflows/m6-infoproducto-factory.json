@@ -1,0 +1,449 @@
+{
+  "name": "M6 — Infoproducto Factory [DeepSeek + Hotmart]",
+  "nodes": [
+    {
+      "id": "sticky-note",
+      "name": "📋 M6: INFOPRODUCTO FACTORY",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [180, 60],
+      "parameters": {
+        "content": "## 🏭 M6 — Infoproducto Factory\n\n**Flujo por ejecución:**\n1. Verifica duplicado por TEMA en Sheet (idempotente: `<!-- M6_PROCESSED -->`)\n2. DeepSeek genera el contenido estructurado del infoproducto\n3. Se construye un HTML estilizado completo (portada, TOC, secciones, CTA)\n4. Se sube a Google Drive como Google Doc (conversión automática HTML→Doc)\n5. Se comparte públicamente → URL PDF = export link del Google Doc\n6. Se registra en Sheet 'Infoproductos'\n7. Se obtiene token OAuth2 de Hotmart y se crea el producto\n8. Se actualiza el Sheet con el ID y link de Hotmart\n\n---\n**⚙️ EDITAR ANTES DE EJECUTAR:**\n- Nodo `📝 INPUT`: tema, especie, tipo, precio\n- Nodo `⚙️ CONFIG`: API keys, IDs de Sheet y Drive\n- Credencial Google Drive OAuth2 en nodos marcados\n- Credencial Google Sheets OAuth2 en nodos marcados\n\n---\n**Tipos de infoproducto soportados:** checklist | ebook | guia | tutorial\n\n**Columnas requeridas en Sheet 'Infoproductos':**\nTIMESTAMP | TEMA | TITULO | ESPECIE | TIPO | PRECIO | ESTADO | GDOC_ID | PDF_URL | HOTMART_ID | HOTMART_LINK",
+        "height": 580,
+        "width": 560,
+        "color": 4
+      }
+    },
+    {
+      "id": "trigger-manual",
+      "name": "▶ Ejecutar",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [180, 740]
+    },
+    {
+      "id": "node-input",
+      "name": "📝 INPUT",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [420, 740],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            { "id": "i01", "name": "tema",    "value": "Checklist de primeros auxilios para perros",  "type": "string" },
+            { "id": "i02", "name": "especie", "value": "perro",                                        "type": "string" },
+            { "id": "i03", "name": "tipo",    "value": "checklist",                                    "type": "string" },
+            { "id": "i04", "name": "precio",  "value": 19.90,                                          "type": "number" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-config",
+      "name": "⚙️ CONFIG",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [660, 740],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            { "id": "c01", "name": "SHEET_ID",              "value": "1Vq8TuyqI22C3_Ffth-GsGdDRuXfHORpdAGOiowLxIpk", "type": "string" },
+            { "id": "c02", "name": "HOJA_INFOPRODUCTOS",    "value": "Infoproductos",                                  "type": "string" },
+            { "id": "c03", "name": "GOOGLE_DRIVE_FOLDER_ID","value": "",                                                "type": "string" },
+            { "id": "c04", "name": "DEEPSEEK_API_KEY",      "value": "sk-TU_DEEPSEEK_KEY_AQUI",                       "type": "string" },
+            { "id": "c05", "name": "HOTMART_CLIENT_ID",     "value": "TU_CLIENT_ID_AQUI",                             "type": "string" },
+            { "id": "c06", "name": "HOTMART_CLIENT_SECRET", "value": "TU_CLIENT_SECRET_AQUI",                         "type": "string" },
+            { "id": "c07", "name": "MONEDA_HOTMART",        "value": "BRL",                                            "type": "string" },
+            { "id": "c08", "name": "WARRANTY_DIAS",         "value": 30,                                               "type": "number" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-merge-params",
+      "name": "🔀 Unir Params",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 740],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const input = $('📝 INPUT').first().json;\nconst cfg   = $('⚙️ CONFIG').first().json;\nreturn [{ json: { ...input, ...cfg } }];\n"
+      }
+    },
+    {
+      "id": "node-check-dup",
+      "name": "📊 Leer Infoproductos (Sheet)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [1140, 740],
+      "parameters": {
+        "operation": "getAll",
+        "documentId": { "__rl": true, "value": "={{ $('⚙️ CONFIG').first().json.SHEET_ID }}", "mode": "id" },
+        "sheetName":  { "__rl": true, "value": "={{ $('⚙️ CONFIG').first().json.HOJA_INFOPRODUCTOS }}", "mode": "name" },
+        "returnAll": true,
+        "options": {}
+      },
+      "continueOnFail": true,
+      "credentials": { "googleSheetsOAuth2Api": { "id": "SHEETS_CREDENTIAL", "name": "Google Sheets OAuth2" } }
+    },
+    {
+      "id": "node-dup-check",
+      "name": "🔍 ¿Es Duplicado?",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1380, 740],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const params = $('🔀 Unir Params').first().json;\nconst tema = (params.tema || '').toLowerCase().trim();\n\n// getAll puede retornar 0 ítems (sheet vacío) o error — ambos = sin duplicado\nconst rows = $input.all()\n  .map(i => i.json)\n  .filter(r => !r.error);\n\nconst dup = rows.find(r =>\n  (r.TEMA || '').toLowerCase().trim() === tema &&\n  (r.ESTADO || '') === 'M6_PROCESSED'\n);\n\nreturn [{ json: {\n  isDuplicate: !!dup,\n  existingPdfUrl: dup ? (dup.PDF_URL || '') : '',\n  existingHotmart: dup ? (dup.HOTMART_LINK || '') : '',\n  ...params\n}}];\n"
+      }
+    },
+    {
+      "id": "node-if-dup",
+      "name": "❓ ¿Ya Existe?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [1620, 740],
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": false, "leftValue": "", "typeValidation": "loose" },
+          "conditions": [{ "id": "d1", "leftValue": "={{ $json.isDuplicate }}", "rightValue": true, "operator": { "type": "boolean", "operation": "equals" } }],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-ya-procesado",
+      "name": "⚠️ Ya Procesado (Saltar)",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1860, 640],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            { "id": "ya1", "name": "resultado", "value": "DUPLICADO — ya existe con M6_PROCESSED",  "type": "string" },
+            { "id": "ya2", "name": "pdf_url",   "value": "={{ $json.existingPdfUrl }}",              "type": "string" },
+            { "id": "ya3", "name": "hotmart",   "value": "={{ $json.existingHotmart }}",             "type": "string" }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "node-prep-ds",
+      "name": "📝 Preparar Prompt DeepSeek",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1860, 840],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const p = $input.first().json;\nconst tipoMap = {\n  checklist: 'checklist práctico con ítems accionables (listas de verificación)',\n  ebook:     'ebook completo con contenido educativo por capítulos',\n  guia:      'guía paso a paso con instrucciones claras',\n  tutorial:  'tutorial detallado con pasos y ejercicios prácticos'\n};\nconst tipoLabel = tipoMap[p.tipo] || 'infoproducto digital';\n\nconst sysPrompt = `Eres experto en creación de infoproductos digitales de alta conversión para el mercado hispanohablante. Generas contenido rico, práctico y profesional. RESPONDE ÚNICAMENTE CON UN OBJETO JSON VÁLIDO, sin markdown, sin bloques de código, sin texto antes ni después del JSON.`;\n\nconst userPrompt = `Crea un ${tipoLabel} completo sobre \"${p.tema}\" para dueños de ${p.especie}s.\n\nREGLAS:\n- Tono cálido, experto y cercano al lector\n- Mínimo 8 secciones/capítulos\n- Para checklists: 6-10 ítems por sección, concisos y accionables\n- Para otros tipos: 200-300 palabras por sección\n- La descripcion debe ser atractiva y de máx 190 caracteres sin saltos de línea\n\nJSON ESPERADO (responde SÓLO con este JSON, sin nada más):\n{\n  \"titulo\": \"título del infoproducto (máx 80 chars)\",\n  \"subtitulo\": \"subtítulo que complementa y engancha\",\n  \"descripcion\": \"descripción vendedora para Hotmart (máx 190 chars, una sola línea)\",\n  \"palabras_clave\": [\"kw1\", \"kw2\", \"kw3\", \"kw4\", \"kw5\"],\n  \"introduccion\": \"texto de introducción (2-3 párrafos separados por doble salto de línea)\",\n  \"secciones\": [\n    {\n      \"titulo\": \"nombre de la sección\",\n      \"contenido\": \"texto del contenido (omitir para checklists)\",\n      \"items\": [\"ítem 1\", \"ítem 2\"]\n    }\n  ],\n  \"conclusion\": \"texto de conclusión (1-2 párrafos)\",\n  \"cta\": \"llamada a la acción urgente y específica (1-2 líneas)\"\n}`;\n\nconst body = JSON.stringify({\n  model: 'deepseek-chat',\n  temperature: 0.72,\n  max_tokens: 4000,\n  response_format: { type: 'json_object' },\n  messages: [\n    { role: 'system', content: sysPrompt },\n    { role: 'user',   content: userPrompt }\n  ]\n});\n\nreturn [{ json: { ...p, _dsBody: body } }];\n"
+      }
+    },
+    {
+      "id": "node-deepseek",
+      "name": "🤖 DeepSeek: Generar Contenido",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2100, 840],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $json._dsBody ? $('📝 Preparar Prompt DeepSeek').first().json.DEEPSEEK_API_KEY : '' }}" },
+            { "name": "Content-Type",  "value": "application/json" },
+            { "name": "Connection",    "value": "keep-alive" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "body": "={{ $json._dsBody }}",
+        "options": { "timeout": 180000, "allowUnauthorizedCerts": true }
+      }
+    },
+    {
+      "id": "node-parse-ds",
+      "name": "📦 Parsear Respuesta DeepSeek",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2340, 840],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const dsResponse = $input.first().json;\nconst params = $('📝 Preparar Prompt DeepSeek').first().json;\n\nconst raw = dsResponse.choices?.[0]?.message?.content || dsResponse.choices?.[0]?.text || '';\n\nlet ds;\ntry {\n  ds = JSON.parse(raw);\n} catch(e) {\n  // Try to extract JSON from response if wrapped\n  const match = raw.match(/\\{[\\s\\S]*\\}/);\n  if (!match) throw new Error('DeepSeek no devolvió JSON válido: ' + raw.substring(0, 200));\n  ds = JSON.parse(match[0]);\n}\n\nif (!ds.titulo || !ds.secciones) {\n  throw new Error('JSON incompleto de DeepSeek — faltan campos titulo o secciones');\n}\n\nreturn [{ json: { ...params, ds } }];\n"
+      }
+    },
+    {
+      "id": "node-build-html",
+      "name": "🎨 Construir HTML del Infoproducto",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2580, 840],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const { ds, tipo, especie, tema, precio,\n        SHEET_ID, HOJA_INFOPRODUCTOS, GOOGLE_DRIVE_FOLDER_ID,\n        HOTMART_CLIENT_ID, HOTMART_CLIENT_SECRET, MONEDA_HOTMART, WARRANTY_DIAS } = $input.first().json;\n\nconst primaryColor = '#1e40af';\nconst accentColor  = '#10b981';\nconst year         = new Date().getFullYear();\n\nfunction esc(s) {\n  return String(s || '')\n    .replace(/&/g,'&amp;').replace(/</g,'&lt;')\n    .replace(/>/g,'&gt;').replace(/\"/g,'&quot;');\n}\n\nfunction buildSection(s, idx) {\n  const isCheck = Array.isArray(s.items) && s.items.length > 0;\n  let body;\n  if (isCheck) {\n    const items = s.items.map(it =>\n      `<div class=\"ci\"><span class=\"ck\">&#9744;</span><span>${esc(it)}</span></div>`\n    ).join('');\n    body = `<div class=\"checklist\">${items}</div>`;\n  } else {\n    const paras = (s.contenido || '').split(/\\n+/).filter(Boolean)\n      .map(p => `<p>${esc(p)}</p>`).join('');\n    body = paras || '<p></p>';\n  }\n  return `<div class=\"section\"><h2>${idx}. ${esc(s.titulo)}</h2>${body}</div>`;\n}\n\nconst tocItems = ds.secciones.map((s,i) =>\n  `<li>${i+1}. ${esc(s.titulo)}</li>`\n).join('');\n\nconst sections = ds.secciones.map((s,i) => buildSection(s, i+1)).join('');\n\nconst introParas = (ds.introduccion || '').split(/\\n+/).filter(Boolean)\n  .map(p => `<p>${esc(p)}</p>`).join('');\n\nconst conclParas = (ds.conclusion || '').split(/\\n+/).filter(Boolean)\n  .map(p => `<p>${esc(p)}</p>`).join('');\n\nconst html = `<!DOCTYPE html>\n<html lang=\"es\">\n<head>\n<meta charset=\"UTF-8\">\n<title>${esc(ds.titulo)}</title>\n<style>\n*{margin:0;padding:0;box-sizing:border-box}\nbody{font-family:Georgia,'Times New Roman',serif;color:#1a1a2e;background:#fff;font-size:13pt;line-height:1.8}\n.cover{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,${primaryColor} 0%,#1e3a8a 100%);color:#fff;padding:80px 60px;text-align:center;page-break-after:always}\n.cover h1{font-size:2.2em;margin-bottom:24px;line-height:1.2;max-width:700px}\n.cover h2{font-size:1.2em;font-weight:300;opacity:.88;margin-bottom:48px;max-width:600px}\n.cover .badge{background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.4);border-radius:30px;padding:10px 30px;font-size:.85em;letter-spacing:3px;text-transform:uppercase}\n.toc{padding:70px 100px;page-break-after:always}\n.toc h2{font-size:1.7em;color:${primaryColor};border-bottom:3px solid ${primaryColor};padding-bottom:14px;margin-bottom:32px}\n.toc ol{list-style:none}\n.toc li{padding:9px 0;border-bottom:1px dotted #d1d5db;font-size:1em}\n.intro{padding:60px 100px;page-break-after:always}\n.intro h2{font-size:1.6em;color:${primaryColor};margin-bottom:22px}\n.intro p{margin-bottom:16px}\n.section{padding:50px 100px;page-break-after:always}\n.section h2{font-size:1.5em;color:${primaryColor};border-left:5px solid ${accentColor};padding-left:18px;margin-bottom:28px}\n.section p{margin-bottom:16px}\n.checklist{margin-top:8px}\n.ci{display:flex;align-items:flex-start;gap:14px;padding:12px 16px;margin-bottom:9px;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb}\n.ck{font-size:1.2em;color:${primaryColor};flex-shrink:0;margin-top:1px}\n.concl{padding:50px 100px;page-break-after:always}\n.concl h2{font-size:1.5em;color:${primaryColor};margin-bottom:20px}\n.concl p{margin-bottom:16px}\n.cta-box{margin:40px 100px 60px;padding:50px 60px;background:${primaryColor};color:#fff;border-radius:16px;text-align:center;page-break-inside:avoid}\n.cta-box h3{font-size:1.6em;margin-bottom:18px}\n.cta-box p{font-size:1.1em;opacity:.9;line-height:1.6}\n.footer{text-align:center;padding:30px;font-size:.8em;color:#9ca3af;border-top:1px solid #e5e7eb}\n</style>\n</head>\n<body>\n<div class=\"cover\">\n  <h1>${esc(ds.titulo)}</h1>\n  <h2>${esc(ds.subtitulo)}</h2>\n  <div class=\"badge\">${esc(tipo.toUpperCase())} DIGITAL &nbsp;|&nbsp; ${esc(especie.toUpperCase())}</div>\n</div>\n<div class=\"toc\">\n  <h2>&#128203; Tabla de Contenidos</h2>\n  <ol>${tocItems}</ol>\n</div>\n<div class=\"intro\">\n  <h2>Introducción</h2>\n  ${introParas}\n</div>\n${sections}\n<div class=\"concl\">\n  <h2>Conclusión</h2>\n  ${conclParas}\n</div>\n<div class=\"cta-box\">\n  <h3>&#128640; ¡Es Momento de Actuar!</h3>\n  <p>${esc(ds.cta)}</p>\n</div>\n<div class=\"footer\">${esc(ds.titulo)} &copy; ${year} &nbsp;|&nbsp; Todos los derechos reservados<!-- M6_PROCESSED --></div>\n</body>\n</html>`;\n\nreturn [{ json: {\n  ds, tipo, especie, tema, precio,\n  htmlContent: html,\n  SHEET_ID, HOJA_INFOPRODUCTOS, GOOGLE_DRIVE_FOLDER_ID,\n  HOTMART_CLIENT_ID, HOTMART_CLIENT_SECRET, MONEDA_HOTMART, WARRANTY_DIAS\n}}];\n"
+      }
+    },
+    {
+      "id": "node-prep-drive",
+      "name": "📦 Preparar Upload a Drive",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2820, 840],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const data = $input.first().json;\nconst BOUNDARY = 'M6_bnd_' + Date.now();\n\nconst meta = { name: '[M6] ' + data.ds.titulo, mimeType: 'application/vnd.google-apps.document' };\nif (data.GOOGLE_DRIVE_FOLDER_ID) meta.parents = [data.GOOGLE_DRIVE_FOLDER_ID];\nconst metaStr = JSON.stringify(meta);\n\n// Multipart/related body (RFC 2046)\n// HTML encoded as base64 to avoid n8n expression collisions\nconst htmlB64 = Buffer.from(data.htmlContent, 'utf8').toString('base64');\n\nconst uploadBody = [\n  '--' + BOUNDARY,\n  'Content-Type: application/json; charset=UTF-8',\n  '',\n  metaStr,\n  '--' + BOUNDARY,\n  'Content-Type: text/html; charset=UTF-8',\n  'Content-Transfer-Encoding: base64',\n  '',\n  htmlB64,\n  '--' + BOUNDARY + '--'\n].join('\\r\\n');\n\nreturn [{ json: {\n  ...data,\n  _uploadBody:   uploadBody,\n  _contentType:  'multipart/related; boundary=\"' + BOUNDARY + '\"'\n}}];\n"
+      }
+    },
+    {
+      "id": "node-create-gdoc",
+      "name": "☁️ Crear Google Doc (Drive API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3060, 840],
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "={{ $json._contentType }}",
+        "body": "={{ $json._uploadBody }}",
+        "options": { "timeout": 60000, "allowUnauthorizedCerts": true }
+      },
+      "credentials": { "googleDriveOAuth2Api": { "id": "DRIVE_CREDENTIAL", "name": "Google Drive OAuth2" } }
+    },
+    {
+      "id": "node-share-gdoc",
+      "name": "🔓 Compartir PDF Públicamente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3300, 840],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://www.googleapis.com/drive/v3/files/{{ $json.id }}/permissions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "sendBody": true,
+        "contentType": "json",
+        "body": "{\"role\":\"reader\",\"type\":\"anyone\"}",
+        "options": { "timeout": 30000, "allowUnauthorizedCerts": true }
+      },
+      "credentials": { "googleDriveOAuth2Api": { "id": "DRIVE_CREDENTIAL", "name": "Google Drive OAuth2" } }
+    },
+    {
+      "id": "node-build-row",
+      "name": "🗂️ Preparar Fila del Sheet",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3540, 840],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// $json here is the Drive permissions response; read upstream nodes by name\nconst params  = $('📦 Preparar Upload a Drive').first().json;\nconst docResp = $('☁️ Crear Google Doc (Drive API)').first().json;\n\nconst gdocId  = docResp.id;\nconst pdfUrl  = `https://docs.google.com/document/d/${gdocId}/export?format=pdf`;\nconst docLink = `https://docs.google.com/document/d/${gdocId}/view`;\n\nreturn [{ json: {\n  ...params,\n  gdocId, pdfUrl, docLink,\n  rowData: {\n    TIMESTAMP:  new Date().toISOString(),\n    TEMA:       params.tema,\n    TITULO:     params.ds.titulo,\n    ESPECIE:    params.especie,\n    TIPO:       params.tipo,\n    PRECIO:     params.precio,\n    ESTADO:     'M6_PROCESSED',\n    GDOC_ID:    gdocId,\n    PDF_URL:    pdfUrl,\n    HOTMART_ID: '',\n    HOTMART_LINK: ''\n  }\n}}];\n"
+      }
+    },
+    {
+      "id": "node-append-sheet",
+      "name": "📊 Registrar en Infoproductos",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [3780, 840],
+      "parameters": {
+        "operation": "append",
+        "documentId": { "__rl": true, "value": "={{ $json.SHEET_ID }}", "mode": "id" },
+        "sheetName":  { "__rl": true, "value": "={{ $json.HOJA_INFOPRODUCTOS }}", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "TIMESTAMP":    "={{ $json.rowData.TIMESTAMP }}",
+            "TEMA":         "={{ $json.rowData.TEMA }}",
+            "TITULO":       "={{ $json.rowData.TITULO }}",
+            "ESPECIE":      "={{ $json.rowData.ESPECIE }}",
+            "TIPO":         "={{ $json.rowData.TIPO }}",
+            "PRECIO":       "={{ $json.rowData.PRECIO }}",
+            "ESTADO":       "={{ $json.rowData.ESTADO }}",
+            "GDOC_ID":      "={{ $json.rowData.GDOC_ID }}",
+            "PDF_URL":      "={{ $json.rowData.PDF_URL }}",
+            "HOTMART_ID":   "",
+            "HOTMART_LINK": ""
+          },
+          "schema": []
+        },
+        "options": {}
+      },
+      "credentials": { "googleSheetsOAuth2Api": { "id": "SHEETS_CREDENTIAL", "name": "Google Sheets OAuth2" } }
+    },
+    {
+      "id": "node-hotmart-token",
+      "name": "🔑 Obtener Token Hotmart",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [4020, 840],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api-sec-vlc.hotmart.com/security/oauth/token",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Basic {{ Buffer.from($('🗂️ Preparar Fila del Sheet').first().json.HOTMART_CLIENT_ID + ':' + $('🗂️ Preparar Fila del Sheet').first().json.HOTMART_CLIENT_SECRET).toString('base64') }}" },
+            { "name": "Content-Type",  "value": "application/x-www-form-urlencoded" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            { "name": "grant_type", "value": "client_credentials" }
+          ]
+        },
+        "options": { "timeout": 30000, "allowUnauthorizedCerts": true }
+      }
+    },
+    {
+      "id": "node-hotmart-create",
+      "name": "🛒 Crear Producto en Hotmart",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [4260, 840],
+      "parameters": {
+        "method": "POST",
+        "url": "https://developers.hotmart.com/products/api/v1/product",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "=Bearer {{ $json.access_token }}" },
+            { "name": "Content-Type",  "value": "application/json" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "body": "={{ JSON.stringify({ name: $('🗂️ Preparar Fila del Sheet').first().json.ds.titulo, description: $('🗂️ Preparar Fila del Sheet').first().json.ds.descripcion, format: 'EBOOK', warranty: $('🗂️ Preparar Fila del Sheet').first().json.WARRANTY_DIAS, price: { value: $('🗂️ Preparar Fila del Sheet').first().json.precio, currency_code: $('🗂️ Preparar Fila del Sheet').first().json.MONEDA_HOTMART }, resource_url: $('🗂️ Preparar Fila del Sheet').first().json.pdfUrl }) }}",
+        "options": { "timeout": 30000, "allowUnauthorizedCerts": true }
+      }
+    },
+    {
+      "id": "node-update-sheet",
+      "name": "📊 Actualizar Sheet: ID Hotmart",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [4500, 840],
+      "parameters": {
+        "operation": "update",
+        "documentId": { "__rl": true, "value": "={{ $('🗂️ Preparar Fila del Sheet').first().json.SHEET_ID }}", "mode": "id" },
+        "sheetName":  { "__rl": true, "value": "={{ $('🗂️ Preparar Fila del Sheet').first().json.HOJA_INFOPRODUCTOS }}", "mode": "name" },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "TEMA":         "={{ $('🗂️ Preparar Fila del Sheet').first().json.tema }}",
+            "HOTMART_ID":   "={{ $json.id || $json.product?.id || '' }}",
+            "HOTMART_LINK": "={{ $json.links?.checkout_url || $json.checkout_url || 'ver panel Hotmart' }}"
+          },
+          "matchingColumns": ["TEMA"],
+          "schema": []
+        },
+        "options": {}
+      },
+      "credentials": { "googleSheetsOAuth2Api": { "id": "SHEETS_CREDENTIAL", "name": "Google Sheets OAuth2" } }
+    },
+    {
+      "id": "node-summary",
+      "name": "✅ Resumen Final",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [4740, 840],
+      "parameters": {
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            { "id": "s1", "name": "status",       "value": "M6_PROCESSED — infoproducto creado correctamente",        "type": "string" },
+            { "id": "s2", "name": "titulo",        "value": "={{ $('🗂️ Preparar Fila del Sheet').first().json.ds.titulo }}", "type": "string" },
+            { "id": "s3", "name": "pdf_url",       "value": "={{ $('🗂️ Preparar Fila del Sheet').first().json.pdfUrl }}", "type": "string" },
+            { "id": "s4", "name": "gdoc_link",     "value": "={{ $('🗂️ Preparar Fila del Sheet').first().json.docLink }}", "type": "string" },
+            { "id": "s5", "name": "hotmart_id",    "value": "={{ $('🛒 Crear Producto en Hotmart').first().json.id || '' }}", "type": "string" }
+          ]
+        },
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "▶ Ejecutar": {
+      "main": [[{ "node": "📝 INPUT", "type": "main", "index": 0 }]]
+    },
+    "📝 INPUT": {
+      "main": [[{ "node": "⚙️ CONFIG", "type": "main", "index": 0 }]]
+    },
+    "⚙️ CONFIG": {
+      "main": [[{ "node": "🔀 Unir Params", "type": "main", "index": 0 }]]
+    },
+    "🔀 Unir Params": {
+      "main": [[{ "node": "📊 Leer Infoproductos (Sheet)", "type": "main", "index": 0 }]]
+    },
+    "📊 Leer Infoproductos (Sheet)": {
+      "main": [[{ "node": "🔍 ¿Es Duplicado?", "type": "main", "index": 0 }]]
+    },
+    "🔍 ¿Es Duplicado?": {
+      "main": [[{ "node": "❓ ¿Ya Existe?", "type": "main", "index": 0 }]]
+    },
+    "❓ ¿Ya Existe?": {
+      "main": [
+        [{ "node": "⚠️ Ya Procesado (Saltar)", "type": "main", "index": 0 }],
+        [{ "node": "📝 Preparar Prompt DeepSeek", "type": "main", "index": 0 }]
+      ]
+    },
+    "📝 Preparar Prompt DeepSeek": {
+      "main": [[{ "node": "🤖 DeepSeek: Generar Contenido", "type": "main", "index": 0 }]]
+    },
+    "🤖 DeepSeek: Generar Contenido": {
+      "main": [[{ "node": "📦 Parsear Respuesta DeepSeek", "type": "main", "index": 0 }]]
+    },
+    "📦 Parsear Respuesta DeepSeek": {
+      "main": [[{ "node": "🎨 Construir HTML del Infoproducto", "type": "main", "index": 0 }]]
+    },
+    "🎨 Construir HTML del Infoproducto": {
+      "main": [[{ "node": "📦 Preparar Upload a Drive", "type": "main", "index": 0 }]]
+    },
+    "📦 Preparar Upload a Drive": {
+      "main": [[{ "node": "☁️ Crear Google Doc (Drive API)", "type": "main", "index": 0 }]]
+    },
+    "☁️ Crear Google Doc (Drive API)": {
+      "main": [[{ "node": "🔓 Compartir PDF Públicamente", "type": "main", "index": 0 }]]
+    },
+    "🔓 Compartir PDF Públicamente": {
+      "main": [[{ "node": "🗂️ Preparar Fila del Sheet", "type": "main", "index": 0 }]]
+    },
+    "🗂️ Preparar Fila del Sheet": {
+      "main": [[{ "node": "📊 Registrar en Infoproductos", "type": "main", "index": 0 }]]
+    },
+    "📊 Registrar en Infoproductos": {
+      "main": [[{ "node": "🔑 Obtener Token Hotmart", "type": "main", "index": 0 }]]
+    },
+    "🔑 Obtener Token Hotmart": {
+      "main": [[{ "node": "🛒 Crear Producto en Hotmart", "type": "main", "index": 0 }]]
+    },
+    "🛒 Crear Producto en Hotmart": {
+      "main": [[{ "node": "📊 Actualizar Sheet: ID Hotmart", "type": "main", "index": 0 }]]
+    },
+    "📊 Actualizar Sheet: ID Hotmart": {
+      "main": [[{ "node": "✅ Resumen Final", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": ""
+  },
+  "staticData": null,
+  "tags": ["infoproducto", "m6", "deepseek", "hotmart", "google-drive"],
+  "triggerCount": 1,
+  "updatedAt": "2026-05-25T00:00:00.000Z",
+  "versionId": "m6-infoproducto-factory-v1"
+}
