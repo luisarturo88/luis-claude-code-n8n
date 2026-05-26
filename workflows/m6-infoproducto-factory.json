@@ -1,16 +1,16 @@
 {
-  "name": "M6 — Infoproducto Factory [DeepSeek + Hotmart]",
+  "name": "M6 — Infoproducto Factory [DeepSeek + Hotmart + Eduzz + Monetizze + Leonardo]",
   "nodes": [
     {
       "id": "sticky-note",
       "name": "📋 M6: INFOPRODUCTO FACTORY",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
-      "position": [180, 60],
+      "position": [180, 40],
       "parameters": {
-        "content": "## 🏭 M6 — Infoproducto Factory (v2 — Sheet-driven)\n\n**Fuente:** hoja `Infoproductos_Pendientes` del Sheet principal.\n\n**Flujo por ejecución (cada 12 h o manual):**\n1. Lee todas las filas de `Infoproductos_Pendientes`\n2. Filtra las que tienen `PROCESADO` ≠ TRUE\n3. Por cada fila pendiente:\n   - DeepSeek genera el contenido estructurado\n   - Se construye HTML estilizado y se sube a Google Drive\n   - Se comparte públicamente → URL PDF exportable\n   - Se obtiene token OAuth2 Hotmart y se crea el producto\n   - Se actualiza la fila: `PROCESADO=TRUE`, `PDF_URL`, `HOTMART_ID`, `HOTMART_LINK`\n4. Si hay error, escribe el mensaje en columna `ERROR` sin marcar como procesado\n\n---\n**Columnas requeridas en `Infoproductos_Pendientes`:**\nTEMA | ESPECIE | TIPO | PRECIO | PROCESADO | PDF_URL | HOTMART_ID | HOTMART_LINK | ERROR\n\n---\n**⚙️ Antes de activar:**\n- Nodo `⚙️ CONFIG`: API keys DeepSeek y Hotmart, folder Drive (opcional)\n- Credencial `Google Sheets OAuth2` en nodos marcados\n- Credencial `Google Drive OAuth2` en nodos marcados",
-        "height": 560,
-        "width": 600,
+        "content": "## 🏭 M6 — Infoproducto Factory v3\n\n**Fuente:** hoja `Infoproductos_Pendientes`\n\n**Por cada fila pendiente:**\n1. DeepSeek genera contenido → HTML → Google Doc (PDF)\n2. Crea carpeta en Drive\n3. DeepSeek genera kit de marketing (email, 5 posts, guía afiliados)\n4. Leonardo.ai genera 4 imágenes promo\n5. Sube kit de marketing como Google Doc a la carpeta\n6. Crea producto en Eduzz y Monetizze\n7. Crea producto en Hotmart\n8. Actualiza la fila: PROCESADO=TRUE + todas las URLs\n\n---\n**Columnas nuevas en `Infoproductos_Pendientes`:**\n`CARPETA_DRIVE_URL` | `KIT_MARKETING_URL` | `URL_EDUZZ` | `URL_MONETIZZE` | `IMAGENES_LISTA` | `ERROR_IMAGENES`\n\n---\n**Credenciales necesarias:**\n- Google Sheets OAuth2\n- Google Drive OAuth2\n- DEEPSEEK_API_KEY → nodo ⚙️ CONFIG\n- LEONARDO_API_KEY → nodo ⚙️ CONFIG\n- HOTMART_CLIENT_ID / SECRET → nodo ⚙️ CONFIG\n- EDUZZ_API_KEY / SECRET → nodo ⚙️ CONFIG\n- MONETIZZE_API_KEY → nodo ⚙️ CONFIG",
+        "height": 600,
+        "width": 620,
         "color": 4
       }
     },
@@ -19,11 +19,9 @@
       "name": "⏰ Schedule 12h",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [180, 720],
+      "position": [180, 740],
       "parameters": {
-        "rule": {
-          "interval": [{ "field": "hours", "hoursInterval": 12 }]
-        }
+        "rule": { "interval": [{ "field": "hours", "hoursInterval": 12 }] }
       }
     },
     {
@@ -31,14 +29,14 @@
       "name": "▶ Ejecutar Manual",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
-      "position": [180, 900]
+      "position": [180, 920]
     },
     {
       "id": "node-config",
       "name": "⚙️ CONFIG",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [420, 800],
+      "position": [420, 820],
       "parameters": {
         "mode": "manual",
         "assignments": {
@@ -46,11 +44,15 @@
             { "id": "c01", "name": "SHEET_ID",               "value": "1Vq8TuyqI22C3_Ffth-GsGdDRuXfHORpdAGOiowLxIpk", "type": "string" },
             { "id": "c02", "name": "HOJA_PENDIENTES",        "value": "Infoproductos_Pendientes",                       "type": "string" },
             { "id": "c03", "name": "GOOGLE_DRIVE_FOLDER_ID", "value": "",                                                "type": "string" },
-            { "id": "c04", "name": "DEEPSEEK_API_KEY",       "value": "sk-TU_DEEPSEEK_KEY_AQUI",                        "type": "string" },
-            { "id": "c05", "name": "HOTMART_CLIENT_ID",      "value": "TU_CLIENT_ID_AQUI",                              "type": "string" },
-            { "id": "c06", "name": "HOTMART_CLIENT_SECRET",  "value": "TU_CLIENT_SECRET_AQUI",                          "type": "string" },
-            { "id": "c07", "name": "MONEDA_HOTMART",         "value": "BRL",                                             "type": "string" },
-            { "id": "c08", "name": "WARRANTY_DIAS",          "value": 30,                                                "type": "number" }
+            { "id": "c04", "name": "DEEPSEEK_API_KEY",       "value": "sk-TU_DEEPSEEK_KEY",                             "type": "string" },
+            { "id": "c05", "name": "LEONARDO_API_KEY",       "value": "TU_LEONARDO_API_KEY",                            "type": "string" },
+            { "id": "c06", "name": "HOTMART_CLIENT_ID",      "value": "TU_HOTMART_CLIENT_ID",                           "type": "string" },
+            { "id": "c07", "name": "HOTMART_CLIENT_SECRET",  "value": "TU_HOTMART_CLIENT_SECRET",                       "type": "string" },
+            { "id": "c08", "name": "MONEDA_HOTMART",         "value": "BRL",                                             "type": "string" },
+            { "id": "c09", "name": "WARRANTY_DIAS",          "value": 30,                                                "type": "number" },
+            { "id": "c10", "name": "EDUZZ_API_KEY",          "value": "TU_EDUZZ_API_KEY",                               "type": "string" },
+            { "id": "c11", "name": "EDUZZ_API_SECRET",       "value": "TU_EDUZZ_API_SECRET",                            "type": "string" },
+            { "id": "c12", "name": "MONETIZZE_API_KEY",      "value": "TU_MONETIZZE_API_KEY",                           "type": "string" }
           ]
         },
         "options": {}
@@ -61,7 +63,7 @@
       "name": "📊 Leer Pendientes",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.4,
-      "position": [660, 800],
+      "position": [660, 820],
       "parameters": {
         "operation": "getAll",
         "documentId": { "__rl": true, "value": "={{ $json.SHEET_ID }}", "mode": "id" },
@@ -77,10 +79,10 @@
       "name": "🔍 Filtrar Pendientes",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [900, 800],
+      "position": [900, 820],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const cfg = $('⚙️ CONFIG').first().json;\nconst rows = $input.all().map(i => i.json).filter(r => !r.error);\n\nconst pending = rows.filter(r => {\n  const p = String(r.PROCESADO || '').trim().toUpperCase();\n  return p !== 'TRUE' && p !== '1' && p !== 'YES';\n});\n\nif (pending.length === 0) return [];\n\nreturn pending.map(row => ({\n  json: {\n    TEMA:    String(row.TEMA    || '').trim(),\n    ESPECIE: String(row.ESPECIE || 'animal').trim(),\n    TIPO:    String(row.TIPO    || 'checklist').trim().toLowerCase(),\n    PRECIO:  parseFloat(row.PRECIO) || 19.90,\n    SHEET_ID:               cfg.SHEET_ID,\n    HOJA_PENDIENTES:        cfg.HOJA_PENDIENTES,\n    GOOGLE_DRIVE_FOLDER_ID: cfg.GOOGLE_DRIVE_FOLDER_ID,\n    DEEPSEEK_API_KEY:       cfg.DEEPSEEK_API_KEY,\n    HOTMART_CLIENT_ID:      cfg.HOTMART_CLIENT_ID,\n    HOTMART_CLIENT_SECRET:  cfg.HOTMART_CLIENT_SECRET,\n    MONEDA_HOTMART:         cfg.MONEDA_HOTMART,\n    WARRANTY_DIAS:          cfg.WARRANTY_DIAS\n  }\n}));\n"
+        "jsCode": "const cfg = $('⚙️ CONFIG').first().json;\nconst rows = $input.all().map(i => i.json).filter(r => !r.error);\nconst pending = rows.filter(r => {\n  const p = String(r.PROCESADO || '').trim().toUpperCase();\n  return p !== 'TRUE' && p !== '1' && p !== 'YES';\n});\nif (pending.length === 0) return [];\nreturn pending.map(row => ({ json: {\n  TEMA:    String(row.TEMA    || '').trim(),\n  ESPECIE: String(row.ESPECIE || 'animal').trim(),\n  TIPO:    String(row.TIPO    || 'checklist').trim().toLowerCase(),\n  PRECIO:  parseFloat(row.PRECIO) || 19.90,\n  SHEET_ID: cfg.SHEET_ID, HOJA_PENDIENTES: cfg.HOJA_PENDIENTES,\n  GOOGLE_DRIVE_FOLDER_ID: cfg.GOOGLE_DRIVE_FOLDER_ID,\n  DEEPSEEK_API_KEY: cfg.DEEPSEEK_API_KEY,\n  LEONARDO_API_KEY: cfg.LEONARDO_API_KEY,\n  HOTMART_CLIENT_ID: cfg.HOTMART_CLIENT_ID, HOTMART_CLIENT_SECRET: cfg.HOTMART_CLIENT_SECRET,\n  MONEDA_HOTMART: cfg.MONEDA_HOTMART, WARRANTY_DIAS: cfg.WARRANTY_DIAS,\n  EDUZZ_API_KEY: cfg.EDUZZ_API_KEY, EDUZZ_API_SECRET: cfg.EDUZZ_API_SECRET,\n  MONETIZZE_API_KEY: cfg.MONETIZZE_API_KEY\n}}));\n"
       }
     },
     {
@@ -88,10 +90,10 @@
       "name": "📝 Preparar Prompt DeepSeek",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1140, 800],
+      "position": [1140, 820],
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const p = $input.item.json;\nconst tipoMap = {\n  checklist: 'checklist práctico con ítems accionables (listas de verificación)',\n  ebook:     'ebook completo con contenido educativo por capítulos',\n  guia:      'guía paso a paso con instrucciones claras',\n  tutorial:  'tutorial detallado con pasos y ejercicios prácticos'\n};\nconst tipoLabel = tipoMap[p.TIPO] || 'infoproducto digital';\n\nconst sysPrompt = 'Eres experto en creación de infoproductos digitales de alta conversión para el mercado hispanohablante. RESPONDE ÚNICAMENTE CON UN OBJETO JSON VÁLIDO, sin markdown, sin bloques de código, sin texto antes ni después del JSON.';\n\nconst userPrompt = `Crea un ${tipoLabel} completo sobre \"${p.TEMA}\" para dueños de ${p.ESPECIE}s.\\n\\nREGLAS:\\n- Tono cálido, experto y cercano\\n- Mínimo 8 secciones\\n- Para checklists: 6-10 ítems por sección\\n- Para otros: 200-300 palabras por sección\\n- descripcion: máx 190 caracteres, sin saltos\\n\\nJSON ESPERADO:\\n{\\n  \"titulo\": \"título (máx 80 chars)\",\\n  \"subtitulo\": \"subtítulo que engancha\",\\n  \"descripcion\": \"descripción para Hotmart (máx 190 chars)\",\\n  \"palabras_clave\": [\"kw1\",\"kw2\",\"kw3\",\"kw4\",\"kw5\"],\\n  \"introduccion\": \"texto intro (2-3 párrafos)\",\\n  \"secciones\": [{\"titulo\": \"nombre\", \"contenido\": \"texto\", \"items\": [\"ítem1\"]}],\\n  \"conclusion\": \"texto conclusión\",\\n  \"cta\": \"llamada a la acción\"\\n}`;\n\nconst body = JSON.stringify({\n  model: 'deepseek-chat',\n  temperature: 0.72,\n  max_tokens: 4000,\n  response_format: { type: 'json_object' },\n  messages: [\n    { role: 'system', content: sysPrompt },\n    { role: 'user',   content: userPrompt }\n  ]\n});\n\nreturn { json: { ...p, _dsBody: body } };\n"
+        "jsCode": "const p = $input.item.json;\nconst tipoMap = { checklist:'checklist práctico con ítems accionables', ebook:'ebook completo por capítulos', guia:'guía paso a paso', tutorial:'tutorial detallado con ejercicios' };\nconst tipoLabel = tipoMap[p.TIPO] || 'infoproducto digital';\nconst sys = 'Eres experto en infoproductos digitales. RESPONDE SOLO CON JSON VÁLIDO sin markdown.';\nconst usr = `Crea un ${tipoLabel} sobre \"${p.TEMA}\" para dueños de ${p.ESPECIE}s.\\nJSON ESPERADO:\\n{\"titulo\":\"(máx 80 chars)\",\"subtitulo\":\"subtítulo\",\"descripcion\":\"(máx 190 chars)\",\"palabras_clave\":[\"k1\",\"k2\",\"k3\"],\"introduccion\":\"2-3 párrafos\",\"secciones\":[{\"titulo\":\"t\",\"contenido\":\"texto\",\"items\":[\"item\"]}],\"conclusion\":\"texto\",\"cta\":\"llamada a la acción\"}`;\nconst body = JSON.stringify({ model:'deepseek-chat', temperature:0.72, max_tokens:4000, response_format:{type:'json_object'}, messages:[{role:'system',content:sys},{role:'user',content:usr}] });\nreturn { json: { ...p, _dsBody: body } };\n"
       }
     },
     {
@@ -99,19 +101,16 @@
       "name": "🤖 DeepSeek: Generar Contenido",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1380, 800],
+      "position": [1380, 820],
       "parameters": {
         "method": "POST",
         "url": "https://api.deepseek.com/v1/chat/completions",
         "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $json.DEEPSEEK_API_KEY }}" },
-            { "name": "Content-Type",  "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "raw",
+        "headerParameters": { "parameters": [
+          { "name": "Authorization", "value": "=Bearer {{ $json.DEEPSEEK_API_KEY }}" },
+          { "name": "Content-Type",  "value": "application/json" }
+        ]},
+        "sendBody": true, "contentType": "raw",
         "body": "={{ $json._dsBody }}",
         "options": { "timeout": 180000, "allowUnauthorizedCerts": true }
       },
@@ -122,10 +121,10 @@
       "name": "📦 Parsear Respuesta DeepSeek",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1620, 800],
+      "position": [1620, 820],
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const orig = $('📝 Preparar Prompt DeepSeek').item.json;\nconst resp = $input.item.json;\n\nif (resp.error) {\n  return { json: { ...orig, ds: null, _error: resp.error.message || 'Error DeepSeek HTTP' } };\n}\n\nconst raw = resp.choices?.[0]?.message?.content || resp.choices?.[0]?.text || '';\nlet ds;\ntry {\n  ds = JSON.parse(raw);\n} catch(e) {\n  const m = raw.match(/\\{[\\s\\S]*\\}/);\n  if (!m) return { json: { ...orig, ds: null, _error: 'JSON inválido de DeepSeek: ' + raw.substring(0,100) } };\n  try { ds = JSON.parse(m[0]); } catch(e2) {\n    return { json: { ...orig, ds: null, _error: 'No se pudo parsear respuesta DeepSeek' } };\n  }\n}\n\nif (!ds || !ds.titulo || !ds.secciones) {\n  return { json: { ...orig, ds: null, _error: 'JSON incompleto de DeepSeek (faltan titulo o secciones)' } };\n}\n\nreturn { json: { ...orig, ds } };\n"
+        "jsCode": "const orig = $('📝 Preparar Prompt DeepSeek').item.json;\nconst resp = $input.item.json;\nif (resp.error) return { json: { ...orig, ds:null, _error: resp.error.message||'Error DeepSeek' } };\nconst raw = resp.choices?.[0]?.message?.content || '';\nlet ds;\ntry { ds = JSON.parse(raw); } catch(e) {\n  const m = raw.match(/\\{[\\s\\S]*\\}/);\n  try { ds = m ? JSON.parse(m[0]) : null; } catch(e2) { ds = null; }\n}\nif (!ds?.titulo || !ds?.secciones) return { json: { ...orig, ds:null, _error:'JSON incompleto de DeepSeek' } };\nreturn { json: { ...orig, ds } };\n"
       },
       "continueOnFail": true
     },
@@ -134,10 +133,10 @@
       "name": "🎨 Construir HTML del Infoproducto",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1860, 800],
+      "position": [1860, 820],
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const p = $input.item.json;\nif (p._error || !p.ds) return { json: { ...p, htmlContent: '' } };\n\nconst { ds, TIPO, ESPECIE } = p;\nconst PC = '#1e40af', AC = '#10b981', yr = new Date().getFullYear();\n\nfunction esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;'); }\n\nfunction buildSection(s, idx) {\n  const isCheck = Array.isArray(s.items) && s.items.length > 0;\n  let body;\n  if (isCheck) {\n    const its = s.items.map(it => `<div class=\"ci\"><span class=\"ck\">&#9744;</span><span>${esc(it)}</span></div>`).join('');\n    body = `<div class=\"checklist\">${its}</div>`;\n  } else {\n    body = (s.contenido||'').split(/\\n+/).filter(Boolean).map(t=>`<p>${esc(t)}</p>`).join('') || '<p></p>';\n  }\n  return `<div class=\"section\"><h2>${idx}. ${esc(s.titulo)}</h2>${body}</div>`;\n}\n\nconst toc = ds.secciones.map((s,i)=>`<li>${i+1}. ${esc(s.titulo)}</li>`).join('');\nconst secs = ds.secciones.map((s,i)=>buildSection(s,i+1)).join('');\nconst intro = (ds.introduccion||'').split(/\\n+/).filter(Boolean).map(t=>`<p>${esc(t)}</p>`).join('');\nconst concl = (ds.conclusion||'').split(/\\n+/).filter(Boolean).map(t=>`<p>${esc(t)}</p>`).join('');\n\nconst css = `*{margin:0;padding:0;box-sizing:border-box}body{font-family:Georgia,'Times New Roman',serif;color:#1a1a2e;background:#fff;font-size:13pt;line-height:1.8}.cover{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,${PC} 0%,#1e3a8a 100%);color:#fff;padding:80px 60px;text-align:center;page-break-after:always}.cover h1{font-size:2.2em;margin-bottom:24px;line-height:1.2;max-width:700px}.cover h2{font-size:1.2em;font-weight:300;opacity:.88;margin-bottom:48px;max-width:600px}.cover .badge{background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.4);border-radius:30px;padding:10px 30px;font-size:.85em;letter-spacing:3px;text-transform:uppercase}.toc{padding:70px 100px;page-break-after:always}.toc h2{font-size:1.7em;color:${PC};border-bottom:3px solid ${PC};padding-bottom:14px;margin-bottom:32px}.toc ol{list-style:none}.toc li{padding:9px 0;border-bottom:1px dotted #d1d5db}.intro,.concl{padding:60px 100px;page-break-after:always}.intro h2,.concl h2{font-size:1.6em;color:${PC};margin-bottom:22px}.intro p,.concl p{margin-bottom:16px}.section{padding:50px 100px;page-break-after:always}.section h2{font-size:1.5em;color:${PC};border-left:5px solid ${AC};padding-left:18px;margin-bottom:28px}.section p{margin-bottom:16px}.checklist{margin-top:8px}.ci{display:flex;align-items:flex-start;gap:14px;padding:12px 16px;margin-bottom:9px;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb}.ck{font-size:1.2em;color:${PC};flex-shrink:0}.cta-box{margin:40px 100px 60px;padding:50px 60px;background:${PC};color:#fff;border-radius:16px;text-align:center}.cta-box h3{font-size:1.6em;margin-bottom:18px}.cta-box p{font-size:1.1em;opacity:.9}.footer{text-align:center;padding:30px;font-size:.8em;color:#9ca3af;border-top:1px solid #e5e7eb}`;\n\nconst html = `<!DOCTYPE html><html lang=\"es\"><head><meta charset=\"UTF-8\"><title>${esc(ds.titulo)}</title><style>${css}</style></head><body><div class=\"cover\"><h1>${esc(ds.titulo)}</h1><h2>${esc(ds.subtitulo)}</h2><div class=\"badge\">${esc(TIPO.toUpperCase())} &nbsp;|&nbsp; ${esc(ESPECIE.toUpperCase())}</div></div><div class=\"toc\"><h2>&#128203; Contenidos</h2><ol>${toc}</ol></div><div class=\"intro\"><h2>Introducción</h2>${intro}</div>${secs}<div class=\"concl\"><h2>Conclusión</h2>${concl}</div><div class=\"cta-box\"><h3>&#128640; ¡Es Momento de Actuar!</h3><p>${esc(ds.cta)}</p></div><div class=\"footer\">${esc(ds.titulo)} &copy; ${yr} &nbsp;|&nbsp; Todos los derechos reservados<!-- M6_PROCESSED --></div></body></html>`;\n\nreturn { json: { ...p, htmlContent: html } };\n"
+        "jsCode": "const p = $input.item.json;\nif (p._error || !p.ds) return { json: { ...p, htmlContent:'' } };\nconst {ds,TIPO,ESPECIE} = p;\nconst PC='#1e40af', AC='#10b981', yr=new Date().getFullYear();\nfunction esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\"/g,'&quot;');}\nfunction sec(s,i){const isC=Array.isArray(s.items)&&s.items.length>0;const body=isC?`<div class=\"checklist\">${s.items.map(it=>`<div class=\"ci\"><span class=\"ck\">&#9744;</span><span>${esc(it)}</span></div>`).join('')}</div>`:(s.contenido||'').split(/\\n+/).filter(Boolean).map(t=>`<p>${esc(t)}</p>`).join('')||'<p></p>';return `<div class=\"section\"><h2>${i}. ${esc(s.titulo)}</h2>${body}</div>`;}\nconst toc=ds.secciones.map((s,i)=>`<li>${i+1}. ${esc(s.titulo)}</li>`).join('');\nconst secs=ds.secciones.map((s,i)=>sec(s,i+1)).join('');\nconst intro=(ds.introduccion||'').split(/\\n+/).filter(Boolean).map(t=>`<p>${esc(t)}</p>`).join('');\nconst concl=(ds.conclusion||'').split(/\\n+/).filter(Boolean).map(t=>`<p>${esc(t)}</p>`).join('');\nconst css=`*{margin:0;padding:0;box-sizing:border-box}body{font-family:Georgia,serif;color:#1a1a2e;background:#fff;font-size:13pt;line-height:1.8}.cover{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,${PC} 0%,#1e3a8a 100%);color:#fff;padding:80px 60px;text-align:center;page-break-after:always}.cover h1{font-size:2.2em;margin-bottom:24px;max-width:700px}.cover h2{font-size:1.2em;font-weight:300;opacity:.88;margin-bottom:48px}.cover .badge{background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.4);border-radius:30px;padding:10px 30px;font-size:.85em;letter-spacing:3px;text-transform:uppercase}.toc{padding:70px 100px;page-break-after:always}.toc h2{font-size:1.7em;color:${PC};border-bottom:3px solid ${PC};padding-bottom:14px;margin-bottom:32px}.toc ol{list-style:none}.toc li{padding:9px 0;border-bottom:1px dotted #d1d5db}.intro,.concl{padding:60px 100px;page-break-after:always}.intro h2,.concl h2{font-size:1.6em;color:${PC};margin-bottom:22px}.intro p,.concl p{margin-bottom:16px}.section{padding:50px 100px;page-break-after:always}.section h2{font-size:1.5em;color:${PC};border-left:5px solid ${AC};padding-left:18px;margin-bottom:28px}.section p{margin-bottom:16px}.checklist{margin-top:8px}.ci{display:flex;align-items:flex-start;gap:14px;padding:12px 16px;margin-bottom:9px;border:1px solid #e5e7eb;border-radius:8px;background:#f9fafb}.ck{font-size:1.2em;color:${PC};flex-shrink:0}.cta-box{margin:40px 100px 60px;padding:50px 60px;background:${PC};color:#fff;border-radius:16px;text-align:center}.cta-box h3{font-size:1.6em;margin-bottom:18px}.cta-box p{font-size:1.1em;opacity:.9}.footer{text-align:center;padding:30px;font-size:.8em;color:#9ca3af;border-top:1px solid #e5e7eb}`;\nconst html=`<!DOCTYPE html><html lang=\"es\"><head><meta charset=\"UTF-8\"><title>${esc(ds.titulo)}</title><style>${css}</style></head><body><div class=\"cover\"><h1>${esc(ds.titulo)}</h1><h2>${esc(ds.subtitulo)}</h2><div class=\"badge\">${esc(TIPO.toUpperCase())} | ${esc(ESPECIE.toUpperCase())}</div></div><div class=\"toc\"><h2>&#128203; Contenidos</h2><ol>${toc}</ol></div><div class=\"intro\"><h2>Introducción</h2>${intro}</div>${secs}<div class=\"concl\"><h2>Conclusión</h2>${concl}</div><div class=\"cta-box\"><h3>&#128640; ¡Actúa Ahora!</h3><p>${esc(ds.cta)}</p></div><div class=\"footer\">${esc(ds.titulo)} &copy; ${yr}<!-- M6_PROCESSED --></div></body></html>`;\nreturn { json: { ...p, htmlContent:html } };\n"
       },
       "continueOnFail": true
     },
@@ -146,10 +145,10 @@
       "name": "📦 Preparar Upload a Drive",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2100, 800],
+      "position": [2100, 820],
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const data = $input.item.json;\nif (data._error || !data.htmlContent) {\n  return { json: { ...data, _uploadBody: '', _contentType: '' } };\n}\n\nconst BOUNDARY = 'M6_bnd_' + Date.now();\nconst meta = { name: '[M6] ' + data.ds.titulo, mimeType: 'application/vnd.google-apps.document' };\nif (data.GOOGLE_DRIVE_FOLDER_ID) meta.parents = [data.GOOGLE_DRIVE_FOLDER_ID];\n\nconst htmlB64 = Buffer.from(data.htmlContent, 'utf8').toString('base64');\nconst uploadBody = [\n  '--' + BOUNDARY,\n  'Content-Type: application/json; charset=UTF-8',\n  '',\n  JSON.stringify(meta),\n  '--' + BOUNDARY,\n  'Content-Type: text/html; charset=UTF-8',\n  'Content-Transfer-Encoding: base64',\n  '',\n  htmlB64,\n  '--' + BOUNDARY + '--'\n].join('\\r\\n');\n\nreturn { json: {\n  ...data,\n  _uploadBody: uploadBody,\n  _contentType: 'multipart/related; boundary=\"' + BOUNDARY + '\"'\n}};\n"
+        "jsCode": "const data = $input.item.json;\nif (data._error || !data.htmlContent) return { json: { ...data, _uploadBody:'', _contentType:'' } };\nconst B='M6pdf_'+Date.now();\nconst meta={name:'[M6] '+data.ds.titulo, mimeType:'application/vnd.google-apps.document'};\nif (data.GOOGLE_DRIVE_FOLDER_ID) meta.parents=[data.GOOGLE_DRIVE_FOLDER_ID];\nconst b64=Buffer.from(data.htmlContent,'utf8').toString('base64');\nconst body=['--'+B,'Content-Type: application/json; charset=UTF-8','',JSON.stringify(meta),'--'+B,'Content-Type: text/html; charset=UTF-8','Content-Transfer-Encoding: base64','',b64,'--'+B+'--'].join('\\r\\n');\nreturn { json: { ...data, _uploadBody:body, _contentType:'multipart/related; boundary=\"'+B+'\"' } };\n"
       },
       "continueOnFail": true
     },
@@ -158,14 +157,13 @@
       "name": "☁️ Crear Google Doc (Drive API)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [2340, 800],
+      "position": [2340, 820],
       "parameters": {
         "method": "POST",
         "url": "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "googleDriveOAuth2Api",
-        "sendBody": true,
-        "contentType": "raw",
+        "sendBody": true, "contentType": "raw",
         "rawContentType": "={{ $json._contentType }}",
         "body": "={{ $json._uploadBody }}",
         "options": { "timeout": 60000, "allowUnauthorizedCerts": true }
@@ -178,14 +176,13 @@
       "name": "🔓 Compartir PDF Públicamente",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [2580, 800],
+      "position": [2580, 820],
       "parameters": {
         "method": "POST",
         "url": "=https://www.googleapis.com/drive/v3/files/{{ $json.id || 'NODOC' }}/permissions",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "googleDriveOAuth2Api",
-        "sendBody": true,
-        "contentType": "json",
+        "sendBody": true, "contentType": "json",
         "body": "{\"role\":\"reader\",\"type\":\"anyone\"}",
         "options": { "timeout": 30000, "allowUnauthorizedCerts": true }
       },
@@ -193,40 +190,216 @@
       "credentials": { "googleDriveOAuth2Api": { "id": "DRIVE_CREDENTIAL", "name": "Google Drive OAuth2" } }
     },
     {
+      "id": "node-create-folder",
+      "name": "📁 Crear Carpeta Drive",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [2820, 820],
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/drive/v3/files",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "sendBody": true, "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify(Object.assign({ name: '[M6] ' + ($('📦 Preparar Upload a Drive').item.json.ds?.titulo || $('📦 Preparar Upload a Drive').item.json.TEMA), mimeType: 'application/vnd.google-apps.folder' }, $('📦 Preparar Upload a Drive').item.json.GOOGLE_DRIVE_FOLDER_ID ? { parents: [$('📦 Preparar Upload a Drive').item.json.GOOGLE_DRIVE_FOLDER_ID] } : {})) }}",
+        "options": { "timeout": 30000, "allowUnauthorizedCerts": true }
+      },
+      "continueOnFail": true,
+      "credentials": { "googleDriveOAuth2Api": { "id": "DRIVE_CREDENTIAL", "name": "Google Drive OAuth2" } }
+    },
+    {
+      "id": "node-collect-drive",
+      "name": "📦 Colectar Datos Drive",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3060, 820],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const orig = $('📦 Preparar Upload a Drive').item.json;\nconst gdocResp = $('☁️ Crear Google Doc (Drive API)').item.json;\nconst folderResp = $input.item.json;\nconst gdocId = (!gdocResp.error && gdocResp.id) ? gdocResp.id : '';\nconst pdfUrl = gdocId ? `https://docs.google.com/document/d/${gdocId}/export?format=pdf` : '';\nconst docLink = gdocId ? `https://docs.google.com/document/d/${gdocId}/view` : '';\nconst driveError = gdocResp.error ? (gdocResp.error.message||'Error Drive API') : (!gdocId ? 'No se obtuvo ID del Doc' : '');\nconst folderId = (!folderResp.error && folderResp.id) ? folderResp.id : '';\nconst folderUrl = folderId ? `https://drive.google.com/drive/folders/${folderId}` : '';\nreturn { json: { ...orig, gdocId, pdfUrl, docLink, _driveError:driveError, folderId, folderUrl } };\n"
+      }
+    },
+    {
+      "id": "node-prep-kit-ds",
+      "name": "📦 Preparar Kit Marketing",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3300, 820],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const p = $input.item.json;\nif (p._error || !p.ds) return { json: { ...p, _kitDsBody:'' } };\nconst sys = 'Eres experto en marketing digital hispanohablante. RESPONDE SOLO CON JSON VÁLIDO.';\nconst usr = `Kit de marketing completo para \"${p.ds.titulo}\" (${p.TIPO} para ${p.ESPECIE}s, $${p.PRECIO}).\\nJSON ESPERADO:\\n{\"subject_line\":\"asunto email (máx 60 chars)\",\"launch_email\":\"HTML del email (máx 400 palabras)\",\"social_posts\":[\"post1 con emojis\",\"post2\",\"post3\",\"post4\",\"post5\"],\"affiliate_guide\":\"markdown guía afiliados (máx 600 palabras)\",\"urgency_phrase\":\"frase urgencia/escasez\"}`;\nconst body = JSON.stringify({ model:'deepseek-chat', temperature:0.75, max_tokens:3000, response_format:{type:'json_object'}, messages:[{role:'system',content:sys},{role:'user',content:usr}] });\nreturn { json: { ...p, _kitDsBody:body } };\n"
+      }
+    },
+    {
+      "id": "node-kit-deepseek",
+      "name": "🤖 DeepSeek: Kit Marketing",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [3540, 820],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [
+          { "name": "Authorization", "value": "=Bearer {{ $json.DEEPSEEK_API_KEY }}" },
+          { "name": "Content-Type",  "value": "application/json" }
+        ]},
+        "sendBody": true, "contentType": "raw",
+        "body": "={{ $json._kitDsBody }}",
+        "options": { "timeout": 120000, "allowUnauthorizedCerts": true }
+      },
+      "continueOnFail": true
+    },
+    {
+      "id": "node-parse-kit",
+      "name": "📦 Parsear Kit Marketing",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [3780, 820],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const orig = $('📦 Preparar Kit Marketing').item.json;\nconst resp = $input.item.json;\nif (!orig._kitDsBody || orig._error) return { json: { ...orig, kit:{} } };\nif (resp.error) return { json: { ...orig, kit:{}, _kitError: resp.error.message||'Error DeepSeek kit' } };\nconst raw = resp.choices?.[0]?.message?.content || '';\nlet kit;\ntry { kit = JSON.parse(raw); } catch(e) {\n  const m = raw.match(/\\{[\\s\\S]*\\}/);\n  try { kit = m ? JSON.parse(m[0]) : {}; } catch(e2) { kit = {}; }\n}\nreturn { json: { ...orig, kit: kit||{} } };\n"
+      },
+      "continueOnFail": true
+    },
+    {
+      "id": "node-leonardo",
+      "name": "🖼️ Leonardo: Imágenes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [4020, 820],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const p = $input.item.json;\nconst apiKey = p.LEONARDO_API_KEY || '';\nif (!apiKey || apiKey.includes('TU_')) {\n  return { json: { ...p, _leonardoImages:{}, _imagesList:'', _errorImagenes:'Leonardo API key no configurada' } };\n}\nconst titulo = p.ds?.titulo || p.TEMA;\nconst baseUrl = 'https://cloud.leonardo.ai/api/rest/v1';\nconst hdrs = { 'Authorization':`Bearer ${apiKey}`, 'Content-Type':'application/json', 'Accept':'application/json' };\nconst fmts = [\n  { name:'banner_horizontal', width:1216, height:640 },\n  { name:'banner_cuadrado',   width:832,  height:832 },\n  { name:'historia_vertical', width:640,  height:1152 },\n  { name:'icono_producto',    width:512,  height:512 }\n];\nconst prompt = `Professional digital product cover art for \"${titulo}\", ${p.TIPO} for ${p.ESPECIE} owners, modern flat design, blue gradient, clean layout, premium quality, no text`;\nconst sleep = ms => new Promise(r => setTimeout(r, ms));\nconst jobs = [];\nfor (const fmt of fmts) {\n  try {\n    const r = await fetch(`${baseUrl}/generations`, { method:'POST', headers:hdrs, body:JSON.stringify({ prompt, modelId:'b24e16ff-06e3-4a9e-8d1f-7c3e1e9f5c3a', width:fmt.width, height:fmt.height, num_images:1, guidance_scale:7, num_inference_steps:30 }) });\n    const d = await r.json();\n    jobs.push({ name:fmt.name, genId: d.sdGenerationJob?.generationId || null });\n  } catch(e) { jobs.push({ name:fmt.name, genId:null, err:e.message }); }\n}\nconst images = {};\nconst pending = jobs.filter(j => j.genId);\nlet elapsed = 0;\nwhile (pending.length > 0 && elapsed < 64000) {\n  await sleep(8000); elapsed += 8000;\n  for (let i = pending.length-1; i >= 0; i--) {\n    try {\n      const r = await fetch(`${baseUrl}/generations/${pending[i].genId}`, { headers:hdrs });\n      const d = await r.json();\n      if (d.generations_by_pk?.status === 'COMPLETE') {\n        images[pending[i].name] = d.generations_by_pk.generated_images?.[0]?.url || '';\n        pending.splice(i, 1);\n      }\n    } catch(e) {}\n  }\n}\nfor (const j of pending) images[j.name] = '';\nfor (const j of jobs.filter(x => !x.genId)) images[j.name] = '';\nconst missing = Object.keys(images).filter(k => !images[k]);\nconst errMsg = missing.length ? `Sin imagen: ${missing.join(', ')}` : '';\nconst imagesList = Object.entries(images).map(([k,v]) => `${k}: ${v||'(no generado)'}`).join('\\n');\nreturn { json: { ...p, _leonardoImages:images, _imagesList:imagesList, _errorImagenes:errMsg } };\n"
+      },
+      "continueOnFail": true
+    },
+    {
+      "id": "node-prep-kit-upload",
+      "name": "📦 Preparar Kit Upload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [4260, 820],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const p = $input.item.json;\nconst kit = p.kit || {};\nconst ds  = p.ds  || {};\nconst images = p._leonardoImages || {};\nconst emailHtml = kit.launch_email || '(sin email generado)';\nconst posts = (kit.social_posts||[]).map((t,i) => `<h3>Post ${i+1}</h3><p>${t}</p>`).join('');\nconst guide = (kit.affiliate_guide||'(sin guía)').replace(/\\n/g,'<br>');\nconst imgRows = Object.entries(images).map(([k,v]) => v ? `<tr><td>${k}</td><td><a href=\"${v}\">${v}</a></td></tr>` : `<tr><td>${k}</td><td>no generado</td></tr>`).join('');\nconst kitHtml = `<!DOCTYPE html><html><head><meta charset=\"UTF-8\"><title>Kit Marketing — ${ds.titulo||p.TEMA}</title><style>body{font-family:Arial,sans-serif;max-width:900px;margin:40px auto;color:#222}h1{color:#1e40af}h2{color:#1e40af;border-bottom:2px solid #1e40af;padding-bottom:8px;margin-top:40px}table{border-collapse:collapse;width:100%}td{padding:8px;border:1px solid #ddd}</style></head><body><h1>Kit de Marketing: ${ds.titulo||p.TEMA}</h1><h2>Email de Lanzamiento</h2><p><strong>Asunto:</strong> ${kit.subject_line||''}</p>${emailHtml}<h2>Posts para Redes Sociales</h2>${posts}<h2>Guía para Afiliados</h2><p>${guide}</p><h2>Frase de Urgencia</h2><p>${kit.urgency_phrase||''}</p><h2>Imágenes Generadas</h2><table><tr><th>Formato</th><th>URL</th></tr>${imgRows}</table><h2>PDF del Infoproducto</h2><p><a href=\"${p.pdfUrl||''}\">Descargar PDF</a></p></body></html>`;\nconst B='M6kit_'+Date.now();\nconst meta={name:'Kit Marketing — '+(ds.titulo||p.TEMA), mimeType:'application/vnd.google-apps.document'};\nif (p.folderId) meta.parents=[p.folderId];\nconst b64=Buffer.from(kitHtml,'utf8').toString('base64');\nconst uploadBody=['--'+B,'Content-Type: application/json; charset=UTF-8','',JSON.stringify(meta),'--'+B,'Content-Type: text/html; charset=UTF-8','Content-Transfer-Encoding: base64','',b64,'--'+B+'--'].join('\\r\\n');\nreturn { json: { ...p, _kitUploadBody:uploadBody, _kitContentType:'multipart/related; boundary=\"'+B+'\"' } };\n"
+      },
+      "continueOnFail": true
+    },
+    {
+      "id": "node-upload-kit",
+      "name": "📤 Subir Kit a Drive",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [4500, 820],
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "sendBody": true, "contentType": "raw",
+        "rawContentType": "={{ $json._kitContentType }}",
+        "body": "={{ $json._kitUploadBody }}",
+        "options": { "timeout": 60000, "allowUnauthorizedCerts": true }
+      },
+      "continueOnFail": true,
+      "credentials": { "googleDriveOAuth2Api": { "id": "DRIVE_CREDENTIAL", "name": "Google Drive OAuth2" } }
+    },
+    {
+      "id": "node-share-kit",
+      "name": "🔓 Compartir Kit Públicamente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [4740, 820],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://www.googleapis.com/drive/v3/files/{{ $json.id || 'NOKIT' }}/permissions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "sendBody": true, "contentType": "json",
+        "body": "{\"role\":\"reader\",\"type\":\"anyone\"}",
+        "options": { "timeout": 30000, "allowUnauthorizedCerts": true }
+      },
+      "continueOnFail": true,
+      "credentials": { "googleDriveOAuth2Api": { "id": "DRIVE_CREDENTIAL", "name": "Google Drive OAuth2" } }
+    },
+    {
+      "id": "node-collect-all",
+      "name": "🔀 Colectar Todos los Datos",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [4980, 820],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const base = $('📦 Parsear Kit Marketing').item.json;\nconst leo  = $('🖼️ Leonardo: Imágenes').item.json;\nconst uploadResp = $('📤 Subir Kit a Drive').item.json;\nconst kitDocId = (!uploadResp.error && uploadResp.id) ? uploadResp.id : '';\nconst kitUrl   = kitDocId ? `https://docs.google.com/document/d/${kitDocId}/view` : '';\nreturn { json: {\n  ...base,\n  _leonardoImages: leo._leonardoImages || {},\n  _imagesList:     leo._imagesList     || '',\n  _errorImagenes:  leo._errorImagenes  || '',\n  kitDocId, kitUrl\n}};\n"
+      }
+    },
+    {
+      "id": "node-eduzz",
+      "name": "🛒 Eduzz: Crear Producto",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [5220, 820],
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.eduzz.com/api/v3/product?api_key={{ $json.EDUZZ_API_KEY }}&api_secret={{ $json.EDUZZ_API_SECRET }}",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [
+          { "name": "Content-Type", "value": "application/json" }
+        ]},
+        "sendBody": true, "contentType": "raw",
+        "body": "={{ JSON.stringify({ title: $json.ds?.titulo || $json.TEMA, description: $json.ds?.descripcion || $json.TEMA, price: $json.PRECIO, type: 'digital', file_url: $json.pdfUrl || '' }) }}",
+        "options": { "timeout": 30000, "allowUnauthorizedCerts": true }
+      },
+      "continueOnFail": true
+    },
+    {
+      "id": "node-monetizze",
+      "name": "🛒 Monetizze: Crear Producto",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [5460, 820],
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.monetizze.com.br/api/v2/product",
+        "sendHeaders": true,
+        "headerParameters": { "parameters": [
+          { "name": "Content-Type", "value": "application/json" },
+          { "name": "TOKENIZE",     "value": "={{ $('🔀 Colectar Todos los Datos').item.json.MONETIZZE_API_KEY }}" }
+        ]},
+        "sendBody": true, "contentType": "raw",
+        "body": "={{ JSON.stringify({ title: $('🔀 Colectar Todos los Datos').item.json.ds?.titulo || $('🔀 Colectar Todos los Datos').item.json.TEMA, description: $('🔀 Colectar Todos los Datos').item.json.ds?.descripcion || '', value: $('🔀 Colectar Todos los Datos').item.json.PRECIO, product_link: $('🔀 Colectar Todos los Datos').item.json.pdfUrl || '' }) }}",
+        "options": { "timeout": 30000, "allowUnauthorizedCerts": true }
+      },
+      "continueOnFail": true
+    },
+    {
       "id": "node-prep-hotmart",
       "name": "🗂️ Preparar Payload Hotmart",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [2820, 800],
+      "position": [5700, 820],
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const orig = $('📦 Preparar Upload a Drive').item.json;\nconst driveResp = $('☁️ Crear Google Doc (Drive API)').item.json;\n\nconst gdocId = (!driveResp.error && driveResp.id) ? driveResp.id : '';\nconst pdfUrl  = gdocId ? `https://docs.google.com/document/d/${gdocId}/export?format=pdf` : '';\nconst docLink = gdocId ? `https://docs.google.com/document/d/${gdocId}/view` : '';\n\nlet driveError = orig._error || '';\nif (!driveError && driveResp.error) driveError = driveResp.error.message || 'Error Drive API';\nif (!driveError && !gdocId) driveError = 'Drive no devolvió ID del Doc';\n\nconst hotmartBody = (orig.ds && pdfUrl) ? JSON.stringify({\n  name: orig.ds.titulo,\n  description: orig.ds.descripcion || orig.ds.titulo,\n  format: 'EBOOK',\n  warranty: orig.WARRANTY_DIAS || 30,\n  price: { value: orig.PRECIO, currency_code: orig.MONEDA_HOTMART || 'BRL' },\n  resource_url: pdfUrl\n}) : '{}';\n\nreturn { json: {\n  ...orig,\n  gdocId, pdfUrl, docLink,\n  _driveError: driveError,\n  _hotmartBody: hotmartBody\n}};\n"
-      },
-      "continueOnFail": true
+        "jsCode": "const p = $('🔀 Colectar Todos los Datos').item.json;\nconst eduzzResp    = $('🛒 Eduzz: Crear Producto').item.json;\nconst monetizzeResp = $('🛒 Monetizze: Crear Producto').item.json;\nconst eduzzId   = !eduzzResp.error    ? (String(eduzzResp.data?.id || eduzzResp.id || '')) : '';\nconst eduzzUrl  = !eduzzResp.error    ? (eduzzResp.data?.checkout_url || eduzzResp.checkout_url || '') : '';\nconst eduzzErr  = eduzzResp.error     ? (eduzzResp.error.message || 'Error Eduzz') : '';\nconst monId     = !monetizzeResp.error ? (String(monetizzeResp.data?.id || monetizzeResp.id || '')) : '';\nconst monUrl    = !monetizzeResp.error ? (monetizzeResp.data?.checkout_url || monetizzeResp.checkout_url || '') : '';\nconst monErr    = monetizzeResp.error  ? (monetizzeResp.error.message || 'Error Monetizze') : '';\nconst hotmartBody = (p.ds && p.pdfUrl) ? JSON.stringify({ name: p.ds.titulo, description: p.ds.descripcion||p.ds.titulo, format:'EBOOK', warranty: p.WARRANTY_DIAS||30, price:{ value:p.PRECIO, currency_code:p.MONEDA_HOTMART||'BRL' }, resource_url:p.pdfUrl }) : '{}';\nreturn { json: { ...p, _hotmartBody:hotmartBody, eduzzId, eduzzUrl, _eduzzError:eduzzErr, monetizzeId:monId, monetizzeUrl:monUrl, _monetizzeError:monErr } };\n"
+      }
     },
     {
       "id": "node-hotmart-token",
       "name": "🔑 Obtener Token Hotmart",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [3060, 800],
+      "position": [5940, 820],
       "parameters": {
         "method": "POST",
         "url": "https://api-sec-vlc.hotmart.com/security/oauth/token",
         "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "=Basic {{ Buffer.from($json.HOTMART_CLIENT_ID + ':' + $json.HOTMART_CLIENT_SECRET).toString('base64') }}" },
-            { "name": "Content-Type",  "value": "application/x-www-form-urlencoded" }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "form-urlencoded",
-        "bodyParameters": {
-          "parameters": [
-            { "name": "grant_type", "value": "client_credentials" }
-          ]
-        },
+        "headerParameters": { "parameters": [
+          { "name": "Authorization", "value": "=Basic {{ Buffer.from($json.HOTMART_CLIENT_ID + ':' + $json.HOTMART_CLIENT_SECRET).toString('base64') }}" },
+          { "name": "Content-Type",  "value": "application/x-www-form-urlencoded" }
+        ]},
+        "sendBody": true, "contentType": "form-urlencoded",
+        "bodyParameters": { "parameters": [{ "name": "grant_type", "value": "client_credentials" }] },
         "options": { "timeout": 30000, "allowUnauthorizedCerts": true }
       },
       "continueOnFail": true
@@ -236,10 +409,10 @@
       "name": "🔀 Merge Token con Params",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [3300, 800],
+      "position": [6180, 820],
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const params = $('🗂️ Preparar Payload Hotmart').item.json;\nconst tokenResp = $input.item.json;\nconst token = (!tokenResp.error && tokenResp.access_token) ? tokenResp.access_token : '';\nconst tokenError = tokenResp.error ? (tokenResp.error.message || 'Error token Hotmart') : (token ? '' : 'Token vacío');\nreturn { json: { ...params, _hotmartToken: token, _tokenError: tokenError } };\n"
+        "jsCode": "const params = $('🗂️ Preparar Payload Hotmart').item.json;\nconst tokenResp = $input.item.json;\nconst token = (!tokenResp.error && tokenResp.access_token) ? tokenResp.access_token : '';\nconst tokenError = tokenResp.error ? (tokenResp.error.message||'Error token Hotmart') : (token ? '' : 'Token vacío');\nreturn { json: { ...params, _hotmartToken:token, _tokenError:tokenError } };\n"
       }
     },
     {
@@ -247,19 +420,16 @@
       "name": "🛒 Crear Producto en Hotmart",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [3540, 800],
+      "position": [6420, 820],
       "parameters": {
         "method": "POST",
         "url": "https://developers.hotmart.com/products/api/v1/product",
         "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            { "name": "Authorization", "value": "=Bearer {{ $json._hotmartToken }}" },
-            { "name": "Content-Type",  "value": "application/json" }
-          ]
-        },
-        "sendBody": true,
-        "contentType": "raw",
+        "headerParameters": { "parameters": [
+          { "name": "Authorization", "value": "=Bearer {{ $json._hotmartToken }}" },
+          { "name": "Content-Type",  "value": "application/json" }
+        ]},
+        "sendBody": true, "contentType": "raw",
         "body": "={{ $json._hotmartBody }}",
         "options": { "timeout": 30000, "allowUnauthorizedCerts": true }
       },
@@ -270,10 +440,10 @@
       "name": "📋 Preparar Actualización",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [3780, 800],
+      "position": [6660, 820],
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "const params = $('🔀 Merge Token con Params').item.json;\nconst hotmartResp = $input.item.json;\n\nconst driveOK   = !!params.gdocId && !params._driveError;\nconst tokenOK   = !!params._hotmartToken && !params._tokenError;\nconst hotmartOK = !hotmartResp.error && !!(hotmartResp.id || hotmartResp.product?.id);\n\nlet errorMsg = '';\nif (params._error)       errorMsg = params._error;\nelse if (!driveOK)       errorMsg = params._driveError || 'Error creando Google Doc';\nelse if (!tokenOK)       errorMsg = params._tokenError || 'Error obteniendo token Hotmart';\nelse if (!hotmartOK)     errorMsg = hotmartResp.error?.message || JSON.stringify(hotmartResp).substring(0,120);\n\nconst success = driveOK && tokenOK && hotmartOK && !params._error;\n\nreturn { json: {\n  _tema:          params.TEMA,\n  _titulo:        params.ds?.titulo || params.TEMA,\n  _success:       success,\n  PROCESADO:      success ? 'TRUE' : 'FALSE',\n  PDF_URL:        params.pdfUrl  || '',\n  GDOC_ID:        params.gdocId  || '',\n  HOTMART_ID:     success ? (String(hotmartResp.id || hotmartResp.product?.id || '')) : '',\n  HOTMART_LINK:   success ? (hotmartResp.links?.checkout_url || hotmartResp.checkout_url || 'ver panel Hotmart') : '',\n  ERROR:          errorMsg,\n  SHEET_ID:       params.SHEET_ID,\n  HOJA_PENDIENTES: params.HOJA_PENDIENTES\n}};\n"
+        "jsCode": "const p = $('🔀 Merge Token con Params').item.json;\nconst hotmartResp = $input.item.json;\nconst driveOK   = !!p.gdocId && !p._driveError;\nconst tokenOK   = !!p._hotmartToken && !p._tokenError;\nconst hotmartOK = !hotmartResp.error && !!(hotmartResp.id || hotmartResp.product?.id);\nlet errorMsg = '';\nif (p._error)      errorMsg = p._error;\nelse if (!driveOK) errorMsg = p._driveError || 'Error creando Google Doc';\nelse if (!tokenOK) errorMsg = p._tokenError || 'Error token Hotmart';\nelse if (!hotmartOK) errorMsg = hotmartResp.error?.message || JSON.stringify(hotmartResp).substring(0,120);\nconst success = driveOK && tokenOK && hotmartOK && !p._error;\nreturn { json: {\n  _tema:            p.TEMA,\n  _titulo:          p.ds?.titulo || p.TEMA,\n  _success:         success,\n  PROCESADO:        success ? 'TRUE' : 'FALSE',\n  PDF_URL:          p.pdfUrl          || '',\n  HOTMART_ID:       success ? String(hotmartResp.id || hotmartResp.product?.id || '') : '',\n  HOTMART_LINK:     success ? (hotmartResp.links?.checkout_url || hotmartResp.checkout_url || 'ver panel Hotmart') : '',\n  CARPETA_DRIVE_URL: p.folderUrl       || '',\n  KIT_MARKETING_URL: p.kitUrl          || '',\n  URL_EDUZZ:         p.eduzzUrl        || '',\n  URL_MONETIZZE:     p.monetizzeUrl    || '',\n  IMAGENES_LISTA:    p._imagesList     || '',\n  ERROR:             errorMsg,\n  ERROR_IMAGENES:    p._errorImagenes  || '',\n  SHEET_ID:          p.SHEET_ID,\n  HOJA_PENDIENTES:   p.HOJA_PENDIENTES\n}};\n"
       }
     },
     {
@@ -281,7 +451,7 @@
       "name": "📊 Actualizar Fila Pendiente",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.4,
-      "position": [4020, 800],
+      "position": [6900, 820],
       "parameters": {
         "operation": "update",
         "documentId": { "__rl": true, "value": "={{ $json.SHEET_ID }}", "mode": "id" },
@@ -289,12 +459,18 @@
         "columns": {
           "mappingMode": "defineBelow",
           "value": {
-            "TEMA":         "={{ $json._tema }}",
-            "PROCESADO":    "={{ $json.PROCESADO }}",
-            "PDF_URL":      "={{ $json.PDF_URL }}",
-            "HOTMART_ID":   "={{ $json.HOTMART_ID }}",
-            "HOTMART_LINK": "={{ $json.HOTMART_LINK }}",
-            "ERROR":        "={{ $json.ERROR }}"
+            "TEMA":             "={{ $json._tema }}",
+            "PROCESADO":        "={{ $json.PROCESADO }}",
+            "PDF_URL":          "={{ $json.PDF_URL }}",
+            "HOTMART_ID":       "={{ $json.HOTMART_ID }}",
+            "HOTMART_LINK":     "={{ $json.HOTMART_LINK }}",
+            "CARPETA_DRIVE_URL":"={{ $json.CARPETA_DRIVE_URL }}",
+            "KIT_MARKETING_URL":"={{ $json.KIT_MARKETING_URL }}",
+            "URL_EDUZZ":        "={{ $json.URL_EDUZZ }}",
+            "URL_MONETIZZE":    "={{ $json.URL_MONETIZZE }}",
+            "IMAGENES_LISTA":   "={{ $json.IMAGENES_LISTA }}",
+            "ERROR":            "={{ $json.ERROR }}",
+            "ERROR_IMAGENES":   "={{ $json.ERROR_IMAGENES }}"
           },
           "matchingColumns": ["TEMA"],
           "schema": []
@@ -308,18 +484,22 @@
       "name": "✅ Resumen Final",
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [4260, 800],
+      "position": [7140, 820],
       "parameters": {
         "mode": "manual",
         "assignments": {
           "assignments": [
-            { "id": "s1", "name": "tema",       "value": "={{ $('📋 Preparar Actualización').item.json._tema }}", "type": "string" },
-            { "id": "s2", "name": "titulo",      "value": "={{ $('📋 Preparar Actualización').item.json._titulo }}", "type": "string" },
-            { "id": "s3", "name": "procesado",   "value": "={{ $('📋 Preparar Actualización').item.json.PROCESADO }}", "type": "string" },
-            { "id": "s4", "name": "pdf_url",     "value": "={{ $('📋 Preparar Actualización').item.json.PDF_URL }}", "type": "string" },
-            { "id": "s5", "name": "hotmart_id",  "value": "={{ $('📋 Preparar Actualización').item.json.HOTMART_ID }}", "type": "string" },
-            { "id": "s6", "name": "hotmart_link","value": "={{ $('📋 Preparar Actualización').item.json.HOTMART_LINK }}", "type": "string" },
-            { "id": "s7", "name": "error",       "value": "={{ $('📋 Preparar Actualización').item.json.ERROR }}", "type": "string" }
+            { "id": "s1", "name": "tema",             "value": "={{ $('📋 Preparar Actualización').item.json._tema }}", "type": "string" },
+            { "id": "s2", "name": "titulo",            "value": "={{ $('📋 Preparar Actualización').item.json._titulo }}", "type": "string" },
+            { "id": "s3", "name": "procesado",         "value": "={{ $('📋 Preparar Actualización').item.json.PROCESADO }}", "type": "string" },
+            { "id": "s4", "name": "pdf_url",           "value": "={{ $('📋 Preparar Actualización').item.json.PDF_URL }}", "type": "string" },
+            { "id": "s5", "name": "hotmart_id",        "value": "={{ $('📋 Preparar Actualización').item.json.HOTMART_ID }}", "type": "string" },
+            { "id": "s6", "name": "carpeta_drive_url", "value": "={{ $('📋 Preparar Actualización').item.json.CARPETA_DRIVE_URL }}", "type": "string" },
+            { "id": "s7", "name": "kit_marketing_url", "value": "={{ $('📋 Preparar Actualización').item.json.KIT_MARKETING_URL }}", "type": "string" },
+            { "id": "s8", "name": "url_eduzz",         "value": "={{ $('📋 Preparar Actualización').item.json.URL_EDUZZ }}", "type": "string" },
+            { "id": "s9", "name": "url_monetizze",     "value": "={{ $('📋 Preparar Actualización').item.json.URL_MONETIZZE }}", "type": "string" },
+            { "id": "s10","name": "error",             "value": "={{ $('📋 Preparar Actualización').item.json.ERROR }}", "type": "string" },
+            { "id": "s11","name": "error_imagenes",    "value": "={{ $('📋 Preparar Actualización').item.json.ERROR_IMAGENES }}", "type": "string" }
           ]
         },
         "options": {}
@@ -327,60 +507,36 @@
     }
   ],
   "connections": {
-    "⏰ Schedule 12h": {
-      "main": [[{ "node": "⚙️ CONFIG", "type": "main", "index": 0 }]]
-    },
-    "▶ Ejecutar Manual": {
-      "main": [[{ "node": "⚙️ CONFIG", "type": "main", "index": 0 }]]
-    },
-    "⚙️ CONFIG": {
-      "main": [[{ "node": "📊 Leer Pendientes", "type": "main", "index": 0 }]]
-    },
-    "📊 Leer Pendientes": {
-      "main": [[{ "node": "🔍 Filtrar Pendientes", "type": "main", "index": 0 }]]
-    },
-    "🔍 Filtrar Pendientes": {
-      "main": [[{ "node": "📝 Preparar Prompt DeepSeek", "type": "main", "index": 0 }]]
-    },
-    "📝 Preparar Prompt DeepSeek": {
-      "main": [[{ "node": "🤖 DeepSeek: Generar Contenido", "type": "main", "index": 0 }]]
-    },
-    "🤖 DeepSeek: Generar Contenido": {
-      "main": [[{ "node": "📦 Parsear Respuesta DeepSeek", "type": "main", "index": 0 }]]
-    },
-    "📦 Parsear Respuesta DeepSeek": {
-      "main": [[{ "node": "🎨 Construir HTML del Infoproducto", "type": "main", "index": 0 }]]
-    },
-    "🎨 Construir HTML del Infoproducto": {
-      "main": [[{ "node": "📦 Preparar Upload a Drive", "type": "main", "index": 0 }]]
-    },
-    "📦 Preparar Upload a Drive": {
-      "main": [[{ "node": "☁️ Crear Google Doc (Drive API)", "type": "main", "index": 0 }]]
-    },
-    "☁️ Crear Google Doc (Drive API)": {
-      "main": [[{ "node": "🔓 Compartir PDF Públicamente", "type": "main", "index": 0 }]]
-    },
-    "🔓 Compartir PDF Públicamente": {
-      "main": [[{ "node": "🗂️ Preparar Payload Hotmart", "type": "main", "index": 0 }]]
-    },
-    "🗂️ Preparar Payload Hotmart": {
-      "main": [[{ "node": "🔑 Obtener Token Hotmart", "type": "main", "index": 0 }]]
-    },
-    "🔑 Obtener Token Hotmart": {
-      "main": [[{ "node": "🔀 Merge Token con Params", "type": "main", "index": 0 }]]
-    },
-    "🔀 Merge Token con Params": {
-      "main": [[{ "node": "🛒 Crear Producto en Hotmart", "type": "main", "index": 0 }]]
-    },
-    "🛒 Crear Producto en Hotmart": {
-      "main": [[{ "node": "📋 Preparar Actualización", "type": "main", "index": 0 }]]
-    },
-    "📋 Preparar Actualización": {
-      "main": [[{ "node": "📊 Actualizar Fila Pendiente", "type": "main", "index": 0 }]]
-    },
-    "📊 Actualizar Fila Pendiente": {
-      "main": [[{ "node": "✅ Resumen Final", "type": "main", "index": 0 }]]
-    }
+    "⏰ Schedule 12h":    { "main": [[{ "node": "⚙️ CONFIG", "type": "main", "index": 0 }]] },
+    "▶ Ejecutar Manual":  { "main": [[{ "node": "⚙️ CONFIG", "type": "main", "index": 0 }]] },
+    "⚙️ CONFIG":          { "main": [[{ "node": "📊 Leer Pendientes", "type": "main", "index": 0 }]] },
+    "📊 Leer Pendientes": { "main": [[{ "node": "🔍 Filtrar Pendientes", "type": "main", "index": 0 }]] },
+    "🔍 Filtrar Pendientes": { "main": [[{ "node": "📝 Preparar Prompt DeepSeek", "type": "main", "index": 0 }]] },
+    "📝 Preparar Prompt DeepSeek": { "main": [[{ "node": "🤖 DeepSeek: Generar Contenido", "type": "main", "index": 0 }]] },
+    "🤖 DeepSeek: Generar Contenido": { "main": [[{ "node": "📦 Parsear Respuesta DeepSeek", "type": "main", "index": 0 }]] },
+    "📦 Parsear Respuesta DeepSeek": { "main": [[{ "node": "🎨 Construir HTML del Infoproducto", "type": "main", "index": 0 }]] },
+    "🎨 Construir HTML del Infoproducto": { "main": [[{ "node": "📦 Preparar Upload a Drive", "type": "main", "index": 0 }]] },
+    "📦 Preparar Upload a Drive": { "main": [[{ "node": "☁️ Crear Google Doc (Drive API)", "type": "main", "index": 0 }]] },
+    "☁️ Crear Google Doc (Drive API)": { "main": [[{ "node": "🔓 Compartir PDF Públicamente", "type": "main", "index": 0 }]] },
+    "🔓 Compartir PDF Públicamente": { "main": [[{ "node": "📁 Crear Carpeta Drive", "type": "main", "index": 0 }]] },
+    "📁 Crear Carpeta Drive": { "main": [[{ "node": "📦 Colectar Datos Drive", "type": "main", "index": 0 }]] },
+    "📦 Colectar Datos Drive": { "main": [[{ "node": "📦 Preparar Kit Marketing", "type": "main", "index": 0 }]] },
+    "📦 Preparar Kit Marketing": { "main": [[{ "node": "🤖 DeepSeek: Kit Marketing", "type": "main", "index": 0 }]] },
+    "🤖 DeepSeek: Kit Marketing": { "main": [[{ "node": "📦 Parsear Kit Marketing", "type": "main", "index": 0 }]] },
+    "📦 Parsear Kit Marketing": { "main": [[{ "node": "🖼️ Leonardo: Imágenes", "type": "main", "index": 0 }]] },
+    "🖼️ Leonardo: Imágenes": { "main": [[{ "node": "📦 Preparar Kit Upload", "type": "main", "index": 0 }]] },
+    "📦 Preparar Kit Upload": { "main": [[{ "node": "📤 Subir Kit a Drive", "type": "main", "index": 0 }]] },
+    "📤 Subir Kit a Drive": { "main": [[{ "node": "🔓 Compartir Kit Públicamente", "type": "main", "index": 0 }]] },
+    "🔓 Compartir Kit Públicamente": { "main": [[{ "node": "🔀 Colectar Todos los Datos", "type": "main", "index": 0 }]] },
+    "🔀 Colectar Todos los Datos": { "main": [[{ "node": "🛒 Eduzz: Crear Producto", "type": "main", "index": 0 }]] },
+    "🛒 Eduzz: Crear Producto": { "main": [[{ "node": "🛒 Monetizze: Crear Producto", "type": "main", "index": 0 }]] },
+    "🛒 Monetizze: Crear Producto": { "main": [[{ "node": "🗂️ Preparar Payload Hotmart", "type": "main", "index": 0 }]] },
+    "🗂️ Preparar Payload Hotmart": { "main": [[{ "node": "🔑 Obtener Token Hotmart", "type": "main", "index": 0 }]] },
+    "🔑 Obtener Token Hotmart": { "main": [[{ "node": "🔀 Merge Token con Params", "type": "main", "index": 0 }]] },
+    "🔀 Merge Token con Params": { "main": [[{ "node": "🛒 Crear Producto en Hotmart", "type": "main", "index": 0 }]] },
+    "🛒 Crear Producto en Hotmart": { "main": [[{ "node": "📋 Preparar Actualización", "type": "main", "index": 0 }]] },
+    "📋 Preparar Actualización": { "main": [[{ "node": "📊 Actualizar Fila Pendiente", "type": "main", "index": 0 }]] },
+    "📊 Actualizar Fila Pendiente": { "main": [[{ "node": "✅ Resumen Final", "type": "main", "index": 0 }]] }
   },
   "settings": {
     "executionOrder": "v1",
@@ -389,8 +545,8 @@
     "errorWorkflow": ""
   },
   "staticData": null,
-  "tags": ["infoproducto", "m6", "deepseek", "hotmart", "google-drive", "sheets-driven"],
+  "tags": ["infoproducto", "m6", "deepseek", "hotmart", "eduzz", "monetizze", "leonardo", "google-drive"],
   "triggerCount": 1,
   "updatedAt": "2026-05-26T00:00:00.000Z",
-  "versionId": "m6-infoproducto-factory-v2"
+  "versionId": "m6-infoproducto-factory-v3"
 }
