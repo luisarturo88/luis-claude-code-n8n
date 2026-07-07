@@ -1,0 +1,287 @@
+{
+  "name": "PLANTILLA MAESTRA VETERINARIA 2027",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 3
+            }
+          ]
+        }
+      },
+      "id": "trigger-cron",
+      "name": "Cron Trigger",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "notes": "Configurar según tabla de frecuencias: Grupo A (cada 3 días), Grupo B (cada 4 días), Grupo C (cada 6 días)"
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "sheetId": "={{ $env.GOOGLE_SHEET_ID }}",
+        "range": "{{ $env.GOOGLE_SHEET_RANGE }}",
+        "options": {
+          "valueRenderMode": "UNFORMATTED_VALUE"
+        }
+      },
+      "id": "google-sheets-read",
+      "name": "Google Sheets - Leer Tema",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [450, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "TU_CREDENTIAL_ID",
+          "name": "Google Sheets OAuth2"
+        }
+      },
+      "notes": "Actualizar con Sheet ID y Range (pestaña) específicos del nicho"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Filtrar solo filas con estado PENDIENTE o SIN_USAR\nconst rows = $input.all();\nconst pendingRow = rows.find(row => \n  row.json.ESTADO === 'PENDIENTE' || \n  row.json.ESTADO === 'SIN_USAR' ||\n  row.json.ESTADO === 'PTE'\n);\n\nif (!pendingRow) {\n  throw new Error('No hay temas pendientes en esta hoja');\n}\n\nreturn [pendingRow];"
+      },
+      "id": "code-filter-pending",
+      "name": "Code - Filtrar Pendientes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300],
+      "notes": "Filtra solo temas no procesados. Si no hay, el flujo se detiene."
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "sheetId": "={{ $env.GOOGLE_SHEET_ID }}",
+        "range": "{{ $env.GOOGLE_SHEET_RANGE }}",
+        "columns": {
+          "ESTADO": "EN_PROCESO"
+        },
+        "matchBy": "ID_UNICO",
+        "options": {}
+      },
+      "id": "google-sheets-mark-processing",
+      "name": "Google Sheets - Marcar EN_PROCESO",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [850, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "TU_CREDENTIAL_ID",
+          "name": "Google Sheets OAuth2"
+        }
+      },
+      "notes": "Bloquea el tema para evitar duplicados entre flujos concurrentes"
+    },
+    {
+      "parameters": {
+        "agent": "openAiAgent",
+        "promptType": "define",
+        "systemMessage": "Eres un Médico Veterinario experto en redacción científica y divulgación médica de alto nivel. Tu tarea es generar artículos profesionales para el blog \"Veterinario Luis García\".\n\n## REQUISITOS OBLIGATORIOS DE ESTRUCTURA Y CONTENIDO:\n\n1. **CASO CLÍNICO INTEGRADO**: \n   - Inicia o intercala en el artículo un caso clínico real o hipotético detallado.\n   - Ejemplo: \"Caso Clínico: Paciente canino, Macho, 5 años, raza Labrador, presentado con cuadro de vómitos crónicos y pérdida de peso...\"\n   - Describe signos clínicos, diagnóstico diferencial, pruebas realizadas y tratamiento.\n\n2. **GLOSARIO MÉDICO VETERINARIO**:\n   - Debes usar términos técnicos profesionales (ej: *nefropatía, prurito, disnea, profilaxis, etiología, pronóstico reservado, hemograma, bioquímica sérica*).\n   - INMEDIATAMENTE después de usar el término, explica su significado entre paréntesis o en una frase accesible para el dueño de la mascota.\n   - Ejemplo: \"El paciente presenta *poliuria* (aumento anormal en la producción de orina) y *polidipsia* (sed excesiva y aumento en la ingesta de agua).\"\n\n3. **BIBLIOGRAFÍA CIENTÍFICA APA**:\n   - Intercala citas de libros y revistas veterinarias reales dentro de los párrafos.\n   - Formato: \"(Apellido, Año)\" o \"Según la WSAVA (2023)...\"\n   - Libros de referencia obligatoria: \n     - *Manual de Medicina Interna Veterinaria* (Nelson & Couto)\n     - *Enfermedades Infecciosas en Perros y Gatos* (Greene)\n     - *Tratado de Medicina Felina* (August)\n     - *Merck Veterinary Manual*\n   - Al final del artículo, incluye una sección \"📚 Bibliografía Consultada\" con 3-5 referencias completas en formato APA.\n\n4. **MONETIZACIÓN Y AFILIADOS**:\n   - Inserta estratégicamente 2-3 recomendaciones de productos de Amazon/Hotmart relacionados con el tema.\n   - Usa un tono de recomendación profesional: \"Para el manejo en casa, recomendamos [Producto] que ayuda a [beneficio clínico].\"\n   - Incluye el enlace de afiliado correspondiente (usar datos de la hoja de afiliados).\n\n5. **OPTIMIZACIÓN SEO, AEO Y RICH SNIPPETS**:\n   - Usa etiquetas HTML: <h1>, <h2>, <h3> correctamente jerarquizadas.\n   - Incluye una sección de \"❓ Preguntas Frecuentes (FAQ)\" al final con 3-5 preguntas relevantes.\n   - Genera un bloque JSON-LD de tipo `Article` o `FAQPage` para rich snippets (insertar al final antes de cerrar body).\n   - Longitud: 1500-2500 palabras mínimo.\n\n6. **TONO HUMANO (Human Level)**:\n   - Escribe con empatía, como si estuvieras hablando con un dueño preocupado pero informado.\n   - Evita frases robóticas como \"En conclusión\", \"Es importante destacar\". Usa transiciones naturales.\n   - Usa storytelling en el caso clínico para generar conexión emocional.\n\n7. **LLAMADO A LA ACCIÓN - COMUNIDAD WHATSAPP**:\n   - AL FINAL DEL ARTÍCULO, inserta este bloque destacado:\n   \n   ---\n   🩺 **¿Necesitas orientación veterinaria personalizada?**\n   Únete a nuestra **Comunidad Exclusiva de WhatsApp** donde compartimos casos, consejos y respondemos dudas en tiempo real.\n   👉 **[HAZ CLIC AQUÍ PARA UNIRTE](https://chat.whatsapp.com/IkpYnlrPyEx8Y2NTyaFB6P)**\n   ---\n\n8. **IMÁGENES**:\n   - Sugiere 2-3 imágenes temáticas con descripciones ALT optimizadas para SEO.\n   - Si el flujo tiene nodo de imagen (Pexels/Pixabay), asegura que el prompt de búsqueda use términos veterinarios precisos.\n\n## FORMATO DE SALIDA:\n- El artículo debe estar en HTML limpio, listo para publicar en Blogger.\n- No incluyas markdown (```) alrededor del HTML.\n- Asegúrate de que el título sea atractivo y contenga palabras clave principales.\n\n## NOTA CRÍTICA:\nSi el tema es sobre una patología, SIEMPRE menciona cuándo es una emergencia veterinaria que requiere atención inmediata.",
+        "batching": true
+      },
+      "id": "ai-agent-writer",
+      "name": "AI Agent - Redactor Veterinario",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [1050, 300],
+      "notes": "NODO CRÍTICO: Este prompt garantiza contenido con nivel clínico, monetización y conversión"
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {
+          "temperature": 0.7,
+          "maxTokens": 4000
+        }
+      },
+      "id": "openai-model",
+      "name": "OpenAI Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChat.openAi",
+      "typeVersion": 1,
+      "position": [1050, 500],
+      "credentials": {
+        "openAiApi": {
+          "id": "TU_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "blogId": "2772493032989228627",
+        "postStatus": "draft",
+        "title": "={{ $json.TITULO }}",
+        "content": "={{ $json.output }}",
+        "options": {
+          "labels": ["veterinaria", "mascotas", "salud animal"]
+        }
+      },
+      "id": "blogger-publish",
+      "name": "Blogger - Publicar Artículo",
+      "type": "n8n-nodes-base.blogger",
+      "typeVersion": 1,
+      "position": [1250, 300],
+      "credentials": {
+        "bloggerOAuth2Api": {
+          "id": "TU_BLOGGER_CREDENTIAL_ID",
+          "name": "Blogger OAuth2"
+        }
+      },
+      "notes": "Blog ID fijo: 2772493032989228627 (veterinarioluis.com). Estado inicial: BORRADOR para revisión"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "sheetId": "={{ $env.GOOGLE_SHEET_ID }}",
+        "range": "{{ $env.GOOGLE_SHEET_RANGE }}",
+        "columns": {
+          "ESTADO": "PUBLICADO",
+          "URL_BLOGGER": "={{ $json.url }}",
+          "FECHA_PUBLICACION": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}"
+        },
+        "matchBy": "ID_UNICO",
+        "options": {}
+      },
+      "id": "google-sheets-mark-published",
+      "name": "Google Sheets - Marcar PUBLICADO",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [1450, 300],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "TU_CREDENTIAL_ID",
+          "name": "Google Sheets OAuth2"
+        }
+      },
+      "notes": "Registra URL y fecha de publicación. Estado final: PUBLICADO"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Manejo de errores: si algo falla, marcar como ERROR en la hoja\ntry {\n  return $input.all();\n} catch (error) {\n  // Aquí iría lógica para actualizar estado a ERROR\n  throw error;\n}"
+      },
+      "id": "code-error-handler",
+      "name": "Code - Manejo Errores",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1450, 500],
+      "alwaysOutputData": true,
+      "notes": "Captura errores y actualiza estado en Google Sheets a ERROR para revisión manual"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Cron Trigger": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets - Leer Tema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets - Leer Tema": {
+      "main": [
+        [
+          {
+            "node": "Code - Filtrar Pendientes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code - Filtrar Pendientes": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets - Marcar EN_PROCESO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets - Marcar EN_PROCESO": {
+      "main": [
+        [
+          {
+            "node": "AI Agent - Redactor Veterinario",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent - Redactor Veterinario": {
+      "main": [
+        [
+          {
+            "node": "Blogger - Publicar Artículo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Blogger - Publicar Artículo": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets - Marcar PUBLICADO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent - Redactor Veterinario",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "plantilla-v1-2027",
+  "meta": {
+    "templateCategory": "veterinaria",
+    "description": "Plantilla maestra para flujos veterinarios con sistema anti-duplicados, contenido clínico, monetización y conversión a WhatsApp",
+    "requiredCredentials": [
+      "Google Sheets OAuth2",
+      "Blogger OAuth2",
+      "OpenAI API"
+    ],
+    "environmentVariables": [
+      "GOOGLE_SHEET_ID",
+      "GOOGLE_SHEET_RANGE"
+    ]
+  },
+  "tags": [
+    {
+      "name": "veterinaria"
+    },
+    {
+      "name": "blog"
+    },
+    {
+      "name": "automatizacion"
+    }
+  ]
+}
