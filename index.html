@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Solicita una cita veterinaria con el Dr. Luis Arturo García de forma rápida y directa por WhatsApp."
+    />
+    <meta name="theme-color" content="#173f37" />
+    <title>Dr. Luis Arturo García | Medicina Veterinaria</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#reserva">Ir al formulario de reserva</a>
+
+    <header class="site-header">
+      <a class="brand" href="#inicio" aria-label="Ir al inicio">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" role="img">
+            <path d="M24 39c-6.8 0-13-4.2-13-10.2 0-4.5 3.4-7.6 7.6-7.6 2.2 0 4.2 1 5.4 2.6 1.2-1.6 3.2-2.6 5.4-2.6 4.2 0 7.6 3.1 7.6 7.6C37 34.8 30.8 39 24 39Z" />
+            <circle cx="13.5" cy="15" r="4.5" />
+            <circle cx="23" cy="10.5" r="4.5" />
+            <circle cx="34.5" cy="15" r="4.5" />
+          </svg>
+        </span>
+        <span>
+          <strong>Dr. Luis Arturo García</strong>
+          <small>Médico Veterinario</small>
+        </span>
+      </a>
+
+      <nav aria-label="Navegación principal">
+        <a href="#servicios">Servicios</a>
+        <a href="#reserva">Reservar</a>
+        <button class="header-emergency" type="button" data-open-emergency>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 3 2.8 19h18.4L12 3Zm0 5.5v5m0 2.5v.5" />
+          </svg>
+          Emergencia
+        </button>
+      </nav>
+    </header>
+
+    <main id="inicio">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy reveal">
+          <p class="eyebrow"><span></span> Atención veterinaria cercana</p>
+          <h1 id="hero-title">Cuidamos su salud.<br /><em>Acompañamos su vida.</em></h1>
+          <p class="hero-intro">
+            Consulta, prevención y seguimiento para perros y gatos, con atención profesional y un trato tranquilo para cada familia.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#reserva">
+              Solicitar una cita
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6" /></svg>
+            </a>
+            <button class="button button-quiet" type="button" data-open-emergency>
+              ¿Es una emergencia?
+            </button>
+          </div>
+          <div class="trust-line" aria-label="Información del servicio">
+            <span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>
+              Confirmación directa
+            </span>
+            <span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>
+              Atención personalizada
+            </span>
+          </div>
+        </div>
+
+        <div class="hero-art reveal" aria-hidden="true">
+          <div class="art-orbit orbit-one"></div>
+          <div class="art-orbit orbit-two"></div>
+          <div class="pet-portrait">
+            <svg viewBox="0 0 520 620">
+              <path class="portrait-bg" d="M72 497C18 421 27 283 94 178 164 69 284 28 391 92c109 65 139 211 88 332-50 119-143 180-252 170-66-6-120-39-155-97Z" />
+              <path class="dog-shadow" d="M119 490c49-85 109-125 180-120 73 4 127 47 151 129-69 53-253 65-331-9Z" />
+              <path class="dog-body" d="M173 475c15-78 41-119 87-130 62-15 112 26 124 132-54 42-156 45-211-2Z" />
+              <path class="dog-ear" d="M184 241c-49-16-75-2-75 30 0 44 51 105 87 107 15-34 14-100-12-137Zm184 2c45-22 74-11 78 21 5 42-39 107-77 114-18-33-24-96-1-135Z" />
+              <path class="dog-head" d="M182 262c25-76 133-83 179-17 38 55 24 145-13 184-42 44-122 47-166 0-39-42-46-111 0-167Z" />
+              <path class="dog-muzzle" d="M207 357c21-34 84-40 115-7 30 32 5 92-52 94-58 1-87-48-63-87Z" />
+              <path class="dog-eye" d="M210 318c9-10 27-10 37 0m49-1c9-10 27-10 37 0" />
+              <path class="dog-nose" d="M250 365c8-9 28-10 37-1 8 8-2 25-17 26-15 0-28-17-20-25Z" />
+              <path class="dog-smile" d="M270 389v13m0 0c-12 13-29 13-39 2m39-2c12 13 29 13 39 2" />
+              <path class="collar" d="M189 430c43 28 118 29 165-2l8 31c-47 34-132 35-182 3l9-32Z" />
+              <circle class="tag" cx="271" cy="466" r="24" />
+              <path class="tag-mark" d="M271 455v22m-11-11h22" />
+            </svg>
+          </div>
+          <div class="floating-note note-care">
+            <span class="note-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z" /></svg>
+            </span>
+            <span><strong>Bienestar primero</strong><small>Una atención sin prisas</small></span>
+          </div>
+          <div class="floating-note note-experience">
+            <strong>Atención</strong>
+            <small>con criterio y empatía</small>
+          </div>
+        </div>
+      </section>
+
+      <section class="services-section" id="servicios" aria-labelledby="services-title">
+        <div class="section-heading reveal">
+          <div>
+            <p class="eyebrow"><span></span> Servicios</p>
+            <h2 id="services-title">Lo esencial para su bienestar</h2>
+          </div>
+          <p>Selecciona un servicio para llevarlo directamente al formulario de reserva.</p>
+        </div>
+
+        <div class="service-list reveal">
+          <button class="service-card featured" type="button" data-service="Consulta general">
+            <span class="service-number">01</span>
+            <span class="service-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3v5a4 4 0 0 0 8 0V3M8 3v5m4 8a4 4 0 0 0 8 0v-3m-4 0h4" /></svg>
+            </span>
+            <span class="service-copy"><strong>Consulta general</strong><small>Evaluación clínica y orientación</small></span>
+            <span class="service-arrow">↗</span>
+          </button>
+          <button class="service-card" type="button" data-service="Vacunación">
+            <span class="service-number">02</span>
+            <span class="service-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 4.5 5 5M13 6l5 5M4 20l4.5-1 9-9-4-4-9 9L4 20Zm10.5-4.5 2 2M6 13l5 5" /></svg>
+            </span>
+            <span class="service-copy"><strong>Vacunación</strong><small>Protección y esquema preventivo</small></span>
+            <span class="service-arrow">↗</span>
+          </button>
+          <button class="service-card" type="button" data-service="Esterilización">
+            <span class="service-number">03</span>
+            <span class="service-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3v3m8-3v3M5 9h14M6 6h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Zm4 7h4m-2-2v4" /></svg>
+            </span>
+            <span class="service-copy"><strong>Esterilización</strong><small>Valoración para macho o hembra</small></span>
+            <span class="service-arrow">↗</span>
+          </button>
+          <button class="service-card" type="button" data-service="Exámenes de laboratorio">
+            <span class="service-number">04</span>
+            <span class="service-icon">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6m-5 0v6l-5 9a2 2 0 0 0 1.8 3h10.4a2 2 0 0 0 1.8-3l-5-9V3M8 15h8" /></svg>
+            </span>
+            <span class="service-copy"><strong>Laboratorio</strong><small>Apoyo diagnóstico y seguimiento</small></span>
+            <span class="service-arrow">↗</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="booking-section" id="reserva" aria-labelledby="booking-title">
+        <div class="booking-intro reveal">
+          <p class="eyebrow light"><span></span> Reserva</p>
+          <h2 id="booking-title">Cuéntanos sobre tu mascota</h2>
+          <p>Completa los datos y enviaremos la solicitud por WhatsApp. La cita queda agendada cuando el doctor confirme la disponibilidad.</p>
+          <div class="booking-steps">
+            <div><span>1</span><p><strong>Completa los datos</strong><small>Toma menos de dos minutos.</small></p></div>
+            <div><span>2</span><p><strong>Envía por WhatsApp</strong><small>Se prepara el mensaje automáticamente.</small></p></div>
+            <div><span>3</span><p><strong>Recibe confirmación</strong><small>El doctor valida fecha y hora.</small></p></div>
+          </div>
+        </div>
+
+        <form class="booking-form reveal" id="bookingForm" novalidate>
+          <div class="form-heading">
+            <span>Solicitud de cita</span>
+            <small>Los campos con * son obligatorios</small>
+          </div>
+
+          <fieldset class="service-selector">
+            <legend>Servicio *</legend>
+            <div class="radio-grid">
+              <label><input type="radio" name="service" value="Consulta general" required /><span>Consulta</span></label>
+              <label><input type="radio" name="service" value="Vacunación" /><span>Vacunación</span></label>
+              <label><input type="radio" name="service" value="Esterilización" /><span>Esterilización</span></label>
+              <label><input type="radio" name="service" value="Exámenes de laboratorio" /><span>Laboratorio</span></label>
+              <label><input type="radio" name="service" value="Desparasitación" /><span>Desparasitación</span></label>
+              <label><input type="radio" name="service" value="Otro servicio" /><span>Otro</span></label>
+            </div>
+            <p class="field-error" id="serviceError">Selecciona un servicio.</p>
+          </fieldset>
+
+          <div class="field-row">
+            <label class="field">
+              <span>Tu nombre *</span>
+              <input name="ownerName" type="text" autocomplete="name" placeholder="Nombre y apellido" required />
+              <small class="field-error">Ingresa tu nombre.</small>
+            </label>
+            <label class="field">
+              <span>Nombre de la mascota *</span>
+              <input name="petName" type="text" placeholder="¿Cómo se llama?" required />
+              <small class="field-error">Ingresa el nombre de tu mascota.</small>
+            </label>
+          </div>
+
+          <div class="field-row field-row-three">
+            <label class="field">
+              <span>Especie *</span>
+              <select name="species" required>
+                <option value="">Seleccionar</option>
+                <option>Perro</option>
+                <option>Gato</option>
+                <option>Otra</option>
+              </select>
+              <small class="field-error">Selecciona la especie.</small>
+            </label>
+            <label class="field">
+              <span>Raza</span>
+              <input name="breed" type="text" placeholder="Opcional" />
+            </label>
+            <label class="field">
+              <span>Edad</span>
+              <input name="petAge" type="text" placeholder="Ej. 3 años" />
+            </label>
+          </div>
+
+          <div class="field-row">
+            <label class="field">
+              <span>Fecha deseada *</span>
+              <input name="visitDate" type="date" required />
+              <small class="field-error">Elige una fecha válida.</small>
+            </label>
+            <label class="field">
+              <span>Última visita</span>
+              <input name="lastVisit" type="date" />
+            </label>
+          </div>
+
+          <label class="field">
+            <span>Notas o síntomas</span>
+            <textarea name="notes" rows="4" placeholder="Describe brevemente el motivo de la consulta"></textarea>
+          </label>
+
+          <div class="form-footer">
+            <p>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Zm-3-10 2 2 4-4" /></svg>
+              Tus datos solo se incluyen en el mensaje que envías al doctor.
+            </p>
+            <button class="button submit-button" type="submit">
+              <span>Continuar en WhatsApp</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 9.5 9.5 0 0 1-4-1l-5 1.5L4.5 16a8.5 8.5 0 1 1 16.5-4.5Z" /></svg>
+            </button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-brand">
+        <strong>Dr. Luis Arturo García</strong>
+        <span>Medicina veterinaria con criterio, respeto y cercanía.</span>
+      </div>
+      <a href="tel:+593980973781">+593 98 097 3781</a>
+      <span>Atención con cita previa</span>
+    </footer>
+
+    <dialog class="emergency-modal" id="emergencyModal" aria-labelledby="emergencyTitle">
+      <button class="modal-close" type="button" data-close-emergency aria-label="Cerrar ventana">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+      </button>
+      <div class="emergency-badge" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 3 2.8 19h18.4L12 3Zm0 5.5v5m0 2.5v.5" /></svg>
+      </div>
+      <p class="modal-kicker">Atención inmediata</p>
+      <h2 id="emergencyTitle">¿Tu mascota presenta una emergencia?</h2>
+      <p class="modal-intro">No completes el formulario si observas uno o más de estos signos:</p>
+      <ul class="symptom-list">
+        <li>Dificultad severa para respirar</li>
+        <li>Convulsiones o pérdida de conciencia</li>
+        <li>Sangrado abundante</li>
+        <li>Atropello o golpe fuerte</li>
+        <li>Ingesta de veneno o tóxicos</li>
+        <li>Hinchazón abdominal repentina</li>
+      </ul>
+      <div class="emergency-actions">
+        <a class="button emergency-call" href="tel:+593980973781">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.8a2 2 0 0 1-.4 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z" /></svg>
+          Llamar ahora
+        </a>
+        <a class="button emergency-whatsapp" href="https://wa.me/593980973781?text=EMERGENCIA%20VETERINARIA%3A%20Necesito%20ayuda%20inmediata." target="_blank" rel="noopener">
+          Enviar mensaje urgente
+        </a>
+      </div>
+      <button class="not-urgent" type="button" data-close-emergency>No es urgente, volver a la reserva</button>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="script.js"></script>
+  </body>
+</html>
