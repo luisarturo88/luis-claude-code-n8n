@@ -1,0 +1,2797 @@
+{
+  "workflow": {
+    "id": "aqJQo8AEmxH4euHZ",
+    "name": "🦦🩺 HURONES - Blog Automático (temas reales + imágenes + casos)",
+    "active": true,
+    "isArchived": false,
+    "versionId": "f31bf629-a954-4e84-bc10-8df845b73e2f",
+    "activeVersionId": "f31bf629-a954-4e84-bc10-8df845b73e2f",
+    "triggerCount": 1,
+    "createdAt": "2026-05-31T02:49:10.168Z",
+    "updatedAt": "2026-10-29T17:58:38.056Z",
+    "settings": {
+      "executionOrder": "v1",
+      "binaryMode": "separate",
+      "timeSavedMode": "fixed",
+      "callerPolicy": "workflowsFromSameOwner",
+      "availableInMCP": true,
+      "saveManualExecutions": true,
+      "saveExecutionProgress": true,
+      "timezone": "America/Guayaquil",
+      "errorWorkflow": "OMQtnhGTyLkDjpIc"
+    },
+    "connections": {
+      "Workflow Configuration": {
+        "main": [
+          [
+            {
+              "node": "Read Articles from Sheet",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "📋 Leer Casos Clínicos",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read Articles from Sheet": {
+        "main": [
+          [
+            {
+              "node": "Filter",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Update Data": {
+        "main": [
+          [
+            {
+              "node": "Mark as Published",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Validated Content": {
+        "main": [
+          [
+            {
+              "node": "Prepare Blogger Content",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AI Agent": {
+        "main": [
+          [
+            {
+              "node": "Code VALIDATE",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Edit Fields": {
+        "main": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Lock Row": {
+        "main": [
+          [
+            {
+              "node": "Edit Fields",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Filter": {
+        "main": [
+          [
+            {
+              "node": "Limit",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Limit": {
+        "main": [
+          [
+            {
+              "node": "Lock Row",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code VALIDATE": {
+        "main": [
+          [
+            {
+              "node": "VALIDAR HTML",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Prepare Blogger Content": {
+        "main": [
+          [
+            {
+              "node": "📋 Leer Afiliados Hurones",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create a post": {
+        "main": [
+          [
+            {
+              "node": "Prepare Update Data",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "RESUMEN PARA LINKEN",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🖼️ Image Injector (Pexels)": {
+        "main": [
+          [
+            {
+              "node": "Merge2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📋 Leer Casos Clínicos": {
+        "main": [
+          [
+            {
+              "node": "Merge2",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Merge2": {
+        "main": [
+          [
+            {
+              "node": "🔧 Preparar casos para IA",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🔧 Preparar casos para IA": {
+        "main": [
+          [
+            {
+              "node": "Seleccionar y Adaptar Caso",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🔗 Fusionar Datos del Caso": {
+        "main": [
+          [
+            {
+              "node": "📌 Insertar Caso en Artículo",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📌 Insertar Caso en Artículo": {
+        "main": [
+          [
+            {
+              "node": "📲 Banner Club WhatsApp",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "⏱️ Wait (casos)": {
+        "main": [
+          [
+            {
+              "node": "Create a post",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "Workflow Configuration",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get a document in Google Docs": {
+        "ai_tool": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "DeepSeek Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Agente Catálogo Afiliados Hurones",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "DeepSeek Chat Model1": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "DeepSeek Chat Model2": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Seleccionar y Adaptar Caso",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "PROGRAMAR 2 ARTICULOS POR SEMANA A DISTINTA HORA": {
+        "main": [
+          [
+            {
+              "node": "⏱️ Wait (casos)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📋 Leer Afiliados Hurones": {
+        "main": [
+          [
+            {
+              "node": "🔍 Filtrar Afiliados Hurones",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🔍 Filtrar Afiliados Hurones": {
+        "main": [
+          [
+            {
+              "node": "Agente Catálogo Afiliados Hurones",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Agente Catálogo Afiliados Hurones": {
+        "main": [
+          [
+            {
+              "node": "🖼️ Image Injector (Pexels)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Seleccionar y Adaptar Caso": {
+        "main": [
+          [
+            {
+              "node": "🔗 Fusionar Datos del Caso",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🩹 Parsear JSON Basic LLM Chain": {
+        "main": [
+          [
+            {
+              "node": "Prepare Validated Content",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "RESUMEN PARA LINKEN": {
+        "main": [
+          [
+            {
+              "node": "Create a post1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📲 Banner Club WhatsApp": {
+        "main": [
+          [
+            {
+              "node": "PROGRAMAR 2 ARTICULOS POR SEMANA A DISTINTA HORA",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "DeepSeek Chat Model4": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "VALIDAR HTML",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "VALIDAR HTML": {
+        "main": [
+          [
+            {
+              "node": "🩹 Parsear JSON Basic LLM Chain",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "hours"
+              }
+            ]
+          }
+        },
+        "id": "6389b8cc-9667-4978-9295-81ce87263cb8",
+        "name": "Schedule Trigger",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          -272
+        ]
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "id-1",
+                "name": "statusColumn",
+                "value": "PUBLICADO",
+                "type": "string"
+              },
+              {
+                "id": "id-2",
+                "name": "publishedValue",
+                "value": "SI",
+                "type": "string"
+              },
+              {
+                "id": "id-3",
+                "name": "unpublishedValue",
+                "value": "NO",
+                "type": "string"
+              },
+              {
+                "id": "a66a00e9-41a9-4eaf-accb-9f32fd2803dd",
+                "name": "processingValue",
+                "value": "PROCESANDO",
+                "type": "string"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "6972b40e-d05c-42df-9a4f-50c84fc5075c",
+        "name": "Workflow Configuration",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          224,
+          -272
+        ]
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "1Zhb62do5CHDsU-zYiazCp6c25q4G0NdatOjg7UDGe04"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": 203741731,
+            "mode": "list",
+            "cachedResultName": "articulos blog hurones",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Zhb62do5CHDsU-zYiazCp6c25q4G0NdatOjg7UDGe04/edit#gid=203741731"
+          },
+          "options": {
+            "dataLocationOnSheet": {
+              "values": {
+                "rangeDefinition": "detectAutomatically"
+              }
+            }
+          }
+        },
+        "id": "cd64f23b-8849-4c6d-b9ab-0fbeb7d418f4",
+        "name": "Read Articles from Sheet",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          448,
+          -400
+        ]
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "id-1",
+                "name": "Published",
+                "type": "string",
+                "value": "SI"
+              },
+              {
+                "id": "id-2",
+                "name": "row_number",
+                "type": "number",
+                "value": "={{ $('⏱️ Wait (casos)').item.json.rowNumber }}"
+              },
+              {
+                "id": "f716eec9-f990-4e4a-8a74-fdbe3a4a537e",
+                "name": "FECHA_PUBLICACION",
+                "type": "string",
+                "value": "={{ $now }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "8048f86a-906c-46d0-a6fd-469582bf98bf",
+        "name": "Prepare Update Data",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          6336,
+          -368
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "documentId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "1Zhb62do5CHDsU-zYiazCp6c25q4G0NdatOjg7UDGe04"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": 203741731,
+            "mode": "list",
+            "cachedResultName": "articulos blog hurones",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Zhb62do5CHDsU-zYiazCp6c25q4G0NdatOjg7UDGe04/edit#gid=203741731"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "Estado": "publicado",
+              "row_number": "={{ $json.row_number }}"
+            },
+            "matchingColumns": [
+              "row_number"
+            ],
+            "schema": [
+              {
+                "id": "Keyword",
+                "displayName": "Keyword",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "Base keyword",
+                "displayName": "Base keyword",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "Volumen mensual",
+                "displayName": "Volumen mensual",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "Tipo",
+                "displayName": "Tipo",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "Prioridad",
+                "displayName": "Prioridad",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "Título artículo listo para publicar (2026)",
+                "displayName": "Título artículo listo para publicar (2026)",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "Longitud objetivo",
+                "displayName": "Longitud objetivo",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "Notas monetización / cluster",
+                "displayName": "Notas monetización / cluster",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "Estado",
+                "displayName": "Estado",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "row_number",
+                "displayName": "row_number",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "readOnly": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "id": "95adad06-682f-4671-896c-a0785a08b123",
+        "name": "Mark as Published",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          6560,
+          -368
+        ]
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "44ab9da4-7681-4699-a31d-82cd2b2fd359",
+                "name": "validatedHTML",
+                "type": "string",
+                "value": "={{ $json.parsedOutput.correctedHTML || '' }}"
+              },
+              {
+                "id": "id-5",
+                "name": "rowNumber",
+                "type": "number",
+                "value": "={{ $('Lock Row').item.json.row_number }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "fef24dcc-f5a3-4127-aeff-46e2f26eceda",
+        "name": "Prepare Validated Content",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          2720,
+          -400
+        ]
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=TEMA / TÍTULO DEL ARTÍCULO:\n{{ $('Edit Fields').item.json.TEMA_ARTICULO }}\n\nKEYWORD PRINCIPAL:\n{{ $('Edit Fields').item.json.KEYWORD_PRINCIPAL }}\n\nKEYWORD SECUNDARIA:\n{{ $('Edit Fields').item.json.KEYWORD_SECUNDARIA }}\n\nTIPO DE CONTENIDO (Pilar = guía extensa / Cluster = artículo específico):\n{{ $('Edit Fields').item.json.TIPO_CONTENIDO }}\n\nLONGITUD OBJETIVO (palabras):\n{{ $('Edit Fields').item.json.LONGITUD_OBJETIVO }}\n\nNOTAS DE MONETIZACIÓN (si aplica, integra 1-2 CTA naturales sobre esto):\n{{ $('Edit Fields').item.json.NOTAS_MONETIZACION }}\n\n==================================================\nTAREA\n\nRedacta un artículo completo en HTML sobre hurones domésticos (Mustela putorius furo), dirigido a dueños de hurones en español (España y Latinoamérica), siguiendo exactamente el TEMA/TÍTULO indicado arriba.\n\n**INSTRUCCIÓN OBLIGATORIA - USO DEL GLOSARIO VETERINARIO GENERAL:**\nIntegra entre 3 y 5 términos médicos propios de la medicina de hurones relacionados con el tema (por ejemplo insulinoma, enfermedad adrenal, sialorrea) y explica cada uno de forma sencilla para el dueño.\n\n==================================================\nINICIO DEL ARTÍCULO\n\nPRIMER PÁRRAFO:\n- Incluye la keyword principal de forma natural.\n- Describe el problema o duda real que tiene el dueño de un hurón sobre este tema.\n- Lenguaje natural y cercano, como si hablaras con un amigo dueño de hurón.\n\nSEGUNDO PÁRRAFO:\n- Respuesta directa y práctica a la duda planteada.\n\n==================================================\nDESARROLLO\n\n- Usa <h2> para las secciones principales (mínimo 5-7 según el tema).\n- Cada <h2> con mínimo 3-4 párrafos de valor práctico.\n- Usa <h3> para sub-puntos, señales, pasos o comparaciones.\n- Explica siempre los términos médicos/técnicos en el mismo párrafo donde aparecen.\n\nSECCIONES TÍPICAS A CONSIDERAR SEGÚN EL TEMA (adapta según corresponda, no todas aplican siempre):\n<h2>Qué es y por qué ocurre / importa</h2>\n<h2>Señales y síntomas que debes reconocer</h2>\n<h2>Qué hacer si lo notas en tu hurón</h2>\n<h2>Cuándo es una emergencia y debes ir al veterinario YA</h2>\n<h2>Cómo prevenirlo en el día a día</h2>\n<h2>Mitos y verdades sobre este tema</h2>\n<h2>Preguntas frecuentes</h2>\n\n==================================================\nGLOSARIO Y CITAS (OBLIGATORIO)\n\n- Explica en el texto al menos 3-4 términos técnicos propios de hurones (ej. insulinoma, enfermedad adrenal, esplenomegalia, digestión rápida por tracto corto, etc.).\n- Cita al menos 3 fuentes en formato APA (Autor, Año) dentro de los párrafos, usando referencias creíbles de medicina de animales exóticos (ej. Fox, 2014 - Biology and Diseases of the Ferret; guías de la AEMV - Association of Exotic Mammal Veterinarians). Al final agrega sección \"Referencias Bibliográficas\" en formato APA completo.\n\n\n==================================================\nFAQ Y SEO\n\n- Sección de Preguntas Frecuentes (5-7) al final, en formato <h2>Preguntas Frecuentes</h2> con cada pregunta en <h3> y respuesta en <p>.\n- Usa la keyword principal en el primer párrafo y de forma natural a lo largo del texto (sin forzar repetición).\n- Longitud mínima 1500 palabras (o la indicada en LONGITUD OBJETIVO si es mayor).\n\n==================================================\nREGLAS CRÍTICAS\n\n- NO cambies el tema del artículo.\n- NO hables de otras especies como tema principal (bovinos, perros, gatos, etc.) -- solo hurones. Pueden mencionarse otras mascotas solo de forma incidental (ej. convivencia con perros/gatos en casa).\n- NO uses <h1>, <head>, <title>, <html>, <body>, <meta>, <style>, <script>, <!DOCTYPE>.\n- NO repitas ideas ni generalices.\n\n==================================================\nSALIDA\n\nCIERRE OBLIGATORIO:\n- Nunca dejes una frase a medias ni una tabla/<ul>/<h2> abierta.\n- Si te estás quedando sin espacio, termina el apartado actual en 2 frases, cierra etiquetas y pasa a <h2>Preguntas Frecuentes</h2> (5 preguntas) + Referencias.\n- Longitud máxima real: 1800 palabras. Prefiere un artículo completo corto a uno largo cortado.\n- Última línea del HTML debe ser un tag de cierre (</p>, </ol>, </div> o </h2>), nunca texto suelto.\n\nSolo HTML limpio del contenido. Sin explicaciones fuera del HTML.",
+          "options": {
+            "systemMessage": "Eres el Dr. Luis Arturo García A., Médico Veterinario, especializado también en mascotas exóticas y de compañía no convencionales, con experiencia clínica real en el manejo de hurones (Mustela putorius furo).\n\nTu función es escribir artículos educativos, prácticos y confiables sobre el cuidado, la salud y el comportamiento de hurones domésticos, dirigidos a dueños actuales o futuros de hurones (principiantes e intermedios), en español claro y cercano.\n\n==================================================\nREGLA PRINCIPAL\n\nNO debes crear el tema por tu cuenta: desarrolla exactamente el TEMA_ARTICULO recibido, usando los SUBTEMAS como estructura del artículo.\n\nCLÁUSULA DE PUREZA DE NICHO (E-E-A-T HURONES):\nEste artículo es EXCLUSIVAMENTE sobre hurones. PROHIBIDO mencionar bovinos, ganado, perros, gatos u otras especies como tema principal (pueden mencionarse solo de forma incidental, ej. para advertir sobre convivencia con otras mascotas). PROHIBIDO hablar de agricultura, ganadería o fincas. Todos los casos clínicos, ejemplos y consejos deben ser sobre hurones.\n\n==================================================\nCONTENIDO OBLIGATORIO\n\n1. CASO CLÍNICO: incluye al menos 1 caso clínico real o hipotético de un hurón (con nombre ficticio), narrado en primera persona, integrado de forma natural en el cuerpo del artículo (no como sección aparte al final). Debe incluir: presentación del paciente (edad, sexo, si está esterilizado), motivo de consulta, hallazgos, diagnóstico, tratamiento y evolución.\n\n2. GLOSARIO EN EL TEXTO: usa y explica términos técnicos propios de la medicina de hurones dentro de los párrafos (ej. insulinoma, enfermedad adrenal, adrenalitis, esplenomegalia, epizoótica, digestión rápida por tracto corto, etc.), siempre acompañados de una explicación simple entre paréntesis o en la misma frase.\n\n3. CITAS BIBLIOGRÁFICAS APA: cita al menos 3 fuentes en formato APA (Autor, Año) DENTRO de los párrafos (introducción, cuerpo y conclusión), usando referencias creíbles de medicina de animales exóticos (ej. \"Según Fox (2014) en Biology and Diseases of the Ferret...\" o \"De acuerdo con la guía de la AEMV - Association of Exotic Mammal Veterinarians...\"). Al final agrega una sección \"Referencias Bibliográficas\" completa en formato APA.\n\n4. COMUNIDAD DE WHATSAPP: incluye, de forma atractiva con emojis, un llamado a unirse a la comunidad oficial de WhatsApp del Dr. Luis Arturo García: 👉 Únete a nuestra Comunidad de WhatsApp Veterinaria: https://chat.whatsapp.com/IkpYnlrPyEx8Y2NTyaFB6P\n\n5. AFILIADOS: integra 1-2 CTA naturales y útiles sobre productos recomendados para hurones (jaulas, camas tipo hamaca, arena, alimento específico para hurones, suplementos), sin inventar marcas ni enlaces falsos, en formato de recomendación general.\n\n6. SEO Y ESTRUCTURA:\n   - <h2> y <h3> jerarquizados correctamente\n   - Sección de Preguntas Frecuentes (5-7) al final\n   - Marcado JSON-LD para FAQPage\n   - Mínimo 1500 palabras\n   - Meta descripción optimizada al inicio (como comentario HTML o campo aparte si se pide)\n\n==================================================\nESTILO DE ESCRITURA HUMANIZADO (aplica en todo el texto, sin bajar el nivel clínico exigido arriba):\n- Tono conversacional, cálido y cercano, como si le escribieras a un amigo dueño de hurón.\n- Varía la longitud de las frases: mezcla frases cortas con otras más largas.\n- Usa pausas y respiraciones naturales (comas, guiones, \"sin embargo...\", \"pues bien...\").\n- Vocabulario sencillo con ejemplos concretos; evita sonar como enciclopedia.\n- Incluye mini-anécdotas o imágenes mentales cuando ayuden a explicar una idea.\n- Rompe la perfección gramatical de vez en cuando (frases sueltas, coloquialismos leves) sin perder profesionalismo.\n- Haz que el texto respire: párrafos cortos, lectura fluida.\n- No repitas siempre la misma estructura de frase.\n- No abuses de tecnicismos o anglicismos forzados; cuando uses un término médico, explícalo de inmediato.\n- No suenes como una IA que responde mecánicamente ni uses frases robóticas de relleno (\"en conclusión\", \"en resumen\", \"es importante destacar que\").\n\n==================================================\nPROHIBIDO\n- Cambiar el tema o el nicho (hurones).\n- Mezclar con contenido de ganado, agricultura o fincas.\n- Inventar datos clínicos falsos presentados como estudios reales.\n- Usar <h1>, <head>, <title>, <html>, <body>, <meta>, <style>, <script>, <!DOCTYPE>.\n\nSALIDA: solo HTML limpio del contenido, sin explicaciones fuera del HTML."
+          }
+        },
+        "id": "81544b50-8ee4-4135-8b84-41924d1f6f2f",
+        "name": "AI Agent",
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          1568,
+          -400
+        ]
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "3de7613a-48e5-4610-9d73-9841ad5fee6e",
+                "name": "ESTADO_PUBLICACION",
+                "type": "string",
+                "value": "PROCESANDO"
+              },
+              {
+                "id": "dc150e26-dbf6-46e3-aaf1-81486933ed80",
+                "name": "row_number",
+                "type": "number",
+                "value": "={{ $json.row_number }}"
+              },
+              {
+                "id": "hu-1",
+                "name": "TEMA_ARTICULO",
+                "type": "string",
+                "value": "={{ $('Read Articles from Sheet').item.json['Título artículo listo para publicar (2026)'] }}"
+              },
+              {
+                "id": "hu-2",
+                "name": "KEYWORD_PRINCIPAL",
+                "type": "string",
+                "value": "={{ $('Read Articles from Sheet').item.json['Base keyword'] }}"
+              },
+              {
+                "id": "hu-3",
+                "name": "KEYWORD_SECUNDARIA",
+                "type": "string",
+                "value": "={{ $('Read Articles from Sheet').item.json['Base keyword'] }}"
+              },
+              {
+                "id": "hu-4",
+                "name": "LONGITUD_OBJETIVO",
+                "type": "string",
+                "value": "={{ $('Read Articles from Sheet').item.json['Longitud objetivo'] }}"
+              },
+              {
+                "id": "hu-5",
+                "name": "NOTAS_MONETIZACION",
+                "type": "string",
+                "value": "={{ $('Read Articles from Sheet').item.json['Notas monetización / cluster'] }}"
+              },
+              {
+                "id": "hu-6",
+                "name": "TIPO_CONTENIDO",
+                "type": "string",
+                "value": "={{ $('Read Articles from Sheet').item.json.Tipo }}"
+              },
+              {
+                "id": "7b0326eb-be70-43e9-a1af-0502f3a2d17d",
+                "name": "Prioridad",
+                "value": "={{ $('Read Articles from Sheet').item.json.Prioridad }}",
+                "type": "number"
+              }
+            ]
+          },
+          "includeOtherFields": true,
+          "options": {
+            "ignoreConversionErrors": false,
+            "dotNotation": false
+          }
+        },
+        "id": "ab4fb11b-749f-4ff7-8f7d-8a6c719147ac",
+        "name": "Edit Fields",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          1344,
+          -400
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "documentId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "1Zhb62do5CHDsU-zYiazCp6c25q4G0NdatOjg7UDGe04"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": 203741731,
+            "mode": "list",
+            "cachedResultName": "articulos blog hurones",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Zhb62do5CHDsU-zYiazCp6c25q4G0NdatOjg7UDGe04/edit#gid=203741731"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "row_number": "={{ $json.row_number }}",
+              "Estado": "PROCESANDO"
+            },
+            "matchingColumns": [
+              "row_number"
+            ],
+            "schema": [
+              {
+                "id": "Keyword",
+                "displayName": "Keyword",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "Base keyword",
+                "displayName": "Base keyword",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "Volumen mensual",
+                "displayName": "Volumen mensual",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "Tipo",
+                "displayName": "Tipo",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "Prioridad",
+                "displayName": "Prioridad",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "Título artículo listo para publicar (2026)",
+                "displayName": "Título artículo listo para publicar (2026)",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "Longitud objetivo",
+                "displayName": "Longitud objetivo",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "Notas monetización / cluster",
+                "displayName": "Notas monetización / cluster",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": true
+              },
+              {
+                "id": "Estado",
+                "displayName": "Estado",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "row_number",
+                "displayName": "row_number",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "readOnly": true,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "id": "0cd02ce7-174c-45b8-8a52-3d723ed4f165",
+        "name": "Lock Row",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          1120,
+          -400
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "483e31db-1dd6-4a83-b8ca-df90f86d59c8",
+                "leftValue": "={{ $json.Estado }}",
+                "operator": {
+                  "type": "string",
+                  "operation": "notEquals"
+                },
+                "rightValue": "publicado"
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "be2dd00d-488f-418c-8145-bb9a19471578",
+        "name": "Filter",
+        "type": "n8n-nodes-base.filter",
+        "typeVersion": 2.3,
+        "position": [
+          672,
+          -400
+        ]
+      },
+      {
+        "parameters": {},
+        "id": "07b2adcd-9c21-4aac-8cf7-1a2b74bd9fc8",
+        "name": "Limit",
+        "type": "n8n-nodes-base.limit",
+        "typeVersion": 1,
+        "position": [
+          896,
+          -400
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "get",
+          "documentURL": "https://docs.google.com/document/d/1qNPE_sgu6XQR4cd_cNa-BIv9MoOwxT1jFKMu9vxDRzc/edit?usp=sharing"
+        },
+        "id": "90c4cd71-c5d0-467c-8a76-994d383ec095",
+        "name": "Get a document in Google Docs",
+        "type": "n8n-nodes-base.googleDocsTool",
+        "typeVersion": 2,
+        "position": [
+          1712,
+          -176
+        ],
+        "disabled": true
+      },
+      {
+        "parameters": {
+          "jsCode": "// Limpieza determinista del HTML para Blogger\nfunction cerrarEtiquetas(h) {\n  const vacias = /^(br|hr|img|input|meta|link|source|wbr|col)$/i;\n  const pila = [];\n  const salida = h.replace(/<(\\/?)([a-zA-Z][a-zA-Z0-9]*)\\b[^>]*?(\\/?)>/g, (m, cierre, tag, auto) => {\n    tag = tag.toLowerCase();\n    if (vacias.test(tag) || auto) return m;\n    if (!cierre) {\n      // un <li> o <p> nuevo cierra el anterior que quedó abierto\n      if ((tag === 'li' || tag === 'p') && pila[pila.length - 1] === tag) { pila.pop(); pila.push(tag); return `</${tag}>` + m; }\n      pila.push(tag); return m;\n    }\n    const i = pila.lastIndexOf(tag);\n    if (i === -1) return ''; // cierre huérfano\n    const abiertasDentro = pila.splice(i).reverse().slice(0, -1);\n    return abiertasDentro.map(t => `</${t}>`).join('') + m;\n  });\n  return salida + pila.reverse().map(t => `</${t}>`).join('');\n}\nfunction limpiarHTML(html) {\n  let h = String(html || '');\n  h = h.replace(/```(?:html|json)?/gi, '');\n  h = h.replace(/\\\\n/g, ' ').replace(/\\\\\"/g, '\"');\n  h = h.replace(/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F​-‍﻿�]/g, '');\n  h = h.replace(/<!DOCTYPE[^>]*>/gi, '').replace(/<\\/?(html|head|body|meta|title)\\b[^>]*>/gi, '');\n  h = h.replace(/<style[\\s\\S]*?<\\/style>/gi, '');\n  h = h.replace(/<script(?![^>]*application\\/ld\\+json)[^>]*>[\\s\\S]*?<\\/script>/gi, '');\n  h = h.replace(/<h1\\b([^>]*)>([\\s\\S]*?)<\\/h1>/gi, '<h2$1>$2</h2>');\n  h = h.replace(/\\*\\*([^*<>]+)\\*\\*/g, '<strong>$1</strong>');\n  h = h.replace(/(^|>)\\s*#{2,4}\\s+([^<]+)/g, '$1<h3>$2</h3>');\n  h = h.replace(/&amp;(nbsp|amp|quot|lt|gt|#\\d+);/g, '&$1;');\n  h = h.replace(/<[^>]+>/g, tag => tag.replace(/[“”„″]/g, '\"').replace(/[‘’]/g, \"'\"));\n  h = h.replace(/<p\\b[^>]*>\\s*(&nbsp;|<br\\s*\\/?>)?\\s*<\\/p>/gi, '');\n  h = cerrarEtiquetas(h);\n  return h.replace(/\\s+/g, ' ').trim();\n}\n// ============================================================\n// Code VALIDATE - limpia el HTML del artículo sin IA y prepara un resumen corto para el validador\n// ============================================================\nconst item = $input.first().json;\nlet html = item.output || item.text || item.response || item.html || '';\nif (!html && item.messages) {\n  const lastMsg = item.messages[item.messages.length - 1];\n  if (lastMsg && lastMsg.content) html = lastMsg.content;\n}\nif (!html || html.trim().length === 0) {\n  html = `<p style=\"color:#c0392b; font-weight:bold;\">⚠️ Error: No se pudo generar el contenido del artículo. Revisa la conexión con DeepSeek y el prompt del AI Agent.</p><p>Tema esperado: ${item.emailSubject || 'Sin título'}</p>`;\n}\nhtml = limpiarHTML(html);\n// El banner oficial del Club de Huroneros se inserta más adelante: se quitan los enlaces sueltos a WhatsApp\nhtml = html\n  .replace(/<a\\b[^>]*chat\\.whatsapp\\.com[^>]*>[\\s\\S]*?<\\/a>/gi, '')\n  .replace(/https?:\\/\\/chat\\.whatsapp\\.com\\/\\S+/gi, '')\n  .replace(/<p\\b[^>]*>[^<]*Comunidad de WhatsApp Veterinaria[\\s\\S]*?<\\/p>/gi, '');\nconst titulos = [...html.matchAll(/<h[23]\\b[^>]*>([\\s\\S]*?)<\\/h[23]>/gi)].map(m => m[1].replace(/<[^>]+>/g, '').trim());\nconst tieneFAQ = /preguntas\\s+frecuentes|faq/i.test(titulos.join(' '));\nconst palabras = html.replace(/<script[\\s\\S]*?<\\/script>/gi, ' ').replace(/<[^>]+>/g, ' ').split(/\\s+/).filter(Boolean).length;\nreturn [{ html, titulos: titulos.slice(0, 25), tieneFAQ, palabras }];"
+        },
+        "id": "317684cf-e51c-477d-88cf-b60990c81936",
+        "name": "Code VALIDATE",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1920,
+          -400
+        ]
+      },
+      {
+        "parameters": {
+          "assignments": {
+            "assignments": [
+              {
+                "id": "id-1",
+                "name": "emailSubject",
+                "value": "={{ $('Edit Fields').item.json.TEMA_ARTICULO }}",
+                "type": "string"
+              },
+              {
+                "id": "id-2",
+                "name": "emailBody",
+                "value": "={{ $('Prepare Validated Content').item.json.validatedHTML }}",
+                "type": "string"
+              },
+              {
+                "id": "id-3",
+                "name": "rowNumber",
+                "value": "={{ $('Lock Row').item.json.row_number }}",
+                "type": "number"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "b07b9a5c-6f1f-426d-8484-f74257c656c8",
+        "name": "Prepare Blogger Content",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          2944,
+          -400
+        ]
+      },
+      {
+        "parameters": {
+          "resource": "post",
+          "operation": "insert",
+          "postBlogId": "2171262240069038424",
+          "title": "={{ $json.emailSubject }}",
+          "content": "={{ $json.emailBody }}",
+          "postAdditionalFields": {
+            "labels": "={{ $json.CLUSTER || $json.emailSubject || '' }}",
+            "published": "={{ $json.fechaPublicacionISO }}"
+          }
+        },
+        "id": "2e4af738-c723-4648-94ae-8e3a94677a99",
+        "name": "Create a post",
+        "type": "@hienhoceo/n8n-nodes-blogger.blogger",
+        "typeVersion": 1,
+        "position": [
+          6112,
+          -272
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "// 🖼️ Image Injector (Pexels) - HURONES con alt dinámico según el artículo\nconst articleData = $('Prepare Blogger Content').first().json;\nlet html = articleData.emailBody || articleData.CONTENIDO || \"\";\nconst keyword = articleData.emailSubject || articleData.TEMA_ARTICULO || \"ferret pet\";\nconst tituloArticulo = articleData.emailSubject || articleData.TEMA_ARTICULO || \"Hurón\";\nlet enrichedHtml = html;\n\n// ====== FALLBACK: imágenes de hurones subidas a Blogger (URLs únicas) ======\nconst FALLBACK_IMAGES = [\n  {\n    src: 'https://blogger.googleusercontent.com/img/a/AVvXsEi7xNNNSJPtz6djoVM6Pj4tZbkoZdSxDJr1MTeH5pc_nZ2dsqa5ZMRh-ppHI6TC03aMr2Ns57OP6krhpG2TC-E_N9DrinYPOxHNtrAKtOwPFby8SlEeeWa0TOnD0yld9zp3NOe7KIwg9G1RW9NcrlSbr2RYNHVq3cFpF_tvTPt20Py4s5DKP1HcG7Dka9A'\n  },\n  {\n    src: 'https://blogger.googleusercontent.com/img/a/AVvXsEgmCJyIBBm4qP6fgOkMa4zBDJX-NgDvqzcL8dypmgJM0uclIrpvn21BSfMYwuDZI-wT0c7Lx36oPttvYXlJs2IzWAVsJaOA73Xr4RwTstcVyBqRpl-fe3AYObYNnP6Y-ZGNkITPMuI50I2XWCZhuCUlpLJ_Ki85jmTa59MtdN9F70mKNNAAZSq0B7FgJcc'\n  },\n  {\n    src: 'https://blogger.googleusercontent.com/img/a/AVvXsEgA-ex6jwIckVjCodjoMgyrRjItzxyKBjepzrYfldzpF0iObQ9X0D8HHmrnjOPPBro4rGDyjqSufmFogdqa4miABzEc-xUbIsiH3h06LXIn2UGUn1yZbe1WDVS0Oqep5aINN02MhXKl7wChfc6XX7ufbnQaBnnBgMIxHa6tCqHKjbNn8IQiEItUQf15uL4'\n  },\n  {\n    src: 'https://blogger.googleusercontent.com/img/a/AVvXsEijLjzqWsNIIsdHr4Xu6dLSAsp3-0i9I2sjgUwbiNmivszOTBhFUd2wbUEHYJhSleAUxf_-HCp74F8zqXmOw7zbpf2z_g869GggVzpOfL_GFI0ShkJ4R6HQAJs3XzY1SjA8O_gt9f1ilRY9h3HrP86v7cuIwA32kA2Dneuzhv4SHJRVFO-O8rLqo04mF4E'\n  },\n  {\n    src: 'https://blogger.googleusercontent.com/img/a/AVvXsEgs_juhDRJBjQKadyHXmTtLCHfubXuR5JY4dnrgQD2D-IkF8ymawVPqit_G87SLLdZI54g48ca1We-z6HnuHZVGgyJi2Ueb9Q3-btLFIGr_TRtX5W8X41_ij1Do2fy7X4AKd6eE4xcvOCSjUIOHBZcqpkqqiRdDjSlwERnZxPow_VX209nQ3tiReJp5F80'\n  }\n];\n\n// ====== Generador de HTML para una imagen con alt dinámico ======\nfunction makeImg(src, alt, photographer = 'Blogger', photographer_url = '') {\n  // Escapar comillas dobles en alt\n  const altEscaped = alt.replace(/\"/g, '');\n  return `<figure style=\"margin:24px 0;text-align:center\">\n    <img src=\"${src}\" alt=\"${altEscaped}\" style=\"max-width:100%;height:auto;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,.15)\" loading=\"lazy\"/>\n    <figcaption style=\"font-size:12px;color:#777;margin-top:6px\">Foto de ${photographer}${photographer_url ? ' en <a href=\"'+photographer_url+'\" target=\"_blank\" rel=\"nofollow\">'+photographer+'</a>' : ''}</figcaption>\n  </figure>`;\n}\n\n// ====== Sinónimos para buscar en Pexels ======\nconst searchTerms = [\n  'domestic ferret',\n  'ferret pet',\n  'ferret',\n  'mustela putorius furo',\n  'hurón doméstico',\n  'hurón',\n  'ferret playing',\n  'ferret sleeping'\n];\n\n// ====== Función para obtener imágenes de Pexels ======\nasync function fetchPexelsImages() {\n  const API_KEY = \"uM57jRMv7kYk0CiSJpecMFL5jN75D28QMJ0a1cU4XVhQdKgPZ2w2Me5r\";\n  const perPage = 3;\n  for (const term of searchTerms) {\n    try {\n      const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(term)}&per_page=${perPage}&orientation=landscape`;\n      const res = await fetch(url, { headers: { Authorization: API_KEY } });\n      if (!res.ok) continue;\n      const data = await res.json();\n      if (data.photos && data.photos.length > 0) {\n        const photos = data.photos.slice(0, 2);\n        return photos.map(p => ({\n          src: p.src.large2x || p.src.large,\n          alt: p.alt || term,\n          photographer: p.photographer || 'Pexels',\n          photographer_url: p.photographer_url || 'https://www.pexels.com'\n        }));\n      }\n    } catch (e) {\n      continue;\n    }\n  }\n  return null;\n}\n\n// ====== Insertar imagen en posición estratégica ======\nfunction insertImage(html, imgHtml, position = 'after_first_h2') {\n  if (position === 'after_first_h2') {\n    const idx = html.indexOf('</h2>');\n    if (idx !== -1) {\n      return html.slice(0, idx + 5) + imgHtml + html.slice(idx + 5);\n    } else {\n      return imgHtml + html;\n    }\n  } else if (position === 'after_second_h2') {\n    let idx = html.indexOf('</h2>');\n    if (idx !== -1) {\n      idx = html.indexOf('</h2>', idx + 1);\n      if (idx !== -1) {\n        return html.slice(0, idx + 5) + imgHtml + html.slice(idx + 5);\n      }\n    }\n    return insertImage(html, imgHtml, 'after_first_h2');\n  } else {\n    return insertImage(html, imgHtml, 'after_first_h2');\n  }\n}\n\n// ====== Construir alt dinámico basado en el título del artículo ======\nfunction generarAlt(tema) {\n  // Extraer palabras clave del título (máximo 5 palabras)\n  const palabras = tema.split(' ').slice(0, 5).join(' ');\n  // Frases predefinidas para dar contexto\n  const frases = [\n    `Hurón - ${palabras} (imagen ilustrativa)`,\n    `Hurón mostrando signos relacionados con ${palabras.toLowerCase()}`,\n    `Fotografía de un hurón en contexto de ${palabras.toLowerCase()}`\n  ];\n  // Elegir una aleatoriamente para variar\n  const idx = Math.floor(Math.random() * frases.length);\n  return frases[idx];\n}\n\n// ====== OBTENER IMÁGENES ======\nlet images = [];\ntry {\n  const pexelsImages = await fetchPexelsImages();\n  if (pexelsImages && pexelsImages.length > 0) {\n    images = pexelsImages;\n  } else {\n    // Fallback: usar imágenes de Blogger (elegir 2 aleatorias)\n    const shuffled = FALLBACK_IMAGES.sort(() => 0.5 - Math.random());\n    images = shuffled.slice(0, 2).map(img => ({\n      src: img.src,\n      alt: generarAlt(tituloArticulo), // 🔥 alt dinámico basado en el título\n      photographer: 'Blogger',\n      photographer_url: ''\n    }));\n  }\n} catch (e) {\n  const shuffled = FALLBACK_IMAGES.sort(() => 0.5 - Math.random());\n  images = shuffled.slice(0, 2).map(img => ({\n    src: img.src,\n    alt: generarAlt(tituloArticulo),\n    photographer: 'Blogger',\n    photographer_url: ''\n  }));\n}\n\n// Si las imágenes son de Pexels y su alt es genérico, mejoramos con el título\nimages = images.map(img => {\n  // Si el alt es muy corto o genérico, lo reemplazamos por uno más descriptivo\n  if (!img.alt || img.alt.length < 10 || img.alt.toLowerCase().includes('pexels')) {\n    img.alt = generarAlt(tituloArticulo);\n  }\n  return img;\n});\n\n// ====== INSERTAR IMÁGENES EN EL HTML ======\nif (images.length > 0) {\n  const img1Html = makeImg(images[0].src, images[0].alt, images[0].photographer, images[0].photographer_url);\n  enrichedHtml = insertImage(enrichedHtml, img1Html, 'after_first_h2');\n}\nif (images.length > 1) {\n  const img2Html = makeImg(images[1].src, images[1].alt, images[1].photographer, images[1].photographer_url);\n  enrichedHtml = insertImage(enrichedHtml, img2Html, 'after_second_h2');\n}\n\n// ====== INSERTAR CATÁLOGO DE AFILIADOS ======\nlet catalogoHtml = '';\ntry {\n  const agentOut = $('Agente Catálogo Afiliados Hurones').first()?.json;\n  let out = agentOut?.output || agentOut?.text || '';\n  if (typeof out !== 'string') out = '';\n  catalogoHtml = out.replace(/```html/gi, '').replace(/```/g, '').trim();\n} catch (e) {}\n\nif (catalogoHtml) {\n  enrichedHtml = enrichedHtml + '<hr style=\"margin:30px 0;border:0;border-top:1px solid #eee;\">' + catalogoHtml;\n}\n\n// ====== SALIDA ======\nreturn [{ json: { ...articleData, emailBody: enrichedHtml, CONTENIDO: enrichedHtml, imagesAdded: images.length } }];"
+        },
+        "id": "41578671-a769-4192-a308-b7d0bb1fb6c1",
+        "name": "🖼️ Image Injector (Pexels)",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          3968,
+          -400
+        ]
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "value": "1euIPpzZc8FG6zz1c6vR4m0uHAaAGeaEoDRaNg_ufriQ",
+            "mode": "id"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": 2099032251,
+            "mode": "list",
+            "cachedResultName": "CASOS QWEN",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1euIPpzZc8FG6zz1c6vR4m0uHAaAGeaEoDRaNg_ufriQ/edit#gid=2099032251"
+          },
+          "options": {}
+        },
+        "id": "7757fe62-fbb6-43a4-b2c2-2bff7243d194",
+        "name": "📋 Leer Casos Clínicos",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          3968,
+          -144
+        ]
+      },
+      {
+        "parameters": {},
+        "id": "92d7e2ae-bb37-4701-aad6-fcfa57990583",
+        "name": "Merge2",
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          4192,
+          -272
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "// ============================================================\n// FILTRAR CASOS RELEVANTES PARA HURONES (un solo artículo)\n// ============================================================\n\nconst allItems = $input.all().map(i => i.json);\n\n// --- Detectar el artículo (el primer elemento que tenga emailSubject o TITULO) ---\nlet article = allItems.find(item =>\n    (item.emailSubject || item.TITULO) && !item['Título (Narrativa)']\n);\n\n// Si no se encontró, intentar con cualquier elemento que tenga KEYWORD_PRINCIPAL\nif (!article) {\n    article = allItems.find(item =>\n        item.KEYWORD_PRINCIPAL && !item['Título (Narrativa)']\n    );\n}\n\n// Fallback: usar el primer elemento que no sea claramente un caso\nif (!article) {\n    article = allItems.find(item => !item.ID);\n}\n\n// Si no hay artículo, salir\nif (!article) {\n    return [];\n}\n\n// --- Detectar todos los casos clínicos ---\nconst allCases = allItems.filter(item =>\n    item.ID && item['Título (Narrativa)']\n);\n\n// Función para normalizar texto y buscar especies\nfunction contieneHurones(texto) {\n    if (!texto) return false;\n    const normalizado = texto\n        .normalize('NFD')\n        .replace(/[\\u0300-\\u036f]/g, '')\n        .toLowerCase();\n    return normalizado.includes('huron') || normalizado.includes('hurón');\n}\n\n// --- Filtrar SOLO casos de hurones ---\nconst casosHurones = allCases.filter(c => {\n    // Revisar campos clave donde pueda aparecer la especie\n    const campos = [\n        c['Título (Narrativa)'],\n        c['Motivo de consulta'],\n        c['Anamnesis'],\n        c['Exploración física'],\n        c['Diagnóstico definitivo'],\n        c['Especie'],\n        c['Animal'],\n        c['Raza'],\n        c['Palabras Clave (SEO)'],\n        c['Asignación a Artículo Base']\n    ].filter(Boolean);\n\n    // Si algún campo menciona \"hurón\", lo incluimos\n    return campos.some(campo => contieneHurones(campo));\n});\n\n// --- Filtrar adicionalmente: EXCLUIR casos que mencionen perros/gatos ---\nconst casosHuronesFiltrados = casosHurones.filter(c => {\n    const campos = [\n        c['Título (Narrativa)'],\n        c['Motivo de consulta'],\n        c['Anamnesis'],\n        c['Diagnóstico definitivo']\n    ].filter(Boolean);\n\n    // Si menciona perro o gato, lo excluimos (a menos que también mencione hurón)\n    const tienePerro = campos.some(t => /perro|canino|dog/i.test(t));\n    const tieneGato = campos.some(t => /gato|felino|cat/i.test(t));\n\n    // Permitimos solo si NO tiene perro/gato, o si tiene hurón Y también perro/gato (pero mejor priorizar hurón puro)\n    return !tienePerro && !tieneGato;\n});\n\n// Si no hay casos de hurones, devolvemos el artículo sin casos\nif (casosHuronesFiltrados.length === 0) {\n    return [{\n        json: {\n            ...article,\n            casosDisponibles: [],\n            totalCasosFiltrados: 0,\n            mensaje: 'No se encontraron casos clínicos de hurones para este tema.'\n        }\n    }];\n}\n\n// --- Filtrar casos por coincidencia con el TÍTULO del artículo ---\nconst tituloArticulo = (article.TITULO || article.emailSubject || '').toLowerCase();\nconst keywordPrincipal = (article.KEYWORD_PRINCIPAL || '').toLowerCase();\nconst cluster = (article.CLUSTER || '').toLowerCase();\nconst textoBusqueda = `${tituloArticulo} ${keywordPrincipal} ${cluster}`.trim();\n\nlet casosRelevantes = casosHuronesFiltrados;\n\nif (textoBusqueda) {\n    const palabras = textoBusqueda.split(/\\s+/).filter(p => p.length > 3);\n\n    casosRelevantes = casosHuronesFiltrados.filter(c => {\n        const textoCaso = [\n            c['Título (Narrativa)'],\n            c['Motivo de consulta'],\n            c['Anamnesis'],\n            c['Exploración física'],\n            c['Diagnóstico definitivo'],\n            c['Palabras Clave (SEO)']\n        ].filter(Boolean).join(' ').toLowerCase();\n\n        return palabras.some(p => textoCaso.includes(p));\n    });\n\n    // Si no hay coincidencias con palabras clave, tomar los primeros 5 hurones\n    if (casosRelevantes.length === 0) {\n        casosRelevantes = casosHuronesFiltrados.slice(0, 3);\n    }\n} else {\n    // Si no hay texto de búsqueda, tomar los primeros 5 hurones\n    casosRelevantes = casosHuronesFiltrados.slice(0, 3);\n}\n\n// Limitar a un máximo de 5 casos (para no saturar el prompt)\nif (casosRelevantes.length > 3) {\n    casosRelevantes = casosRelevantes.slice(0, 3);\n}\n\n// --- Construir el resumen de casos ---\nconst casesSummary = casosRelevantes.map(c => ({\n    ID: c.ID || '',\n    TITULO: c['Título (Narrativa)'] || '',\n    MOTIVO: c['Motivo de consulta'] || '',\n    ANAMNESIS: c['Anamnesis'] || '',\n    EXPLORACION: c['Exploración física'] || '',\n    PRUEBAS: c['Pruebas complementarias'] || '',\n    DIAGNOSTICO_DIF: c['Diagnóstico diferencial'] || '',\n    DIAGNOSTICO_DEF: c['Diagnóstico definitivo'] || '',\n    TRATAMIENTO: c['Tratamiento (con nexo al artículo)'] || '',\n    EVOLUCION: c['Evolución'] || '',\n    KEYWORDS: c['Palabras Clave (SEO)'] || '',\n    ASIGNACION: c['Asignación a Artículo Base'] || '',\n    ESTATUS: c['Estatus'] || '',\n    FICHA_VENTA: c['Ficha de venta'] || ''\n}));\n\n// Recorta cada campo de los casos para no inflar el prompt del agente de casos\nconst corto = (t, n = 300) => { t = String(t || ''); return t.length > n ? t.slice(0, n) + '…' : t; };\nfor (const c of casesSummary) for (const k of Object.keys(c)) c[k] = corto(c[k]);\n\n// --- Devolver UN SOLO resultado (el artículo enriquecido) ---\nreturn [{\n    json: {\n        ...article,\n        casosDisponibles: casesSummary,\n        totalCasosFiltrados: casesSummary.length,\n        mensaje: casesSummary.length > 0 ?\n            `Se encontraron ${casesSummary.length} casos clínicos de hurones para este tema.` :\n            'No se encontraron casos clínicos de hurones para este tema.'\n    }\n}];"
+        },
+        "id": "26c2d120-a887-4d42-8d9f-9da12bb905c5",
+        "name": "🔧 Preparar casos para IA",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          4416,
+          -272
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "// ============================================================\n// FUSIONAR DATOS DEL CASO CLÍNICO (fix: el AI Agent solo devuelve 'output'\n// y descarta emailSubject/emailBody/ID_UNICO/CLUSTER/PILAR del artículo)\n// ============================================================\nconst originalItems = $('🔧 Preparar casos para IA').all();\nconst agentItems = $input.all();\n\nconst resultados = [];\nfor (let i = 0; i < agentItems.length; i++) {\n  const original = originalItems[i] ? originalItems[i].json : {};\n  const agent = agentItems[i].json;\n\n  resultados.push({\n    json: {\n      ...original,      // TITULO, emailSubject, emailBody, ID_UNICO, CLUSTER, PILAR, etc.\n      output: agent.output   // JSON con el caso clínico generado\n    }\n  });\n}\n\nreturn resultados;\n"
+        },
+        "id": "7744d4b3-d2e3-45fe-9895-02893cae9b76",
+        "name": "🔗 Fusionar Datos del Caso",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          4992,
+          -272
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "// ============================================================\n// INSERTAR CASO EN EL ARTÍCULO\n// Recibe el artículo y la respuesta del agente (JSON)\n// ============================================================\n\nconst items = $input.all();\nconst resultados = [];\n\nfor (const item of items) {\n  let articleHtml = item.json.emailBody || item.json.CONTENIDO || '';\n  \n  // Parsear la respuesta del agente (asumiendo que está en item.json.output)\n  let caseData = null;\n  try {\n    caseData = JSON.parse(String(item.json.output || '{}').replace(/```json/gi, '').replace(/```/g, '').trim() || '{}');\n  } catch (e) {\n    caseData = null;\n  }\n\n  // Si no hay datos válidos, dejar el artículo sin cambios\n  if (!caseData || !caseData.htmlBlock) {\n    resultados.push(item);\n    continue;\n  }\n\n  const block = caseData.htmlBlock;\n  const position = caseData.insertPosition || 'despues_segundo_parrafo';\n\n  // Función para insertar después de un punto específico\n  function insertAfter(html, marker, block) {\n    const index = html.indexOf(marker);\n    if (index === -1) return html;\n    return html.slice(0, index + marker.length) + block + html.slice(index + marker.length);\n  }\n\n  let newHtml = articleHtml;\n\n  switch (position) {\n    case 'inicio':\n      // Después del primer párrafo\n      const firstP = newHtml.indexOf('</p>');\n      if (firstP !== -1) {\n        newHtml = newHtml.slice(0, firstP + 4) + block + newHtml.slice(firstP + 4);\n      }\n      break;\n    case 'despues_segundo_parrafo':\n      let secondP = newHtml.indexOf('</p>');\n      if (secondP !== -1) {\n        secondP = newHtml.indexOf('</p>', secondP + 1);\n        if (secondP !== -1) {\n          newHtml = newHtml.slice(0, secondP + 4) + block + newHtml.slice(secondP + 4);\n        }\n      }\n      break;\n    case 'despues_beneficios':\n      // Buscar un H2 que contenga \"Beneficios\" o \"Ventajas\"\n      const benefRegex = /<h2[^>]*>.*?Beneficios.*?<\\/h2>/i;\n      const matchBenef = newHtml.match(benefRegex);\n      if (matchBenef) {\n        const endTag = matchBenef[0].length + matchBenef.index;\n        newHtml = newHtml.slice(0, endTag) + block + newHtml.slice(endTag);\n      }\n      break;\n    case 'antes_faq':\n      const faqIndex = newHtml.indexOf('<h3');\n      if (faqIndex !== -1) {\n        newHtml = newHtml.slice(0, faqIndex) + block + newHtml.slice(faqIndex);\n      }\n      break;\n    case 'final':\n      const descargoIndex = newHtml.lastIndexOf('<p style=\"font-size: 12px;');\n      if (descargoIndex !== -1) {\n        newHtml = newHtml.slice(0, descargoIndex) + block + newHtml.slice(descargoIndex);\n      } else {\n        newHtml = newHtml + block;\n      }\n      break;\n    default:\n      // Por defecto, después del segundo párrafo\n      let p2 = newHtml.indexOf('</p>');\n      if (p2 !== -1) {\n        p2 = newHtml.indexOf('</p>', p2 + 1);\n        if (p2 !== -1) {\n          newHtml = newHtml.slice(0, p2 + 4) + block + newHtml.slice(p2 + 4);\n        }\n      }\n  }\n\n  resultados.push({\n    json: {\n      ...item.json,\n      emailBody: newHtml,\n      CONTENIDO: newHtml,\n      casoInsertado: true,\n      caseId: caseData.selectedCaseId || ''\n    }\n  });\n}\n\nreturn resultados;"
+        },
+        "id": "7d37f4d1-0ce4-4c3d-b330-6ddcfe445657",
+        "name": "📌 Insertar Caso en Artículo",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          5216,
+          -272
+        ]
+      },
+      {
+        "parameters": {
+          "amount": 2
+        },
+        "id": "18549125-7410-4056-ac77-6e20989e67aa",
+        "name": "⏱️ Wait (casos)",
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1,
+        "position": [
+          5888,
+          -272
+        ],
+        "webhookId": "a5617b22-51e2-4a13-a687-4fa9591b1d04"
+      },
+      {
+        "parameters": {
+          "model": "deepseek-flash",
+          "options": {
+            "maxTokens": 4000
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+        "typeVersion": 1,
+        "position": [
+          3696,
+          -176
+        ],
+        "id": "e86e4a92-3faa-4350-ab13-8aae2bafccf2",
+        "name": "DeepSeek Chat Model"
+      },
+      {
+        "parameters": {
+          "model": "deepseek-flash",
+          "options": {
+            "maxTokens": 8000,
+            "temperature": 0.7
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+        "typeVersion": 1,
+        "position": [
+          1584,
+          -176
+        ],
+        "id": "4cb40c59-3710-4426-be0b-87f1b24c45c3",
+        "name": "DeepSeek Chat Model1"
+      },
+      {
+        "parameters": {
+          "model": "deepseek-flash",
+          "options": {
+            "maxTokens": 5000,
+            "responseFormat": "json_object",
+            "temperature": 0.6
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+        "typeVersion": 1,
+        "position": [
+          4720,
+          -48
+        ],
+        "id": "ac81d012-3c5c-4aef-a855-c9ec10dafeb7",
+        "name": "DeepSeek Chat Model2"
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForEachItem",
+          "jsCode": "// PROGRAMAR 2 ARTÍCULOS POR SEMANA A DISTINTA HORA\n// ==============================================================================\n// CONFIGURACIÓN DE PUBLICACIÓN\n// ==============================================================================\n\n// ELIGE EL MODO:\n// \"LUN_MIE_VIE\"  -> Publica Lunes (1), Miércoles (3) y Viernes (5)\n// \"DOS_SEMANA\"   -> Publica 2 artículos por semana (Martes y Jueves) a horas distintas\nconst MODO_PUBLICACION = \"DOS_SEMANA\";   // ← cámbialo aquí según necesites\n\n// Días según el modo elegido (0 = Domingo, 1 = Lunes, ..., 6 = Sábado)\nlet diasPublicacion = [];\nif (MODO_PUBLICACION === \"LUN_MIE_VIE\") {\n  diasPublicacion = [1, 3, 5]; // Lunes, Miércoles, Viernes\n} else if (MODO_PUBLICACION === \"DOS_SEMANA\") {\n  diasPublicacion = [2, 4];    // Martes y Jueves\n} else {\n  diasPublicacion = [2, 5];    // Por defecto: Martes y Viernes\n}\n\n// Horarios variados (Formato 24h)\nconst horasPosibles = [8, 10, 14, 17, 19, 21];\nconst minutosPosibles = [0, 15, 30, 45];\n\n// ==============================================================================\n// LÓGICA DE CÁLCULO DE FECHAS\n// ==============================================================================\n\nconst index = $itemIndex; // Índice del artículo actual (0, 1, 2...)\n\n// Generador pseudo-aleatorio determinista (misma hora para el mismo artículo)\nfunction pseudoRandom(seed) {\n  const x = Math.sin(seed + 1) * 10000;\n  return x - Math.floor(x);\n}\n\n// Calcula la fecha de publicación para este artículo\nfunction obtenerFechaPublicacion(numeroArticulo) {\n  // Empezamos desde HOY (no desde el mes siguiente)\n  let fechaActual = new Date();\n  fechaActual.setHours(0, 0, 0, 0); // empezamos desde las 00:00 de hoy\n\n  let articulosContados = 0;\n  const MAX_ITERACIONES = 365 * 2; // seguridad (máximo 2 años)\n  let iteraciones = 0;\n\n  while (iteraciones < MAX_ITERACIONES) {\n    const diaSemanaActual = fechaActual.getDay();\n\n    // Solo cuenta los días de publicación configurados\n    if (diasPublicacion.includes(diaSemanaActual)) {\n      if (articulosContados === numeroArticulo) {\n        // Asignar hora y minuto únicos y consistentes\n        const randHoraIndex = Math.floor(pseudoRandom(numeroArticulo * 7) * horasPosibles.length);\n        const randMinIndex  = Math.floor(pseudoRandom(numeroArticulo * 13) * minutosPosibles.length);\n\n        const horaElegida   = horasPosibles[randHoraIndex];\n        const minutoElegido = minutosPosibles[randMinIndex];\n\n        fechaActual.setHours(horaElegida, minutoElegido, 0, 0);\n        return fechaActual;\n      }\n      articulosContados++;\n    }\n\n    // Avanzar siempre un día\n    fechaActual.setDate(fechaActual.getDate() + 1);\n    iteraciones++;\n  }\n\n  // Fallback (no debería llegar aquí)\n  return new Date();\n}\n\n// Obtener fecha calculada para este artículo\nconst fechaProgramada = obtenerFechaPublicacion(index);\n\n// ==============================================================================\n// RETORNO DE DATOS AL SIGUIENTE NODO\n// ==============================================================================\nreturn {\n  ...$input.item.json, // mantiene todos tus campos originales\n  articuloNumero: index + 1,\n  fechaPublicacionISO: fechaProgramada.toISOString(),\n  fechaPublicacionTexto: fechaProgramada.toLocaleString('es-ES', {\n    weekday: 'long',\n    year: 'numeric',\n    month: 'long',\n    day: 'numeric',\n    hour: '2-digit',\n    minute: '2-digit',\n    hour12: false\n  }),\n  programadoAno: fechaProgramada.getFullYear(),\n  programadoMes: fechaProgramada.getMonth() + 1,\n  programadoDia: fechaProgramada.getDate(),\n  programadoHora: fechaProgramada.getHours(),\n  programadoMinuto: fechaProgramada.getMinutes()\n};"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          5664,
+          -272
+        ],
+        "id": "b2d96903-d6be-42b4-bac2-079ce1f469ee",
+        "name": "PROGRAMAR 2 ARTICULOS POR SEMANA A DISTINTA HORA"
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "13zYYocI1qa5JKrn1xAj1e2T_mpU11spVKlW-ZCHMlcM"
+          },
+          "sheetName": {
+            "__rl": true,
+            "mode": "id",
+            "value": "962543898"
+          },
+          "options": {}
+        },
+        "id": "af-huron-read-001",
+        "name": "📋 Leer Afiliados Hurones",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.6,
+        "position": [
+          3168,
+          -400
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const rows = $input.all().map(i => i.json);\n\nfunction normalizar(s) {\n  return (s || '').toString().toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').trim();\n}\n\nconst productos = rows\n  .filter(r => {\n    const tipoReg = normalizar(r.TIPO_REGISTRO);\n    const activo = normalizar(r.ACTIVO) === 'si';\n    const tipoAnimal = normalizar(r.TIPO_ANIMAL);\n    return (tipoReg === 'afiliado' || tipoReg === 'ebook') && activo && tipoAnimal.includes('huron');\n  })\n  .map(r => ({\n    tipo: (r.TIPO_REGISTRO || 'afiliado').toUpperCase(),\n    categoria: r.CATEGORIA || '',\n    nombre: r.NOMBRE_PRODUCTO || '',\n    descripcion: r.DESCRIPCION_CORTA || '',\n    enlace: r.LINK_AFILIADO_O_VENTA || r.LINK_DESTINO_FINAL || '',\n    imagen: r.LINK_IMAGEN || ''\n  }))\n  .filter(p => p.nombre && p.enlace);\n\n// Si no hay productos de hurones todavía en la hoja, el catálogo queda vacío\n// (no se muestran productos de perros/gatos ni de ningún otro nicho).\nreturn [{ json: { productos, totalProductos: productos.length } }];"
+        },
+        "id": "af-huron-filter-001",
+        "name": "🔍 Filtrar Afiliados Hurones",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          3392,
+          -400
+        ]
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Genera un catálogo HTML atractivo, persuasivo y comercial de los siguientes productos afiliados de Hotmart para dueños de hurones.\n\nDISEÑO OBLIGATORIO (llamativo, con color de fondo atractivo, no blanco plano):\n<table style=\"width:100%;border-collapse:collapse;margin:24px 0;border-radius:10px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.12);\">\n  <tr>\n    <td style=\"width:35%;padding:16px;text-align:center;vertical-align:middle;background:#FFF4E0;\">\n      <a href=\"ENLACE_AFILIADO\" target=\"_blank\">\n        <img src=\"URL_IMAGEN\" style=\"width:100%;max-width:180px;height:auto;border-radius:6px;\" alt=\"NOMBRE_PRODUCTO\">\n      </a>\n    </td>\n    <td style=\"width:65%;padding:18px;vertical-align:top;background:#FFF4E0;\">\n      <h3 style=\"color:#B35C00;margin:0 0 8px 0;font-size:16pt;\">TÍTULO LLAMATIVO</h3>\n      <p style=\"color:#4a3b2a;font-size:11.5pt;line-height:1.5;margin:0 0 14px 0;\">Descripción persuasiva de 2-3 frases que resalte el beneficio principal para el dueño del hurón y genere deseo de compra.</p>\n      <a href=\"ENLACE_AFILIADO\" target=\"_blank\" style=\"display:inline-block;background:#E9962C;color:#ffffff;padding:10px 24px;border-radius:6px;font-weight:bold;text-decoration:none;font-size:12pt;\">\n        Ver oferta →\n      </a>\n    </td>\n  </tr>\n</table>\n\nInstrucciones:\n- Mejora ligeramente el título y la descripción para que suenen más comerciales y persuasivos (sin mentir ni inventar características).\n- El botón y la imagen DEBEN llevar el enlace afiliado exacto que se te da.\n- Antes de la lista de productos agrega este encabezado:\n\n<h2 style=\"text-align:center;color:#B35C00;margin-bottom:6px;\">🐾 Recomendado para tu hurón</h2>\n<p style=\"text-align:center;color:#555;margin-bottom:20px;\">Productos que pueden ayudarte con el cuidado diario de tu hurón</p>\n\n🔴 REGLA CRÍTICA: usa ÚNICAMENTE los productos de la lista de abajo. Si el array está vacío ([]), devuelve exclusivamente una cadena vacía \"\" -- NO inventes productos, NO muestres productos de perros/gatos ni de otras especies, NO generes el encabezado si no hay productos.\n\nProductos disponibles (solo hurones, ya filtrados):\n{{ JSON.stringify($json.productos || []) }}",
+          "options": {
+            "systemMessage": "Eres un copywriter experto en marketing de afiliados para el nicho de mascotas exóticas (hurones). Generas bloques HTML de catálogo persuasivo, siguiendo exactamente el diseño y las reglas que te indique el usuario. Devuelves SOLO el HTML solicitado (o una cadena vacía si así se te pide), sin explicaciones ni texto adicional."
+          }
+        },
+        "id": "af-huron-agent-001",
+        "name": "Agente Catálogo Afiliados Hurones",
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          3616,
+          -400
+        ]
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Artículo del blog hurones.online: \"{{ $json.emailSubject }}\" (palabra clave: \"{{ $json.KEYWORD_PRINCIPAL || $json.CLUSTER || '' }}\").\nResumen del artículo: {{ String($json.emailBody || '').replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').slice(0, 700) }}\n\nCasos clínicos disponibles (JSON): {{ JSON.stringify($json.casosDisponibles || []) }}\n\nTAREA: elige el caso MÁS relevante para el tema. Si ninguno encaja o la lista está vacía, crea un caso ficticio realista de un hurón. Escribe un bloque HTML con:\n1. Título gancho (máximo 8 palabras) en un <h3>.\n2. Presentación: el dueño (nombre ficticio) y su hurón (nombre, edad, sexo, si está esterilizado), y el problema con detalles sensoriales (2 párrafos cortos).\n3. Diagnóstico y tratamiento en primera persona, con 2 o 3 términos médicos explicados entre paréntesis y la evolución con tiempos concretos (\"a los 7 días\") (2 o 3 párrafos).\n4. Final feliz (1 párrafo).\n5. CTA: \"Si quieres que tu hurón también logre este cambio, te he preparado el <strong>Reto de 21 Días – [nombre según el tema]</strong>, una ficha imprimible por solo $5.\" con un botón \"📅 Quiero el reto\" enlazado a https://www.veterinarioluis.com/p/fichas-medicas.html\n\nREGLAS: solo hurones (nunca perros ni gatos); máximo 350 palabras; todo dentro de un único <div> con estilos inline (fondo #e6f8e6, bordes redondeados, sombra suave, fuente 16px); comillas dobles rectas en los atributos; sin markdown; sin enlaces de WhatsApp.\n\nDevuelve SOLO este JSON válido, sin texto antes ni después:\n{\"selectedCaseId\":\"ID del caso o vacío\",\"insertPosition\":\"despues_segundo_parrafo\",\"htmlBlock\":\"<div ...>...</div>\",\"fuente\":\"Experiencia clínica del Dr. Luis Arturo García\"}",
+          "options": {
+            "systemMessage": "Eres el Dr. Luis Arturo García, médico veterinario especializado en hurones (Mustela putorius furo). Narras casos clínicos breves en primera persona, con calidez y rigor clínico. Respondes siempre con un JSON válido."
+          }
+        },
+        "id": "1cf9eeca-bdee-4c22-8290-c39366a458eb",
+        "name": "Seleccionar y Adaptar Caso",
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 1.7,
+        "position": [
+          4640,
+          -272
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "// Limpieza determinista del HTML para Blogger\nfunction cerrarEtiquetas(h) {\n  const vacias = /^(br|hr|img|input|meta|link|source|wbr|col)$/i;\n  const pila = [];\n  const salida = h.replace(/<(\\/?)([a-zA-Z][a-zA-Z0-9]*)\\b[^>]*?(\\/?)>/g, (m, cierre, tag, auto) => {\n    tag = tag.toLowerCase();\n    if (vacias.test(tag) || auto) return m;\n    if (!cierre) {\n      // un <li> o <p> nuevo cierra el anterior que quedó abierto\n      if ((tag === 'li' || tag === 'p') && pila[pila.length - 1] === tag) { pila.pop(); pila.push(tag); return `</${tag}>` + m; }\n      pila.push(tag); return m;\n    }\n    const i = pila.lastIndexOf(tag);\n    if (i === -1) return ''; // cierre huérfano\n    const abiertasDentro = pila.splice(i).reverse().slice(0, -1);\n    return abiertasDentro.map(t => `</${t}>`).join('') + m;\n  });\n  return salida + pila.reverse().map(t => `</${t}>`).join('');\n}\nfunction limpiarHTML(html) {\n  let h = String(html || '');\n  h = h.replace(/```(?:html|json)?/gi, '');\n  h = h.replace(/\\\\n/g, ' ').replace(/\\\\\"/g, '\"');\n  h = h.replace(/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F​-‍﻿�]/g, '');\n  h = h.replace(/<!DOCTYPE[^>]*>/gi, '').replace(/<\\/?(html|head|body|meta|title)\\b[^>]*>/gi, '');\n  h = h.replace(/<style[\\s\\S]*?<\\/style>/gi, '');\n  h = h.replace(/<script(?![^>]*application\\/ld\\+json)[^>]*>[\\s\\S]*?<\\/script>/gi, '');\n  h = h.replace(/<h1\\b([^>]*)>([\\s\\S]*?)<\\/h1>/gi, '<h2$1>$2</h2>');\n  h = h.replace(/\\*\\*([^*<>]+)\\*\\*/g, '<strong>$1</strong>');\n  h = h.replace(/(^|>)\\s*#{2,4}\\s+([^<]+)/g, '$1<h3>$2</h3>');\n  h = h.replace(/&amp;(nbsp|amp|quot|lt|gt|#\\d+);/g, '&$1;');\n  h = h.replace(/<[^>]+>/g, tag => tag.replace(/[“”„″]/g, '\"').replace(/[‘’]/g, \"'\"));\n  h = h.replace(/<p\\b[^>]*>\\s*(&nbsp;|<br\\s*\\/?>)?\\s*<\\/p>/gi, '');\n  h = cerrarEtiquetas(h);\n  return h.replace(/\\s+/g, ' ').trim();\n}\n// ============================================================\n// Une el HTML ya limpio (Code VALIDATE) con las preguntas frecuentes que añada el validador\n// ============================================================\nconst item = $input.first().json;\nconst base = $('Code VALIDATE').first().json;\nlet raw = item.text || item.output || '';\nif (typeof raw !== 'string') raw = JSON.stringify(raw || {});\nraw = raw.replace(/```json/gi, '').replace(/```/g, '').trim();\nconst first = raw.indexOf('{');\nconst last = raw.lastIndexOf('}');\nif (first !== -1 && last > first) raw = raw.substring(first, last + 1);\n\nlet parsed;\ntry {\n  parsed = JSON.parse(raw);\n} catch (e) {\n  parsed = { faqHTML: '', errorsFound: ['No se pudo parsear el JSON del validador: ' + e.message], correctionsMade: [] };\n}\nparsed.errorsFound = parsed.errorsFound || [];\nparsed.correctionsMade = parsed.correctionsMade || [];\n\nlet html = base.html || '';\nconst faq = limpiarHTML(parsed.faqHTML || '');\nif (!base.tieneFAQ && faq.length > 50) {\n  // Las FAQ van antes de las referencias o del JSON-LD; si no hay, al final\n  const m = html.match(/<h[23]\\b[^>]*>\\s*Referencias/i) || html.match(/<script[^>]*application\\/ld\\+json/i);\n  html = m ? html.slice(0, m.index) + faq + html.slice(m.index) : html + faq;\n  parsed.correctionsMade.push('Añadida sección de Preguntas Frecuentes');\n}\n\nif (!html || html.trim().length < 100) {\n  html = `<p>🐾 Artículo en proceso de generación para el blog HuronExpert.</p><p><strong>Tema:</strong> ${item.emailSubject || 'Hurones'}</p>`;\n  parsed.errorsFound.push('⚠️ Fallback de emergencia: Se usó contenido predeterminado.');\n}\n\nparsed.correctedHTML = html;\nreturn [{ json: { ...item, parsedOutput: parsed } }];"
+        },
+        "id": "696a8da4-598f-4ed6-a7d9-2a475d4410a8",
+        "name": "🩹 Parsear JSON Basic LLM Chain",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2496,
+          -400
+        ]
+      },
+      {
+        "parameters": {
+          "person": "iTLJ1_YKit",
+          "text": "={{ $json.summary }}\\n\\n🔗 Lee el artículo completo aquí: {{ $json.url }}",
+          "shareMediaCategory": "ARTICLE",
+          "additionalFields": {
+            "originalUrl": "={{ $json.url }}",
+            "title": "={{ $('Create a post').item.json.title }}"
+          }
+        },
+        "type": "n8n-nodes-base.linkedIn",
+        "typeVersion": 1,
+        "position": [
+          6560,
+          -176
+        ],
+        "id": "8b5e8739-acf2-4f88-bb2c-8d60f49a0dcc",
+        "name": "Create a post1"
+      },
+      {
+        "parameters": {
+          "jsCode": "// Extraer título y resumen del artículo para LinkedIn\nconst items = $input.all();\nconst resultados = [];\n\nfor (let i = 0; i < items.length; i++) {\n  const item = items[i].json;\n  let content = item.content || '';\n  \n  // Eliminar etiquetas HTML para obtener texto plano\n  let plainText = content.replace(/<[^>]*>/g, ' ');\n  plainText = plainText.replace(/\\s+/g, ' ').trim();\n  \n  // Tomar los primeros 300 caracteres como resumen\n  const summary = plainText.substring(0, 300) + '...';\n  \n  resultados.push({\n    json: {\n      title: item.title || '',\n      url: item.url || '',\n      summary: summary\n    }\n  });\n}\n\nreturn resultados;"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          6336,
+          -176
+        ],
+        "id": "78a10526-93b2-4365-a995-d68812c68f37",
+        "name": "RESUMEN PARA LINKEN"
+      },
+      {
+        "parameters": {
+          "jsCode": "// Limpieza determinista del HTML para Blogger\nfunction cerrarEtiquetas(h) {\n  const vacias = /^(br|hr|img|input|meta|link|source|wbr|col)$/i;\n  const pila = [];\n  const salida = h.replace(/<(\\/?)([a-zA-Z][a-zA-Z0-9]*)\\b[^>]*?(\\/?)>/g, (m, cierre, tag, auto) => {\n    tag = tag.toLowerCase();\n    if (vacias.test(tag) || auto) return m;\n    if (!cierre) {\n      // un <li> o <p> nuevo cierra el anterior que quedó abierto\n      if ((tag === 'li' || tag === 'p') && pila[pila.length - 1] === tag) { pila.pop(); pila.push(tag); return `</${tag}>` + m; }\n      pila.push(tag); return m;\n    }\n    const i = pila.lastIndexOf(tag);\n    if (i === -1) return ''; // cierre huérfano\n    const abiertasDentro = pila.splice(i).reverse().slice(0, -1);\n    return abiertasDentro.map(t => `</${t}>`).join('') + m;\n  });\n  return salida + pila.reverse().map(t => `</${t}>`).join('');\n}\nfunction limpiarHTML(html) {\n  let h = String(html || '');\n  h = h.replace(/```(?:html|json)?/gi, '');\n  h = h.replace(/\\\\n/g, ' ').replace(/\\\\\"/g, '\"');\n  h = h.replace(/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F​-‍﻿�]/g, '');\n  h = h.replace(/<!DOCTYPE[^>]*>/gi, '').replace(/<\\/?(html|head|body|meta|title)\\b[^>]*>/gi, '');\n  h = h.replace(/<style[\\s\\S]*?<\\/style>/gi, '');\n  h = h.replace(/<script(?![^>]*application\\/ld\\+json)[^>]*>[\\s\\S]*?<\\/script>/gi, '');\n  h = h.replace(/<h1\\b([^>]*)>([\\s\\S]*?)<\\/h1>/gi, '<h2$1>$2</h2>');\n  h = h.replace(/\\*\\*([^*<>]+)\\*\\*/g, '<strong>$1</strong>');\n  h = h.replace(/(^|>)\\s*#{2,4}\\s+([^<]+)/g, '$1<h3>$2</h3>');\n  h = h.replace(/&amp;(nbsp|amp|quot|lt|gt|#\\d+);/g, '&$1;');\n  h = h.replace(/<[^>]+>/g, tag => tag.replace(/[“”„″]/g, '\"').replace(/[‘’]/g, \"'\"));\n  h = h.replace(/<p\\b[^>]*>\\s*(&nbsp;|<br\\s*\\/?>)?\\s*<\\/p>/gi, '');\n  h = cerrarEtiquetas(h);\n  return h.replace(/\\s+/g, ' ').trim();\n}\nconst WA = 'https://chat.whatsapp.com/CrANuqK9kpq3LtxR6sBuai';\nconst IMG = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhlfCVxbySjvntxm4n0GJLfUHd8qYktRg4jO98lbmm-dPxxtPXPY9N7DlMFuQTJ1QgqoVD3dgRzerHUNHwR_eCEeWIXWFuMMEorDRxC965aE9IK6Lb1ur8msuWg2ExMDuD5c0sknpGnCkVDoqmqp5pYLF6Ilu9qpwzeSmOi2jzimo6w88mZRuJ3L2Qvth4/s1536/club%20de%20hurones.png';\n\nconst BANNER = `\n<div class=\"cta-club-huroneros\" style=\"margin:28px 0;padding:0;border-radius:16px;overflow:hidden;border:2px solid #1B4F9C;background:#ffffff;box-shadow:0 8px 24px rgba(27,79,156,.18);text-align:center;\">\n  <a href=\"${WA}\" target=\"_blank\" rel=\"noopener\" style=\"display:block;text-decoration:none;\">\n    <img src=\"${IMG}\" alt=\"Únete al Club de Huroneros en WhatsApp — Dr. Luis García Vet\" style=\"width:100%;max-width:100%;height:auto;display:block;border:0;\" />\n  </a>\n  <div style=\"padding:16px 18px 22px 18px;background:#0F2F5B;\">\n    <p style=\"margin:0 0 12px 0;font-family:Arial,sans-serif;font-size:16px;line-height:1.4;color:#ffffff;\">\n      Club de Huroneros — comunidad de WhatsApp del Dr. Luis García\n    </p>\n    <a href=\"${WA}\" target=\"_blank\" rel=\"noopener\" style=\"display:inline-block;background:#25D366;color:#ffffff;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;text-decoration:none;padding:12px 26px;border-radius:28px;\">\n      Únete ahora al grupo de WhatsApp\n    </a>\n  </div>\n</div>\n`.trim();\n\nfunction insertAfterFirst(html, marker, block) {\n  const i = html.indexOf(marker);\n  if (i === -1) return html;\n  return html.slice(0, i + marker.length) + block + html.slice(i + marker.length);\n}\n\nfunction insertBefore(html, regex, block) {\n  const m = html.match(regex);\n  if (!m) return html;\n  return html.slice(0, m.index) + block + html.slice(m.index);\n}\n\nconst items = $input.all();\nreturn items.map((item) => {\n  const json = { ...item.json };\n  let html = json.emailBody || json.CONTENIDO || json.validatedHTML || '';\n\n  html = html.replace(/https:\\/\\/chat\\.whatsapp\\.com\\/[A-Za-z0-9]+/g, WA);\n\n  const yaEsta = html.includes('cta-club-huroneros') || html.includes('club%20de%20hurones.png');\n  if (!yaEsta && html) {\n    const mid = insertAfterFirst(html, '</h2>', BANNER);\n    html = mid !== html ? mid : html;\n\n    const beforeFaq = insertBefore(\n      html,\n      /<h2[^>]*>\\s*Preguntas\\s+Frecuentes/i,\n      BANNER\n    );\n    html = beforeFaq !== html ? beforeFaq : html + BANNER;\n  }\n\n  html = limpiarHTML(html);\n  json.emailBody = html;\n  json.CONTENIDO = html;\n  json.bannerWhatsAppInsertado = !yaEsta;\n  return { json };\n});"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          5440,
+          -272
+        ],
+        "id": "8ed45a0a-910a-4dbd-a46e-20d9077a6bed",
+        "name": "📲 Banner Club WhatsApp"
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "=Eres el editor del blog hurones.online. NO reescribas el artículo: solo revisas su estructura.\n\nTÍTULO: {{ $('Edit Fields').first().json.TEMA_ARTICULO }}\nENCABEZADOS (h2/h3): {{ $json.titulos.join(' | ') }}\nPALABRAS: {{ $json.palabras }}\nTIENE SECCIÓN DE PREGUNTAS FRECUENTES: {{ $json.tieneFAQ ? 'SI' : 'NO' }}\n\n1. Si NO tiene preguntas frecuentes, escribe en faqHTML: <h2>Preguntas Frecuentes</h2> y 5 preguntas cortas del MISMO tema, cada una en <h3> con su respuesta en un <p> de máximo 2 frases. Sin enlaces, marcas ni precios. Usa comillas dobles rectas en los atributos. Si ya tiene, faqHTML = \"\".\n2. En errorsFound anota (máximo 5) problemas de estructura que veas en los encabezados: temas que no sean de hurones, encabezados repetidos o fuera de orden.\n\nDevuelve SOLO este JSON válido, sin texto antes ni después:\n{\"faqHTML\":\"\",\"errorsFound\":[],\"correctionsMade\":[]}",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 3.1,
+        "position": [
+          2144,
+          -400
+        ],
+        "id": "76a4c0d7-e0fa-40c3-9e01-c75e0a901a42",
+        "name": "VALIDAR HTML"
+      },
+      {
+        "parameters": {
+          "model": "deepseek-flash",
+          "options": {
+            "maxTokens": 4000,
+            "responseFormat": "json_object",
+            "temperature": 0.3,
+            "timeout": 360000,
+            "maxRetries": 2
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+        "typeVersion": 1,
+        "position": [
+          2224,
+          -176
+        ],
+        "id": "c87b5280-5678-4742-a5e5-93e78a89cf16",
+        "name": "DeepSeek Chat Model4"
+      }
+    ],
+    "activeVersion": {
+      "nodes": [
+        {
+          "parameters": {
+            "rule": {
+              "interval": [
+                {
+                  "field": "hours"
+                }
+              ]
+            }
+          },
+          "id": "6389b8cc-9667-4978-9295-81ce87263cb8",
+          "name": "Schedule Trigger",
+          "type": "n8n-nodes-base.scheduleTrigger",
+          "typeVersion": 1.2,
+          "position": [
+            0,
+            -272
+          ]
+        },
+        {
+          "parameters": {
+            "assignments": {
+              "assignments": [
+                {
+                  "id": "id-1",
+                  "name": "statusColumn",
+                  "value": "PUBLICADO",
+                  "type": "string"
+                },
+                {
+                  "id": "id-2",
+                  "name": "publishedValue",
+                  "value": "SI",
+                  "type": "string"
+                },
+                {
+                  "id": "id-3",
+                  "name": "unpublishedValue",
+                  "value": "NO",
+                  "type": "string"
+                },
+                {
+                  "id": "a66a00e9-41a9-4eaf-accb-9f32fd2803dd",
+                  "name": "processingValue",
+                  "value": "PROCESANDO",
+                  "type": "string"
+                }
+              ]
+            },
+            "options": {}
+          },
+          "id": "6972b40e-d05c-42df-9a4f-50c84fc5075c",
+          "name": "Workflow Configuration",
+          "type": "n8n-nodes-base.set",
+          "typeVersion": 3.4,
+          "position": [
+            224,
+            -272
+          ]
+        },
+        {
+          "parameters": {
+            "documentId": {
+              "__rl": true,
+              "mode": "id",
+              "value": "1Zhb62do5CHDsU-zYiazCp6c25q4G0NdatOjg7UDGe04"
+            },
+            "sheetName": {
+              "__rl": true,
+              "value": 203741731,
+              "mode": "list",
+              "cachedResultName": "articulos blog hurones",
+              "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Zhb62do5CHDsU-zYiazCp6c25q4G0NdatOjg7UDGe04/edit#gid=203741731"
+            },
+            "options": {
+              "dataLocationOnSheet": {
+                "values": {
+                  "rangeDefinition": "detectAutomatically"
+                }
+              }
+            }
+          },
+          "id": "cd64f23b-8849-4c6d-b9ab-0fbeb7d418f4",
+          "name": "Read Articles from Sheet",
+          "type": "n8n-nodes-base.googleSheets",
+          "typeVersion": 4.7,
+          "position": [
+            448,
+            -400
+          ]
+        },
+        {
+          "parameters": {
+            "assignments": {
+              "assignments": [
+                {
+                  "id": "id-1",
+                  "name": "Published",
+                  "type": "string",
+                  "value": "SI"
+                },
+                {
+                  "id": "id-2",
+                  "name": "row_number",
+                  "type": "number",
+                  "value": "={{ $('⏱️ Wait (casos)').item.json.rowNumber }}"
+                },
+                {
+                  "id": "f716eec9-f990-4e4a-8a74-fdbe3a4a537e",
+                  "name": "FECHA_PUBLICACION",
+                  "type": "string",
+                  "value": "={{ $now }}"
+                }
+              ]
+            },
+            "options": {}
+          },
+          "id": "8048f86a-906c-46d0-a6fd-469582bf98bf",
+          "name": "Prepare Update Data",
+          "type": "n8n-nodes-base.set",
+          "typeVersion": 3.4,
+          "position": [
+            6336,
+            -368
+          ]
+        },
+        {
+          "parameters": {
+            "operation": "update",
+            "documentId": {
+              "__rl": true,
+              "mode": "id",
+              "value": "1Zhb62do5CHDsU-zYiazCp6c25q4G0NdatOjg7UDGe04"
+            },
+            "sheetName": {
+              "__rl": true,
+              "value": 203741731,
+              "mode": "list",
+              "cachedResultName": "articulos blog hurones",
+              "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Zhb62do5CHDsU-zYiazCp6c25q4G0NdatOjg7UDGe04/edit#gid=203741731"
+            },
+            "columns": {
+              "mappingMode": "defineBelow",
+              "value": {
+                "Estado": "publicado",
+                "row_number": "={{ $json.row_number }}"
+              },
+              "matchingColumns": [
+                "row_number"
+              ],
+              "schema": [
+                {
+                  "id": "Keyword",
+                  "displayName": "Keyword",
+                  "required": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "type": "string",
+                  "canBeUsedToMatch": true,
+                  "removed": true
+                },
+                {
+                  "id": "Base keyword",
+                  "displayName": "Base keyword",
+                  "required": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "type": "string",
+                  "canBeUsedToMatch": true,
+                  "removed": true
+                },
+                {
+                  "id": "Volumen mensual",
+                  "displayName": "Volumen mensual",
+                  "required": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "type": "string",
+                  "canBeUsedToMatch": true,
+                  "removed": true
+                },
+                {
+                  "id": "Tipo",
+                  "displayName": "Tipo",
+                  "required": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "type": "string",
+                  "canBeUsedToMatch": true,
+                  "removed": true
+                },
+                {
+                  "id": "Prioridad",
+                  "displayName": "Prioridad",
+                  "required": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "type": "string",
+                  "canBeUsedToMatch": true,
+                  "removed": true
+                },
+                {
+                  "id": "Título artículo listo para publicar (2026)",
+                  "displayName": "Título artículo listo para publicar (2026)",
+                  "required": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "type": "string",
+                  "canBeUsedToMatch": true,
+                  "removed": true
+                },
+                {
+                  "id": "Longitud objetivo",
+                  "displayName": "Longitud objetivo",
+                  "required": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "type": "string",
+                  "canBeUsedToMatch": true,
+                  "removed": true
+                },
+                {
+                  "id": "Notas monetización / cluster",
+                  "displayName": "Notas monetización / cluster",
+                  "required": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "type": "string",
+                  "canBeUsedToMatch": true,
+                  "removed": true
+                },
+                {
+                  "id": "Estado",
+                  "displayName": "Estado",
+                  "required": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "type": "string",
+                  "canBeUsedToMatch": true
+                },
+                {
+                  "id": "row_number",
+                  "displayName": "row_number",
+                  "required": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "type": "number",
+                  "canBeUsedToMatch": true,
+                  "readOnly": true
+                }
+              ],
+              "attemptToConvertTypes": false,
+              "convertFieldsToString": false
+            },
+            "options": {}
+          },
+          "id": "95adad06-682f-4671-896c-a0785a08b123",
+          "name": "Mark as Published",
+          "type": "n8n-nodes-base.googleSheets",
+          "typeVersion": 4.7,
+          "position": [
+            6560,
+            -368
+          ]
+        },
+        {
+          "parameters": {
+            "assignments": {
+              "assignments": [
+                {
+                  "id": "44ab9da4-7681-4699-a31d-82cd2b2fd359",
+                  "name": "validatedHTML",
+                  "type": "string",
+                  "value": "={{ $json.parsedOutput.correctedHTML || '' }}"
+                },
+                {
+                  "id": "id-5",
+                  "name": "rowNumber",
+                  "type": "number",
+                  "value": "={{ $('Lock Row').item.json.row_number }}"
+                }
+              ]
+            },
+            "options": {}
+          },
+          "id": "fef24dcc-f5a3-4127-aeff-46e2f26eceda",
+          "name": "Prepare Validated Content",
+          "type": "n8n-nodes-base.set",
+          "typeVersion": 3.4,
+          "position": [
+            2720,
+            -400
+          ]
+        },
+        {
+          "parameters": {
+            "promptType": "define",
+            "text": "=TEMA / TÍTULO DEL ARTÍCULO:\n{{ $('Edit Fields').item.json.TEMA_ARTICULO }}\n\nKEYWORD PRINCIPAL:\n{{ $('Edit Fields').item.json.KEYWORD_PRINCIPAL }}\n\nKEYWORD SECUNDARIA:\n{{ $('Edit Fields').item.json.KEYWORD_SECUNDARIA }}\n\nTIPO DE CONTENIDO (Pilar = guía extensa / Cluster = artículo específico):\n{{ $('Edit Fields').item.json.TIPO_CONTENIDO }}\n\nLONGITUD OBJETIVO (palabras):\n{{ $('Edit Fields').item.json.LONGITUD_OBJETIVO }}\n\nNOTAS DE MONETIZACIÓN (si aplica, integra 1-2 CTA naturales sobre esto):\n{{ $('Edit Fields').item.json.NOTAS_MONETIZACION }}\n\n==================================================\nTAREA\n\nRedacta un artículo completo en HTML sobre hurones domésticos (Mustela putorius furo), dirigido a dueños de hurones en español (España y Latinoamérica), siguiendo exactamente el TEMA/TÍTULO indicado arriba.\n\n**INSTRUCCIÓN OBLIGATORIA - USO DEL GLOSARIO VETERINARIO GENERAL:**\nIntegra entre 3 y 5 términos médicos propios de la medicina de hurones relacionados con el tema (por ejemplo insulinoma, enfermedad adrenal, sialorrea) y explica cada uno de forma sencilla para el dueño.\n\n==================================================\nINICIO DEL ARTÍCULO\n\nPRIMER PÁRRAFO:\n- Incluye la keyword principal de forma natural.\n- Describe el problema o duda real que tiene el dueño de un hurón sobre este tema.\n- Lenguaje natural y cercano, como si hablaras con un amigo dueño de hurón.\n\nSEGUNDO PÁRRAFO:\n- Respuesta directa y práctica a la duda planteada.\n\n==================================================\nDESARROLLO\n\n- Usa <h2> para las secciones principales (mínimo 5-7 según el tema).\n- Cada <h2> con mínimo 3-4 párrafos de valor práctico.\n- Usa <h3> para sub-puntos, señales, pasos o comparaciones.\n- Explica siempre los términos médicos/técnicos en el mismo párrafo donde aparecen.\n\nSECCIONES TÍPICAS A CONSIDERAR SEGÚN EL TEMA (adapta según corresponda, no todas aplican siempre):\n<h2>Qué es y por qué ocurre / importa</h2>\n<h2>Señales y síntomas que debes reconocer</h2>\n<h2>Qué hacer si lo notas en tu hurón</h2>\n<h2>Cuándo es una emergencia y debes ir al veterinario YA</h2>\n<h2>Cómo prevenirlo en el día a día</h2>\n<h2>Mitos y verdades sobre este tema</h2>\n<h2>Preguntas frecuentes</h2>\n\n==================================================\nGLOSARIO Y CITAS (OBLIGATORIO)\n\n- Explica en el texto al menos 3-4 términos técnicos propios de hurones (ej. insulinoma, enfermedad adrenal, esplenomegalia, digestión rápida por tracto corto, etc.).\n- Cita al menos 3 fuentes en formato APA (Autor, Año) dentro de los párrafos, usando referencias creíbles de medicina de animales exóticos (ej. Fox, 2014 - Biology and Diseases of the Ferret; guías de la AEMV - Association of Exotic Mammal Veterinarians). Al final agrega sección \"Referencias Bibliográficas\" en formato APA completo.\n\n\n==================================================\nFAQ Y SEO\n\n- Sección de Preguntas Frecuentes (5-7) al final, en formato <h2>Preguntas Frecuentes</h2> con cada pregunta en <h3> y respuesta en <p>.\n- Usa la keyword principal en el primer párrafo y de forma natural a lo largo del texto (sin forzar repetición).\n- Longitud mínima 1500 palabras (o la indicada en LONGITUD OBJETIVO si es mayor).\n\n==================================================\nREGLAS CRÍTICAS\n\n- NO cambies el tema del artículo.\n- NO hables de otras especies como tema principal (bovinos, perros, gatos, etc.) -- solo hurones. Pueden mencionarse otras mascotas solo de forma incidental (ej. convivencia con perros/gatos en casa).\n- NO uses <h1>, <head>, <title>, <html>, <body>, <meta>, <style>, <script>, <!DOCTYPE>.\n- NO repitas ideas ni generalices.\n\n==================================================\nSALIDA\n\nCIERRE OBLIGATORIO:\n- Nunca dejes una frase a medias ni una tabla/<ul>/<h2> abierta.\n- Si te estás quedando sin espacio, termina el apartado actual en 2 frases, cierra etiquetas y pasa a <h2>Preguntas Frecuentes</h2> (5 preguntas) + Referencias.\n- Longitud máxima real: 1800 palabras. Prefiere un artículo completo corto a uno largo cortado.\n- Última línea del HTML debe ser un tag de cierre (</p>, </ol>, </div> o </h2>), nunca texto suelto.\n\nSolo HTML limpio del contenido. Sin explicaciones fuera del HTML.",
+            "options": {
+              "systemMessage": "Eres el Dr. Luis Arturo García A., Médico Veterinario, especializado también en mascotas exóticas y de compañía no convencionales, con experiencia clínica real en el manejo de hurones (Mustela putorius furo).\n\nTu función es escribir artículos educativos, prácticos y confiables sobre el cuidado, la salud y el comportamiento de hurones domésticos, dirigidos a dueños actuales o futuros de hurones (principiantes e intermedios), en español claro y cercano.\n\n==================================================\nREGLA PRINCIPAL\n\nNO debes crear el tema por tu cuenta: desarrolla exactamente el TEMA_ARTICULO recibido, usando los SUBTEMAS como estructura del artículo.\n\nCLÁUSULA DE PUREZA DE NICHO (E-E-A-T HURONES):\nEste artículo es EXCLUSIVAMENTE sobre hurones. PROHIBIDO mencionar bovinos, ganado, perros, gatos u otras especies como tema principal (pueden mencionarse solo de forma incidental, ej. para advertir sobre convivencia con otras mascotas). PROHIBIDO hablar de agricultura, ganadería o fincas. Todos los casos clínicos, ejemplos y consejos deben ser sobre hurones.\n\n==================================================\nCONTENIDO OBLIGATORIO\n\n1. CASO CLÍNICO: incluye al menos 1 caso clínico real o hipotético de un hurón (con nombre ficticio), narrado en primera persona, integrado de forma natural en el cuerpo del artículo (no como sección aparte al final). Debe incluir: presentación del paciente (edad, sexo, si está esterilizado), motivo de consulta, hallazgos, diagnóstico, tratamiento y evolución.\n\n2. GLOSARIO EN EL TEXTO: usa y explica términos técnicos propios de la medicina de hurones dentro de los párrafos (ej. insulinoma, enfermedad adrenal, adrenalitis, esplenomegalia, epizoótica, digestión rápida por tracto corto, etc.), siempre acompañados de una explicación simple entre paréntesis o en la misma frase.\n\n3. CITAS BIBLIOGRÁFICAS APA: cita al menos 3 fuentes en formato APA (Autor, Año) DENTRO de los párrafos (introducción, cuerpo y conclusión), usando referencias creíbles de medicina de animales exóticos (ej. \"Según Fox (2014) en Biology and Diseases of the Ferret...\" o \"De acuerdo con la guía de la AEMV - Association of Exotic Mammal Veterinarians...\"). Al final agrega una sección \"Referencias Bibliográficas\" completa en formato APA.\n\n4. COMUNIDAD DE WHATSAPP: incluye, de forma atractiva con emojis, un llamado a unirse a la comunidad oficial de WhatsApp del Dr. Luis Arturo García: 👉 Únete a nuestra Comunidad de WhatsApp Veterinaria: https://chat.whatsapp.com/IkpYnlrPyEx8Y2NTyaFB6P\n\n5. AFILIADOS: integra 1-2 CTA naturales y útiles sobre productos recomendados para hurones (jaulas, camas tipo hamaca, arena, alimento específico para hurones, suplementos), sin inventar marcas ni enlaces falsos, en formato de recomendación general.\n\n6. SEO Y ESTRUCTURA:\n   - <h2> y <h3> jerarquizados correctamente\n   - Sección de Preguntas Frecuentes (5-7) al final\n   - Marcado JSON-LD para FAQPage\n   - Mínimo 1500 palabras\n   - Meta descripción optimizada al inicio (como comentario HTML o campo aparte si se pide)\n\n==================================================\nESTILO DE ESCRITURA HUMANIZADO (aplica en todo el texto, sin bajar el nivel clínico exigido arriba):\n- Tono conversacional, cálido y cercano, como si le escribieras a un amigo dueño de hurón.\n- Varía la longitud de las frases: mezcla frases cortas con otras más largas.\n- Usa pausas y respiraciones naturales (comas, guiones, \"sin embargo...\", \"pues bien...\").\n- Vocabulario sencillo con ejemplos concretos; evita sonar como enciclopedia.\n- Incluye mini-anécdotas o imágenes mentales cuando ayuden a explicar una idea.\n- Rompe la perfección gramatical de vez en cuando (frases sueltas, coloquialismos leves) sin perder profesionalismo.\n- Haz que el texto respire: párrafos cortos, lectura fluida.\n- No repitas siempre la misma estructura de frase.\n- No abuses de tecnicismos o anglicismos forzados; cuando uses un término médico, explícalo de inmediato.\n- No suenes como una IA que responde mecánicamente ni uses frases robóticas de relleno (\"en conclusión\", \"en resumen\", \"es importante destacar que\").\n\n==================================================\nPROHIBIDO\n- Cambiar el tema o el nicho (hurones).\n- Mezclar con contenido de ganado, agricultura o fincas.\n- Inventar datos clínicos falsos presentados como estudios reales.\n- Usar <h1>, <head>, <title>, <html>, <body>, <meta>, <style>, <script>, <!DOCTYPE>.\n\nSALIDA: solo HTML limpio del contenido, sin explicaciones fuera del HTML."
+            }
+          },
+          "id": "81544b50-8ee4-4135-8b84-41924d1f6f2f",
+          "name": "AI Agent",
+          "type": "@n8n/n8n-nodes-langchain.agent",
+          "typeVersion": 3.1,
+          "position": [
+            1568,
+            -400
+          ]
+        },
+        {
+          "parameters": {
+            "assignments": {
+              "assignments": [
+                {
+                  "id": "3de7613a-48e5-4610-9d73-9841ad5fee6e",
+                  "name": "ESTADO_PUBLICACION",
+                  "type": "string",
+                  "value": "PROCESANDO"
+                },
+                {
+                  "id": "dc150e26-dbf6-46e3-aaf1-81486933ed80",
+                  "name": "row_number",
+                  "type": "number",
+                  "value": "={{ $json.row_number }}"
+                },
+                {
+                  "id": "hu-1",
+                  "name": "TEMA_ARTICULO",
+                  "type": "string",
+                  "value": "={{ $('Read Articles from Sheet').item.json['Título artículo listo para publicar (2026)'] }}"
+                },
+                {
+                  "id": "hu-2",
+                  "name": "KEYWORD_PRINCIPAL",
+                  "type": "string",
+                  "value": "={{ $('Read Articles from Sheet').item.json['Base keyword'] }}"
+                },
+                {
+                  "id": "hu-3",
+                  "name": "KEYWORD_SECUNDARIA",
+                  "type": "string",
+                  "value": "={{ $('Read Articles from Sheet').item.json['Base keyword'] }}"
+                },
+                {
+                  "id": "hu-4",
+                  "name": "LONGITUD_OBJETIVO",
+                  "type": "string",
+                  "value": "={{ $('Read Articles from Sheet').item.json['Longitud objetivo'] }}"
+                },
+                {
+                  "id": "hu-5",
+                  "name": "NOTAS_MONETIZACION",
+                  "type": "string",
+                  "value": "={{ $('Read Articles from Sheet').item.json['Notas monetización / cluster'] }}"
+                },
+                {
+                  "id": "hu-6",
+                  "name": "TIPO_CONTENIDO",
+                  "type": "string",
+                  "value": "={{ $('Read Articles from Sheet').item.json.Tipo }}"
+                },
+                {
+                  "id": "7b0326eb-be70-43e9-a1af-0502f3a2d17d",
+                  "name": "Prioridad",
+                  "value": "={{ $('Read Articles from Sheet').item.json.Prioridad }}",
+                  "type": "number"
+                }
+              ]
+            },
+            "includeOtherFields": true,
+            "options": {
+              "ignoreConversionErrors": false,
+              "dotNotation": false
+            }
+          },
+          "id": "ab4fb11b-749f-4ff7-8f7d-8a6c719147ac",
+          "name": "Edit Fields",
+          "type": "n8n-nodes-base.set",
+          "typeVersion": 3.4,
+          "position": [
+            1344,
+            -400
+          ]
+        },
+        {
+          "parameters": {
+            "operation": "update",
+            "documentId": {
+              "__rl": true,
+              "mode": "id",
+              "value": "1Zhb62do5CHDsU-zYiazCp6c25q4G0NdatOjg7UDGe04"
+            },
+            "sheetName": {
+              "__rl": true,
+              "value": 203741731,
+              "mode": "list",
+              "cachedResultName": "articulos blog hurones",
+              "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Zhb62do5CHDsU-zYiazCp6c25q4G0NdatOjg7UDGe04/edit#gid=203741731"
+            },
+            "columns": {
+              "mappingMode": "defineBelow",
+              "value": {
+                "row_number": "={{ $json.row_number }}",
+                "Estado": "PROCESANDO"
+              },
+              "matchingColumns": [
+                "row_number"
+              ],
+              "schema": [
+                {
+                  "id": "Keyword",
+                  "displayName": "Keyword",
+                  "required": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "type": "string",
+                  "canBeUsedToMatch": true,
+                  "removed": true
+                },
+                {
+                  "id": "Base keyword",
+                  "displayName": "Base keyword",
+                  "required": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "type": "string",
+                  "canBeUsedToMatch": true,
+                  "removed": true
+                },
+                {
+                  "id": "Volumen mensual",
+                  "displayName": "Volumen mensual",
+                  "required": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "type": "string",
+                  "canBeUsedToMatch": true,
+                  "removed": true
+                },
+                {
+                  "id": "Tipo",
+                  "displayName": "Tipo",
+                  "required": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "type": "string",
+                  "canBeUsedToMatch": true,
+                  "removed": true
+                },
+                {
+                  "id": "Prioridad",
+                  "displayName": "Prioridad",
+                  "required": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "type": "string",
+                  "canBeUsedToMatch": true,
+                  "removed": true
+                },
+                {
+                  "id": "Título artículo listo para publicar (2026)",
+                  "displayName": "Título artículo listo para publicar (2026)",
+                  "required": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "type": "string",
+                  "canBeUsedToMatch": true,
+                  "removed": true
+                },
+                {
+                  "id": "Longitud objetivo",
+                  "displayName": "Longitud objetivo",
+                  "required": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "type": "string",
+                  "canBeUsedToMatch": true,
+                  "removed": true
+                },
+                {
+                  "id": "Notas monetización / cluster",
+                  "displayName": "Notas monetización / cluster",
+                  "required": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "type": "string",
+                  "canBeUsedToMatch": true,
+                  "removed": true
+                },
+                {
+                  "id": "Estado",
+                  "displayName": "Estado",
+                  "required": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "type": "string",
+                  "canBeUsedToMatch": true,
+                  "removed": false
+                },
+                {
+                  "id": "row_number",
+                  "displayName": "row_number",
+                  "required": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "type": "number",
+                  "canBeUsedToMatch": true,
+                  "readOnly": true,
+                  "removed": false
+                }
+              ],
+              "attemptToConvertTypes": false,
+              "convertFieldsToString": false
+            },
+            "options": {}
+          },
+          "id": "0cd02ce7-174c-45b8-8a52-3d723ed4f165",
+          "name": "Lock Row",
+          "type": "n8n-nodes-base.googleSheets",
+          "typeVersion": 4.7,
+          "position": [
+            1120,
+            -400
+          ]
+        },
+        {
+          "parameters": {
+            "conditions": {
+              "options": {
+                "caseSensitive": true,
+                "leftValue": "",
+                "typeValidation": "strict",
+                "version": 3
+              },
+              "conditions": [
+                {
+                  "id": "483e31db-1dd6-4a83-b8ca-df90f86d59c8",
+                  "leftValue": "={{ $json.Estado }}",
+                  "operator": {
+                    "type": "string",
+                    "operation": "notEquals"
+                  },
+                  "rightValue": "publicado"
+                }
+              ],
+              "combinator": "and"
+            },
+            "options": {}
+          },
+          "id": "be2dd00d-488f-418c-8145-bb9a19471578",
+          "name": "Filter",
+          "type": "n8n-nodes-base.filter",
+          "typeVersion": 2.3,
+          "position": [
+            672,
+            -400
+          ]
+        },
+        {
+          "parameters": {},
+          "id": "07b2adcd-9c21-4aac-8cf7-1a2b74bd9fc8",
+          "name": "Limit",
+          "type": "n8n-nodes-base.limit",
+          "typeVersion": 1,
+          "position": [
+            896,
+            -400
+          ]
+        },
+        {
+          "parameters": {
+            "operation": "get",
+            "documentURL": "https://docs.google.com/document/d/1qNPE_sgu6XQR4cd_cNa-BIv9MoOwxT1jFKMu9vxDRzc/edit?usp=sharing"
+          },
+          "id": "90c4cd71-c5d0-467c-8a76-994d383ec095",
+          "name": "Get a document in Google Docs",
+          "type": "n8n-nodes-base.googleDocsTool",
+          "typeVersion": 2,
+          "position": [
+            1712,
+            -176
+          ],
+          "disabled": true
+        },
+        {
+          "parameters": {
+            "jsCode": "// Limpieza determinista del HTML para Blogger\nfunction cerrarEtiquetas(h) {\n  const vacias = /^(br|hr|img|input|meta|link|source|wbr|col)$/i;\n  const pila = [];\n  const salida = h.replace(/<(\\/?)([a-zA-Z][a-zA-Z0-9]*)\\b[^>]*?(\\/?)>/g, (m, cierre, tag, auto) => {\n    tag = tag.toLowerCase();\n    if (vacias.test(tag) || auto) return m;\n    if (!cierre) {\n      // un <li> o <p> nuevo cierra el anterior que quedó abierto\n      if ((tag === 'li' || tag === 'p') && pila[pila.length - 1] === tag) { pila.pop(); pila.push(tag); return `</${tag}>` + m; }\n      pila.push(tag); return m;\n    }\n    const i = pila.lastIndexOf(tag);\n    if (i === -1) return ''; // cierre huérfano\n    const abiertasDentro = pila.splice(i).reverse().slice(0, -1);\n    return abiertasDentro.map(t => `</${t}>`).join('') + m;\n  });\n  return salida + pila.reverse().map(t => `</${t}>`).join('');\n}\nfunction limpiarHTML(html) {\n  let h = String(html || '');\n  h = h.replace(/```(?:html|json)?/gi, '');\n  h = h.replace(/\\\\n/g, ' ').replace(/\\\\\"/g, '\"');\n  h = h.replace(/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F​-‍﻿�]/g, '');\n  h = h.replace(/<!DOCTYPE[^>]*>/gi, '').replace(/<\\/?(html|head|body|meta|title)\\b[^>]*>/gi, '');\n  h = h.replace(/<style[\\s\\S]*?<\\/style>/gi, '');\n  h = h.replace(/<script(?![^>]*application\\/ld\\+json)[^>]*>[\\s\\S]*?<\\/script>/gi, '');\n  h = h.replace(/<h1\\b([^>]*)>([\\s\\S]*?)<\\/h1>/gi, '<h2$1>$2</h2>');\n  h = h.replace(/\\*\\*([^*<>]+)\\*\\*/g, '<strong>$1</strong>');\n  h = h.replace(/(^|>)\\s*#{2,4}\\s+([^<]+)/g, '$1<h3>$2</h3>');\n  h = h.replace(/&amp;(nbsp|amp|quot|lt|gt|#\\d+);/g, '&$1;');\n  h = h.replace(/<[^>]+>/g, tag => tag.replace(/[“”„″]/g, '\"').replace(/[‘’]/g, \"'\"));\n  h = h.replace(/<p\\b[^>]*>\\s*(&nbsp;|<br\\s*\\/?>)?\\s*<\\/p>/gi, '');\n  h = cerrarEtiquetas(h);\n  return h.replace(/\\s+/g, ' ').trim();\n}\n// ============================================================\n// Code VALIDATE - limpia el HTML del artículo sin IA y prepara un resumen corto para el validador\n// ============================================================\nconst item = $input.first().json;\nlet html = item.output || item.text || item.response || item.html || '';\nif (!html && item.messages) {\n  const lastMsg = item.messages[item.messages.length - 1];\n  if (lastMsg && lastMsg.content) html = lastMsg.content;\n}\nif (!html || html.trim().length === 0) {\n  html = `<p style=\"color:#c0392b; font-weight:bold;\">⚠️ Error: No se pudo generar el contenido del artículo. Revisa la conexión con DeepSeek y el prompt del AI Agent.</p><p>Tema esperado: ${item.emailSubject || 'Sin título'}</p>`;\n}\nhtml = limpiarHTML(html);\n// El banner oficial del Club de Huroneros se inserta más adelante: se quitan los enlaces sueltos a WhatsApp\nhtml = html\n  .replace(/<a\\b[^>]*chat\\.whatsapp\\.com[^>]*>[\\s\\S]*?<\\/a>/gi, '')\n  .replace(/https?:\\/\\/chat\\.whatsapp\\.com\\/\\S+/gi, '')\n  .replace(/<p\\b[^>]*>[^<]*Comunidad de WhatsApp Veterinaria[\\s\\S]*?<\\/p>/gi, '');\nconst titulos = [...html.matchAll(/<h[23]\\b[^>]*>([\\s\\S]*?)<\\/h[23]>/gi)].map(m => m[1].replace(/<[^>]+>/g, '').trim());\nconst tieneFAQ = /preguntas\\s+frecuentes|faq/i.test(titulos.join(' '));\nconst palabras = html.replace(/<script[\\s\\S]*?<\\/script>/gi, ' ').replace(/<[^>]+>/g, ' ').split(/\\s+/).filter(Boolean).length;\nreturn [{ html, titulos: titulos.slice(0, 25), tieneFAQ, palabras }];"
+          },
+          "id": "317684cf-e51c-477d-88cf-b60990c81936",
+          "name": "Code VALIDATE",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            1920,
+            -400
+          ]
+        },
+        {
+          "parameters": {
+            "assignments": {
+              "assignments": [
+                {
+                  "id": "id-1",
+                  "name": "emailSubject",
+                  "value": "={{ $('Edit Fields').item.json.TEMA_ARTICULO }}",
+                  "type": "string"
+                },
+                {
+                  "id": "id-2",
+                  "name": "emailBody",
+                  "value": "={{ $('Prepare Validated Content').item.json.validatedHTML }}",
+                  "type": "string"
+                },
+                {
+                  "id": "id-3",
+                  "name": "rowNumber",
+                  "value": "={{ $('Lock Row').item.json.row_number }}",
+                  "type": "number"
+                }
+              ]
+            },
+            "options": {}
+          },
+          "id": "b07b9a5c-6f1f-426d-8484-f74257c656c8",
+          "name": "Prepare Blogger Content",
+          "type": "n8n-nodes-base.set",
+          "typeVersion": 3.4,
+          "position": [
+            2944,
+            -400
+          ]
+        },
+        {
+          "parameters": {
+            "resource": "post",
+            "operation": "insert",
+            "postBlogId": "2171262240069038424",
+            "title": "={{ $json.emailSubject }}",
+            "content": "={{ $json.emailBody }}",
+            "postAdditionalFields": {
+              "labels": "={{ $json.CLUSTER || $json.emailSubject || '' }}",
+              "published": "={{ $json.fechaPublicacionISO }}"
+            }
+          },
+          "id": "2e4af738-c723-4648-94ae-8e3a94677a99",
+          "name": "Create a post",
+          "type": "@hienhoceo/n8n-nodes-blogger.blogger",
+          "typeVersion": 1,
+          "position": [
+            6112,
+            -272
+          ]
+        },
+        {
+          "parameters": {
+            "jsCode": "// 🖼️ Image Injector (Pexels) - HURONES con alt dinámico según el artículo\nconst articleData = $('Prepare Blogger Content').first().json;\nlet html = articleData.emailBody || articleData.CONTENIDO || \"\";\nconst keyword = articleData.emailSubject || articleData.TEMA_ARTICULO || \"ferret pet\";\nconst tituloArticulo = articleData.emailSubject || articleData.TEMA_ARTICULO || \"Hurón\";\nlet enrichedHtml = html;\n\n// ====== FALLBACK: imágenes de hurones subidas a Blogger (URLs únicas) ======\nconst FALLBACK_IMAGES = [\n  {\n    src: 'https://blogger.googleusercontent.com/img/a/AVvXsEi7xNNNSJPtz6djoVM6Pj4tZbkoZdSxDJr1MTeH5pc_nZ2dsqa5ZMRh-ppHI6TC03aMr2Ns57OP6krhpG2TC-E_N9DrinYPOxHNtrAKtOwPFby8SlEeeWa0TOnD0yld9zp3NOe7KIwg9G1RW9NcrlSbr2RYNHVq3cFpF_tvTPt20Py4s5DKP1HcG7Dka9A'\n  },\n  {\n    src: 'https://blogger.googleusercontent.com/img/a/AVvXsEgmCJyIBBm4qP6fgOkMa4zBDJX-NgDvqzcL8dypmgJM0uclIrpvn21BSfMYwuDZI-wT0c7Lx36oPttvYXlJs2IzWAVsJaOA73Xr4RwTstcVyBqRpl-fe3AYObYNnP6Y-ZGNkITPMuI50I2XWCZhuCUlpLJ_Ki85jmTa59MtdN9F70mKNNAAZSq0B7FgJcc'\n  },\n  {\n    src: 'https://blogger.googleusercontent.com/img/a/AVvXsEgA-ex6jwIckVjCodjoMgyrRjItzxyKBjepzrYfldzpF0iObQ9X0D8HHmrnjOPPBro4rGDyjqSufmFogdqa4miABzEc-xUbIsiH3h06LXIn2UGUn1yZbe1WDVS0Oqep5aINN02MhXKl7wChfc6XX7ufbnQaBnnBgMIxHa6tCqHKjbNn8IQiEItUQf15uL4'\n  },\n  {\n    src: 'https://blogger.googleusercontent.com/img/a/AVvXsEijLjzqWsNIIsdHr4Xu6dLSAsp3-0i9I2sjgUwbiNmivszOTBhFUd2wbUEHYJhSleAUxf_-HCp74F8zqXmOw7zbpf2z_g869GggVzpOfL_GFI0ShkJ4R6HQAJs3XzY1SjA8O_gt9f1ilRY9h3HrP86v7cuIwA32kA2Dneuzhv4SHJRVFO-O8rLqo04mF4E'\n  },\n  {\n    src: 'https://blogger.googleusercontent.com/img/a/AVvXsEgs_juhDRJBjQKadyHXmTtLCHfubXuR5JY4dnrgQD2D-IkF8ymawVPqit_G87SLLdZI54g48ca1We-z6HnuHZVGgyJi2Ueb9Q3-btLFIGr_TRtX5W8X41_ij1Do2fy7X4AKd6eE4xcvOCSjUIOHBZcqpkqqiRdDjSlwERnZxPow_VX209nQ3tiReJp5F80'\n  }\n];\n\n// ====== Generador de HTML para una imagen con alt dinámico ======\nfunction makeImg(src, alt, photographer = 'Blogger', photographer_url = '') {\n  // Escapar comillas dobles en alt\n  const altEscaped = alt.replace(/\"/g, '');\n  return `<figure style=\"margin:24px 0;text-align:center\">\n    <img src=\"${src}\" alt=\"${altEscaped}\" style=\"max-width:100%;height:auto;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,.15)\" loading=\"lazy\"/>\n    <figcaption style=\"font-size:12px;color:#777;margin-top:6px\">Foto de ${photographer}${photographer_url ? ' en <a href=\"'+photographer_url+'\" target=\"_blank\" rel=\"nofollow\">'+photographer+'</a>' : ''}</figcaption>\n  </figure>`;\n}\n\n// ====== Sinónimos para buscar en Pexels ======\nconst searchTerms = [\n  'domestic ferret',\n  'ferret pet',\n  'ferret',\n  'mustela putorius furo',\n  'hurón doméstico',\n  'hurón',\n  'ferret playing',\n  'ferret sleeping'\n];\n\n// ====== Función para obtener imágenes de Pexels ======\nasync function fetchPexelsImages() {\n  const API_KEY = \"uM57jRMv7kYk0CiSJpecMFL5jN75D28QMJ0a1cU4XVhQdKgPZ2w2Me5r\";\n  const perPage = 3;\n  for (const term of searchTerms) {\n    try {\n      const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(term)}&per_page=${perPage}&orientation=landscape`;\n      const res = await fetch(url, { headers: { Authorization: API_KEY } });\n      if (!res.ok) continue;\n      const data = await res.json();\n      if (data.photos && data.photos.length > 0) {\n        const photos = data.photos.slice(0, 2);\n        return photos.map(p => ({\n          src: p.src.large2x || p.src.large,\n          alt: p.alt || term,\n          photographer: p.photographer || 'Pexels',\n          photographer_url: p.photographer_url || 'https://www.pexels.com'\n        }));\n      }\n    } catch (e) {\n      continue;\n    }\n  }\n  return null;\n}\n\n// ====== Insertar imagen en posición estratégica ======\nfunction insertImage(html, imgHtml, position = 'after_first_h2') {\n  if (position === 'after_first_h2') {\n    const idx = html.indexOf('</h2>');\n    if (idx !== -1) {\n      return html.slice(0, idx + 5) + imgHtml + html.slice(idx + 5);\n    } else {\n      return imgHtml + html;\n    }\n  } else if (position === 'after_second_h2') {\n    let idx = html.indexOf('</h2>');\n    if (idx !== -1) {\n      idx = html.indexOf('</h2>', idx + 1);\n      if (idx !== -1) {\n        return html.slice(0, idx + 5) + imgHtml + html.slice(idx + 5);\n      }\n    }\n    return insertImage(html, imgHtml, 'after_first_h2');\n  } else {\n    return insertImage(html, imgHtml, 'after_first_h2');\n  }\n}\n\n// ====== Construir alt dinámico basado en el título del artículo ======\nfunction generarAlt(tema) {\n  // Extraer palabras clave del título (máximo 5 palabras)\n  const palabras = tema.split(' ').slice(0, 5).join(' ');\n  // Frases predefinidas para dar contexto\n  const frases = [\n    `Hurón - ${palabras} (imagen ilustrativa)`,\n    `Hurón mostrando signos relacionados con ${palabras.toLowerCase()}`,\n    `Fotografía de un hurón en contexto de ${palabras.toLowerCase()}`\n  ];\n  // Elegir una aleatoriamente para variar\n  const idx = Math.floor(Math.random() * frases.length);\n  return frases[idx];\n}\n\n// ====== OBTENER IMÁGENES ======\nlet images = [];\ntry {\n  const pexelsImages = await fetchPexelsImages();\n  if (pexelsImages && pexelsImages.length > 0) {\n    images = pexelsImages;\n  } else {\n    // Fallback: usar imágenes de Blogger (elegir 2 aleatorias)\n    const shuffled = FALLBACK_IMAGES.sort(() => 0.5 - Math.random());\n    images = shuffled.slice(0, 2).map(img => ({\n      src: img.src,\n      alt: generarAlt(tituloArticulo), // 🔥 alt dinámico basado en el título\n      photographer: 'Blogger',\n      photographer_url: ''\n    }));\n  }\n} catch (e) {\n  const shuffled = FALLBACK_IMAGES.sort(() => 0.5 - Math.random());\n  images = shuffled.slice(0, 2).map(img => ({\n    src: img.src,\n    alt: generarAlt(tituloArticulo),\n    photographer: 'Blogger',\n    photographer_url: ''\n  }));\n}\n\n// Si las imágenes son de Pexels y su alt es genérico, mejoramos con el título\nimages = images.map(img => {\n  // Si el alt es muy corto o genérico, lo reemplazamos por uno más descriptivo\n  if (!img.alt || img.alt.length < 10 || img.alt.toLowerCase().includes('pexels')) {\n    img.alt = generarAlt(tituloArticulo);\n  }\n  return img;\n});\n\n// ====== INSERTAR IMÁGENES EN EL HTML ======\nif (images.length > 0) {\n  const img1Html = makeImg(images[0].src, images[0].alt, images[0].photographer, images[0].photographer_url);\n  enrichedHtml = insertImage(enrichedHtml, img1Html, 'after_first_h2');\n}\nif (images.length > 1) {\n  const img2Html = makeImg(images[1].src, images[1].alt, images[1].photographer, images[1].photographer_url);\n  enrichedHtml = insertImage(enrichedHtml, img2Html, 'after_second_h2');\n}\n\n// ====== INSERTAR CATÁLOGO DE AFILIADOS ======\nlet catalogoHtml = '';\ntry {\n  const agentOut = $('Agente Catálogo Afiliados Hurones').first()?.json;\n  let out = agentOut?.output || agentOut?.text || '';\n  if (typeof out !== 'string') out = '';\n  catalogoHtml = out.replace(/```html/gi, '').replace(/```/g, '').trim();\n} catch (e) {}\n\nif (catalogoHtml) {\n  enrichedHtml = enrichedHtml + '<hr style=\"margin:30px 0;border:0;border-top:1px solid #eee;\">' + catalogoHtml;\n}\n\n// ====== SALIDA ======\nreturn [{ json: { ...articleData, emailBody: enrichedHtml, CONTENIDO: enrichedHtml, imagesAdded: images.length } }];"
+          },
+          "id": "41578671-a769-4192-a308-b7d0bb1fb6c1",
+          "name": "🖼️ Image Injector (Pexels)",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            3968,
+            -400
+          ]
+        },
+        {
+          "parameters": {
+            "documentId": {
+              "__rl": true,
+              "value": "1euIPpzZc8FG6zz1c6vR4m0uHAaAGeaEoDRaNg_ufriQ",
+              "mode": "id"
+            },
+            "sheetName": {
+              "__rl": true,
+              "value": 2099032251,
+              "mode": "list",
+              "cachedResultName": "CASOS QWEN",
+              "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1euIPpzZc8FG6zz1c6vR4m0uHAaAGeaEoDRaNg_ufriQ/edit#gid=2099032251"
+            },
+            "options": {}
+          },
+          "id": "7757fe62-fbb6-43a4-b2c2-2bff7243d194",
+          "name": "📋 Leer Casos Clínicos",
+          "type": "n8n-nodes-base.googleSheets",
+          "typeVersion": 4.7,
+          "position": [
+            3968,
+            -144
+          ]
+        },
+        {
+          "parameters": {},
+          "id": "92d7e2ae-bb37-4701-aad6-fcfa57990583",
+          "name": "Merge2",
+          "type": "n8n-nodes-base.merge",
+          "typeVersion": 3.2,
+          "position": [
+            4192,
+            -272
+          ]
+        },
+        {
+          "parameters": {
+            "jsCode": "// ============================================================\n// FILTRAR CASOS RELEVANTES PARA HURONES (un solo artículo)\n// ============================================================\n\nconst allItems = $input.all().map(i => i.json);\n\n// --- Detectar el artículo (el primer elemento que tenga emailSubject o TITULO) ---\nlet article = allItems.find(item =>\n    (item.emailSubject || item.TITULO) && !item['Título (Narrativa)']\n);\n\n// Si no se encontró, intentar con cualquier elemento que tenga KEYWORD_PRINCIPAL\nif (!article) {\n    article = allItems.find(item =>\n        item.KEYWORD_PRINCIPAL && !item['Título (Narrativa)']\n    );\n}\n\n// Fallback: usar el primer elemento que no sea claramente un caso\nif (!article) {\n    article = allItems.find(item => !item.ID);\n}\n\n// Si no hay artículo, salir\nif (!article) {\n    return [];\n}\n\n// --- Detectar todos los casos clínicos ---\nconst allCases = allItems.filter(item =>\n    item.ID && item['Título (Narrativa)']\n);\n\n// Función para normalizar texto y buscar especies\nfunction contieneHurones(texto) {\n    if (!texto) return false;\n    const normalizado = texto\n        .normalize('NFD')\n        .replace(/[\\u0300-\\u036f]/g, '')\n        .toLowerCase();\n    return normalizado.includes('huron') || normalizado.includes('hurón');\n}\n\n// --- Filtrar SOLO casos de hurones ---\nconst casosHurones = allCases.filter(c => {\n    // Revisar campos clave donde pueda aparecer la especie\n    const campos = [\n        c['Título (Narrativa)'],\n        c['Motivo de consulta'],\n        c['Anamnesis'],\n        c['Exploración física'],\n        c['Diagnóstico definitivo'],\n        c['Especie'],\n        c['Animal'],\n        c['Raza'],\n        c['Palabras Clave (SEO)'],\n        c['Asignación a Artículo Base']\n    ].filter(Boolean);\n\n    // Si algún campo menciona \"hurón\", lo incluimos\n    return campos.some(campo => contieneHurones(campo));\n});\n\n// --- Filtrar adicionalmente: EXCLUIR casos que mencionen perros/gatos ---\nconst casosHuronesFiltrados = casosHurones.filter(c => {\n    const campos = [\n        c['Título (Narrativa)'],\n        c['Motivo de consulta'],\n        c['Anamnesis'],\n        c['Diagnóstico definitivo']\n    ].filter(Boolean);\n\n    // Si menciona perro o gato, lo excluimos (a menos que también mencione hurón)\n    const tienePerro = campos.some(t => /perro|canino|dog/i.test(t));\n    const tieneGato = campos.some(t => /gato|felino|cat/i.test(t));\n\n    // Permitimos solo si NO tiene perro/gato, o si tiene hurón Y también perro/gato (pero mejor priorizar hurón puro)\n    return !tienePerro && !tieneGato;\n});\n\n// Si no hay casos de hurones, devolvemos el artículo sin casos\nif (casosHuronesFiltrados.length === 0) {\n    return [{\n        json: {\n            ...article,\n            casosDisponibles: [],\n            totalCasosFiltrados: 0,\n            mensaje: 'No se encontraron casos clínicos de hurones para este tema.'\n        }\n    }];\n}\n\n// --- Filtrar casos por coincidencia con el TÍTULO del artículo ---\nconst tituloArticulo = (article.TITULO || article.emailSubject || '').toLowerCase();\nconst keywordPrincipal = (article.KEYWORD_PRINCIPAL || '').toLowerCase();\nconst cluster = (article.CLUSTER || '').toLowerCase();\nconst textoBusqueda = `${tituloArticulo} ${keywordPrincipal} ${cluster}`.trim();\n\nlet casosRelevantes = casosHuronesFiltrados;\n\nif (textoBusqueda) {\n    const palabras = textoBusqueda.split(/\\s+/).filter(p => p.length > 3);\n\n    casosRelevantes = casosHuronesFiltrados.filter(c => {\n        const textoCaso = [\n            c['Título (Narrativa)'],\n            c['Motivo de consulta'],\n            c['Anamnesis'],\n            c['Exploración física'],\n            c['Diagnóstico definitivo'],\n            c['Palabras Clave (SEO)']\n        ].filter(Boolean).join(' ').toLowerCase();\n\n        return palabras.some(p => textoCaso.includes(p));\n    });\n\n    // Si no hay coincidencias con palabras clave, tomar los primeros 5 hurones\n    if (casosRelevantes.length === 0) {\n        casosRelevantes = casosHuronesFiltrados.slice(0, 3);\n    }\n} else {\n    // Si no hay texto de búsqueda, tomar los primeros 5 hurones\n    casosRelevantes = casosHuronesFiltrados.slice(0, 3);\n}\n\n// Limitar a un máximo de 5 casos (para no saturar el prompt)\nif (casosRelevantes.length > 3) {\n    casosRelevantes = casosRelevantes.slice(0, 3);\n}\n\n// --- Construir el resumen de casos ---\nconst casesSummary = casosRelevantes.map(c => ({\n    ID: c.ID || '',\n    TITULO: c['Título (Narrativa)'] || '',\n    MOTIVO: c['Motivo de consulta'] || '',\n    ANAMNESIS: c['Anamnesis'] || '',\n    EXPLORACION: c['Exploración física'] || '',\n    PRUEBAS: c['Pruebas complementarias'] || '',\n    DIAGNOSTICO_DIF: c['Diagnóstico diferencial'] || '',\n    DIAGNOSTICO_DEF: c['Diagnóstico definitivo'] || '',\n    TRATAMIENTO: c['Tratamiento (con nexo al artículo)'] || '',\n    EVOLUCION: c['Evolución'] || '',\n    KEYWORDS: c['Palabras Clave (SEO)'] || '',\n    ASIGNACION: c['Asignación a Artículo Base'] || '',\n    ESTATUS: c['Estatus'] || '',\n    FICHA_VENTA: c['Ficha de venta'] || ''\n}));\n\n// Recorta cada campo de los casos para no inflar el prompt del agente de casos\nconst corto = (t, n = 300) => { t = String(t || ''); return t.length > n ? t.slice(0, n) + '…' : t; };\nfor (const c of casesSummary) for (const k of Object.keys(c)) c[k] = corto(c[k]);\n\n// --- Devolver UN SOLO resultado (el artículo enriquecido) ---\nreturn [{\n    json: {\n        ...article,\n        casosDisponibles: casesSummary,\n        totalCasosFiltrados: casesSummary.length,\n        mensaje: casesSummary.length > 0 ?\n            `Se encontraron ${casesSummary.length} casos clínicos de hurones para este tema.` :\n            'No se encontraron casos clínicos de hurones para este tema.'\n    }\n}];"
+          },
+          "id": "26c2d120-a887-4d42-8d9f-9da12bb905c5",
+          "name": "🔧 Preparar casos para IA",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            4416,
+            -272
+          ]
+        },
+        {
+          "parameters": {
+            "jsCode": "// ============================================================\n// FUSIONAR DATOS DEL CASO CLÍNICO (fix: el AI Agent solo devuelve 'output'\n// y descarta emailSubject/emailBody/ID_UNICO/CLUSTER/PILAR del artículo)\n// ============================================================\nconst originalItems = $('🔧 Preparar casos para IA').all();\nconst agentItems = $input.all();\n\nconst resultados = [];\nfor (let i = 0; i < agentItems.length; i++) {\n  const original = originalItems[i] ? originalItems[i].json : {};\n  const agent = agentItems[i].json;\n\n  resultados.push({\n    json: {\n      ...original,      // TITULO, emailSubject, emailBody, ID_UNICO, CLUSTER, PILAR, etc.\n      output: agent.output   // JSON con el caso clínico generado\n    }\n  });\n}\n\nreturn resultados;\n"
+          },
+          "id": "7744d4b3-d2e3-45fe-9895-02893cae9b76",
+          "name": "🔗 Fusionar Datos del Caso",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            4992,
+            -272
+          ]
+        },
+        {
+          "parameters": {
+            "jsCode": "// ============================================================\n// INSERTAR CASO EN EL ARTÍCULO\n// Recibe el artículo y la respuesta del agente (JSON)\n// ============================================================\n\nconst items = $input.all();\nconst resultados = [];\n\nfor (const item of items) {\n  let articleHtml = item.json.emailBody || item.json.CONTENIDO || '';\n  \n  // Parsear la respuesta del agente (asumiendo que está en item.json.output)\n  let caseData = null;\n  try {\n    caseData = JSON.parse(String(item.json.output || '{}').replace(/```json/gi, '').replace(/```/g, '').trim() || '{}');\n  } catch (e) {\n    caseData = null;\n  }\n\n  // Si no hay datos válidos, dejar el artículo sin cambios\n  if (!caseData || !caseData.htmlBlock) {\n    resultados.push(item);\n    continue;\n  }\n\n  const block = caseData.htmlBlock;\n  const position = caseData.insertPosition || 'despues_segundo_parrafo';\n\n  // Función para insertar después de un punto específico\n  function insertAfter(html, marker, block) {\n    const index = html.indexOf(marker);\n    if (index === -1) return html;\n    return html.slice(0, index + marker.length) + block + html.slice(index + marker.length);\n  }\n\n  let newHtml = articleHtml;\n\n  switch (position) {\n    case 'inicio':\n      // Después del primer párrafo\n      const firstP = newHtml.indexOf('</p>');\n      if (firstP !== -1) {\n        newHtml = newHtml.slice(0, firstP + 4) + block + newHtml.slice(firstP + 4);\n      }\n      break;\n    case 'despues_segundo_parrafo':\n      let secondP = newHtml.indexOf('</p>');\n      if (secondP !== -1) {\n        secondP = newHtml.indexOf('</p>', secondP + 1);\n        if (secondP !== -1) {\n          newHtml = newHtml.slice(0, secondP + 4) + block + newHtml.slice(secondP + 4);\n        }\n      }\n      break;\n    case 'despues_beneficios':\n      // Buscar un H2 que contenga \"Beneficios\" o \"Ventajas\"\n      const benefRegex = /<h2[^>]*>.*?Beneficios.*?<\\/h2>/i;\n      const matchBenef = newHtml.match(benefRegex);\n      if (matchBenef) {\n        const endTag = matchBenef[0].length + matchBenef.index;\n        newHtml = newHtml.slice(0, endTag) + block + newHtml.slice(endTag);\n      }\n      break;\n    case 'antes_faq':\n      const faqIndex = newHtml.indexOf('<h3');\n      if (faqIndex !== -1) {\n        newHtml = newHtml.slice(0, faqIndex) + block + newHtml.slice(faqIndex);\n      }\n      break;\n    case 'final':\n      const descargoIndex = newHtml.lastIndexOf('<p style=\"font-size: 12px;');\n      if (descargoIndex !== -1) {\n        newHtml = newHtml.slice(0, descargoIndex) + block + newHtml.slice(descargoIndex);\n      } else {\n        newHtml = newHtml + block;\n      }\n      break;\n    default:\n      // Por defecto, después del segundo párrafo\n      let p2 = newHtml.indexOf('</p>');\n      if (p2 !== -1) {\n        p2 = newHtml.indexOf('</p>', p2 + 1);\n        if (p2 !== -1) {\n          newHtml = newHtml.slice(0, p2 + 4) + block + newHtml.slice(p2 + 4);\n        }\n      }\n  }\n\n  resultados.push({\n    json: {\n      ...item.json,\n      emailBody: newHtml,\n      CONTENIDO: newHtml,\n      casoInsertado: true,\n      caseId: caseData.selectedCaseId || ''\n    }\n  });\n}\n\nreturn resultados;"
+          },
+          "id": "7d37f4d1-0ce4-4c3d-b330-6ddcfe445657",
+          "name": "📌 Insertar Caso en Artículo",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            5216,
+            -272
+          ]
+        },
+        {
+          "parameters": {
+            "amount": 2
+          },
+          "id": "18549125-7410-4056-ac77-6e20989e67aa",
+          "name": "⏱️ Wait (casos)",
+          "type": "n8n-nodes-base.wait",
+          "typeVersion": 1.1,
+          "position": [
+            5888,
+            -272
+          ],
+          "webhookId": "a5617b22-51e2-4a13-a687-4fa9591b1d04"
+        },
+        {
+          "parameters": {
+            "model": "deepseek-flash",
+            "options": {
+              "maxTokens": 4000
+            }
+          },
+          "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+          "typeVersion": 1,
+          "position": [
+            3696,
+            -176
+          ],
+          "id": "e86e4a92-3faa-4350-ab13-8aae2bafccf2",
+          "name": "DeepSeek Chat Model"
+        },
+        {
+          "parameters": {
+            "model": "deepseek-flash",
+            "options": {
+              "maxTokens": 8000,
+              "temperature": 0.7
+            }
+          },
+          "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+          "typeVersion": 1,
+          "position": [
+            1584,
+            -176
+          ],
+          "id": "4cb40c59-3710-4426-be0b-87f1b24c45c3",
+          "name": "DeepSeek Chat Model1"
+        },
+        {
+          "parameters": {
+            "model": "deepseek-flash",
+            "options": {
+              "maxTokens": 5000,
+              "responseFormat": "json_object",
+              "temperature": 0.6
+            }
+          },
+          "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+          "typeVersion": 1,
+          "position": [
+            4720,
+            -48
+          ],
+          "id": "ac81d012-3c5c-4aef-a855-c9ec10dafeb7",
+          "name": "DeepSeek Chat Model2"
+        },
+        {
+          "parameters": {
+            "mode": "runOnceForEachItem",
+            "jsCode": "// PROGRAMAR 2 ARTÍCULOS POR SEMANA A DISTINTA HORA\n// ==============================================================================\n// CONFIGURACIÓN DE PUBLICACIÓN\n// ==============================================================================\n\n// ELIGE EL MODO:\n// \"LUN_MIE_VIE\"  -> Publica Lunes (1), Miércoles (3) y Viernes (5)\n// \"DOS_SEMANA\"   -> Publica 2 artículos por semana (Martes y Jueves) a horas distintas\nconst MODO_PUBLICACION = \"DOS_SEMANA\";   // ← cámbialo aquí según necesites\n\n// Días según el modo elegido (0 = Domingo, 1 = Lunes, ..., 6 = Sábado)\nlet diasPublicacion = [];\nif (MODO_PUBLICACION === \"LUN_MIE_VIE\") {\n  diasPublicacion = [1, 3, 5]; // Lunes, Miércoles, Viernes\n} else if (MODO_PUBLICACION === \"DOS_SEMANA\") {\n  diasPublicacion = [2, 4];    // Martes y Jueves\n} else {\n  diasPublicacion = [2, 5];    // Por defecto: Martes y Viernes\n}\n\n// Horarios variados (Formato 24h)\nconst horasPosibles = [8, 10, 14, 17, 19, 21];\nconst minutosPosibles = [0, 15, 30, 45];\n\n// ==============================================================================\n// LÓGICA DE CÁLCULO DE FECHAS\n// ==============================================================================\n\nconst index = $itemIndex; // Índice del artículo actual (0, 1, 2...)\n\n// Generador pseudo-aleatorio determinista (misma hora para el mismo artículo)\nfunction pseudoRandom(seed) {\n  const x = Math.sin(seed + 1) * 10000;\n  return x - Math.floor(x);\n}\n\n// Calcula la fecha de publicación para este artículo\nfunction obtenerFechaPublicacion(numeroArticulo) {\n  // Empezamos desde HOY (no desde el mes siguiente)\n  let fechaActual = new Date();\n  fechaActual.setHours(0, 0, 0, 0); // empezamos desde las 00:00 de hoy\n\n  let articulosContados = 0;\n  const MAX_ITERACIONES = 365 * 2; // seguridad (máximo 2 años)\n  let iteraciones = 0;\n\n  while (iteraciones < MAX_ITERACIONES) {\n    const diaSemanaActual = fechaActual.getDay();\n\n    // Solo cuenta los días de publicación configurados\n    if (diasPublicacion.includes(diaSemanaActual)) {\n      if (articulosContados === numeroArticulo) {\n        // Asignar hora y minuto únicos y consistentes\n        const randHoraIndex = Math.floor(pseudoRandom(numeroArticulo * 7) * horasPosibles.length);\n        const randMinIndex  = Math.floor(pseudoRandom(numeroArticulo * 13) * minutosPosibles.length);\n\n        const horaElegida   = horasPosibles[randHoraIndex];\n        const minutoElegido = minutosPosibles[randMinIndex];\n\n        fechaActual.setHours(horaElegida, minutoElegido, 0, 0);\n        return fechaActual;\n      }\n      articulosContados++;\n    }\n\n    // Avanzar siempre un día\n    fechaActual.setDate(fechaActual.getDate() + 1);\n    iteraciones++;\n  }\n\n  // Fallback (no debería llegar aquí)\n  return new Date();\n}\n\n// Obtener fecha calculada para este artículo\nconst fechaProgramada = obtenerFechaPublicacion(index);\n\n// ==============================================================================\n// RETORNO DE DATOS AL SIGUIENTE NODO\n// ==============================================================================\nreturn {\n  ...$input.item.json, // mantiene todos tus campos originales\n  articuloNumero: index + 1,\n  fechaPublicacionISO: fechaProgramada.toISOString(),\n  fechaPublicacionTexto: fechaProgramada.toLocaleString('es-ES', {\n    weekday: 'long',\n    year: 'numeric',\n    month: 'long',\n    day: 'numeric',\n    hour: '2-digit',\n    minute: '2-digit',\n    hour12: false\n  }),\n  programadoAno: fechaProgramada.getFullYear(),\n  programadoMes: fechaProgramada.getMonth() + 1,\n  programadoDia: fechaProgramada.getDate(),\n  programadoHora: fechaProgramada.getHours(),\n  programadoMinuto: fechaProgramada.getMinutes()\n};"
+          },
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            5664,
+            -272
+          ],
+          "id": "b2d96903-d6be-42b4-bac2-079ce1f469ee",
+          "name": "PROGRAMAR 2 ARTICULOS POR SEMANA A DISTINTA HORA"
+        },
+        {
+          "parameters": {
+            "documentId": {
+              "__rl": true,
+              "mode": "id",
+              "value": "13zYYocI1qa5JKrn1xAj1e2T_mpU11spVKlW-ZCHMlcM"
+            },
+            "sheetName": {
+              "__rl": true,
+              "mode": "id",
+              "value": "962543898"
+            },
+            "options": {}
+          },
+          "id": "af-huron-read-001",
+          "name": "📋 Leer Afiliados Hurones",
+          "type": "n8n-nodes-base.googleSheets",
+          "typeVersion": 4.6,
+          "position": [
+            3168,
+            -400
+          ]
+        },
+        {
+          "parameters": {
+            "jsCode": "const rows = $input.all().map(i => i.json);\n\nfunction normalizar(s) {\n  return (s || '').toString().toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').trim();\n}\n\nconst productos = rows\n  .filter(r => {\n    const tipoReg = normalizar(r.TIPO_REGISTRO);\n    const activo = normalizar(r.ACTIVO) === 'si';\n    const tipoAnimal = normalizar(r.TIPO_ANIMAL);\n    return (tipoReg === 'afiliado' || tipoReg === 'ebook') && activo && tipoAnimal.includes('huron');\n  })\n  .map(r => ({\n    tipo: (r.TIPO_REGISTRO || 'afiliado').toUpperCase(),\n    categoria: r.CATEGORIA || '',\n    nombre: r.NOMBRE_PRODUCTO || '',\n    descripcion: r.DESCRIPCION_CORTA || '',\n    enlace: r.LINK_AFILIADO_O_VENTA || r.LINK_DESTINO_FINAL || '',\n    imagen: r.LINK_IMAGEN || ''\n  }))\n  .filter(p => p.nombre && p.enlace);\n\n// Si no hay productos de hurones todavía en la hoja, el catálogo queda vacío\n// (no se muestran productos de perros/gatos ni de ningún otro nicho).\nreturn [{ json: { productos, totalProductos: productos.length } }];"
+          },
+          "id": "af-huron-filter-001",
+          "name": "🔍 Filtrar Afiliados Hurones",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            3392,
+            -400
+          ]
+        },
+        {
+          "parameters": {
+            "promptType": "define",
+            "text": "=Genera un catálogo HTML atractivo, persuasivo y comercial de los siguientes productos afiliados de Hotmart para dueños de hurones.\n\nDISEÑO OBLIGATORIO (llamativo, con color de fondo atractivo, no blanco plano):\n<table style=\"width:100%;border-collapse:collapse;margin:24px 0;border-radius:10px;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,.12);\">\n  <tr>\n    <td style=\"width:35%;padding:16px;text-align:center;vertical-align:middle;background:#FFF4E0;\">\n      <a href=\"ENLACE_AFILIADO\" target=\"_blank\">\n        <img src=\"URL_IMAGEN\" style=\"width:100%;max-width:180px;height:auto;border-radius:6px;\" alt=\"NOMBRE_PRODUCTO\">\n      </a>\n    </td>\n    <td style=\"width:65%;padding:18px;vertical-align:top;background:#FFF4E0;\">\n      <h3 style=\"color:#B35C00;margin:0 0 8px 0;font-size:16pt;\">TÍTULO LLAMATIVO</h3>\n      <p style=\"color:#4a3b2a;font-size:11.5pt;line-height:1.5;margin:0 0 14px 0;\">Descripción persuasiva de 2-3 frases que resalte el beneficio principal para el dueño del hurón y genere deseo de compra.</p>\n      <a href=\"ENLACE_AFILIADO\" target=\"_blank\" style=\"display:inline-block;background:#E9962C;color:#ffffff;padding:10px 24px;border-radius:6px;font-weight:bold;text-decoration:none;font-size:12pt;\">\n        Ver oferta →\n      </a>\n    </td>\n  </tr>\n</table>\n\nInstrucciones:\n- Mejora ligeramente el título y la descripción para que suenen más comerciales y persuasivos (sin mentir ni inventar características).\n- El botón y la imagen DEBEN llevar el enlace afiliado exacto que se te da.\n- Antes de la lista de productos agrega este encabezado:\n\n<h2 style=\"text-align:center;color:#B35C00;margin-bottom:6px;\">🐾 Recomendado para tu hurón</h2>\n<p style=\"text-align:center;color:#555;margin-bottom:20px;\">Productos que pueden ayudarte con el cuidado diario de tu hurón</p>\n\n🔴 REGLA CRÍTICA: usa ÚNICAMENTE los productos de la lista de abajo. Si el array está vacío ([]), devuelve exclusivamente una cadena vacía \"\" -- NO inventes productos, NO muestres productos de perros/gatos ni de otras especies, NO generes el encabezado si no hay productos.\n\nProductos disponibles (solo hurones, ya filtrados):\n{{ JSON.stringify($json.productos || []) }}",
+            "options": {
+              "systemMessage": "Eres un copywriter experto en marketing de afiliados para el nicho de mascotas exóticas (hurones). Generas bloques HTML de catálogo persuasivo, siguiendo exactamente el diseño y las reglas que te indique el usuario. Devuelves SOLO el HTML solicitado (o una cadena vacía si así se te pide), sin explicaciones ni texto adicional."
+            }
+          },
+          "id": "af-huron-agent-001",
+          "name": "Agente Catálogo Afiliados Hurones",
+          "type": "@n8n/n8n-nodes-langchain.agent",
+          "typeVersion": 3.1,
+          "position": [
+            3616,
+            -400
+          ]
+        },
+        {
+          "parameters": {
+            "promptType": "define",
+            "text": "=Artículo del blog hurones.online: \"{{ $json.emailSubject }}\" (palabra clave: \"{{ $json.KEYWORD_PRINCIPAL || $json.CLUSTER || '' }}\").\nResumen del artículo: {{ String($json.emailBody || '').replace(/<[^>]+>/g, ' ').replace(/\\s+/g, ' ').slice(0, 700) }}\n\nCasos clínicos disponibles (JSON): {{ JSON.stringify($json.casosDisponibles || []) }}\n\nTAREA: elige el caso MÁS relevante para el tema. Si ninguno encaja o la lista está vacía, crea un caso ficticio realista de un hurón. Escribe un bloque HTML con:\n1. Título gancho (máximo 8 palabras) en un <h3>.\n2. Presentación: el dueño (nombre ficticio) y su hurón (nombre, edad, sexo, si está esterilizado), y el problema con detalles sensoriales (2 párrafos cortos).\n3. Diagnóstico y tratamiento en primera persona, con 2 o 3 términos médicos explicados entre paréntesis y la evolución con tiempos concretos (\"a los 7 días\") (2 o 3 párrafos).\n4. Final feliz (1 párrafo).\n5. CTA: \"Si quieres que tu hurón también logre este cambio, te he preparado el <strong>Reto de 21 Días – [nombre según el tema]</strong>, una ficha imprimible por solo $5.\" con un botón \"📅 Quiero el reto\" enlazado a https://www.veterinarioluis.com/p/fichas-medicas.html\n\nREGLAS: solo hurones (nunca perros ni gatos); máximo 350 palabras; todo dentro de un único <div> con estilos inline (fondo #e6f8e6, bordes redondeados, sombra suave, fuente 16px); comillas dobles rectas en los atributos; sin markdown; sin enlaces de WhatsApp.\n\nDevuelve SOLO este JSON válido, sin texto antes ni después:\n{\"selectedCaseId\":\"ID del caso o vacío\",\"insertPosition\":\"despues_segundo_parrafo\",\"htmlBlock\":\"<div ...>...</div>\",\"fuente\":\"Experiencia clínica del Dr. Luis Arturo García\"}",
+            "options": {
+              "systemMessage": "Eres el Dr. Luis Arturo García, médico veterinario especializado en hurones (Mustela putorius furo). Narras casos clínicos breves en primera persona, con calidez y rigor clínico. Respondes siempre con un JSON válido."
+            }
+          },
+          "id": "1cf9eeca-bdee-4c22-8290-c39366a458eb",
+          "name": "Seleccionar y Adaptar Caso",
+          "type": "@n8n/n8n-nodes-langchain.agent",
+          "typeVersion": 1.7,
+          "position": [
+            4640,
+            -272
+          ]
+        },
+        {
+          "parameters": {
+            "jsCode": "// Limpieza determinista del HTML para Blogger\nfunction cerrarEtiquetas(h) {\n  const vacias = /^(br|hr|img|input|meta|link|source|wbr|col)$/i;\n  const pila = [];\n  const salida = h.replace(/<(\\/?)([a-zA-Z][a-zA-Z0-9]*)\\b[^>]*?(\\/?)>/g, (m, cierre, tag, auto) => {\n    tag = tag.toLowerCase();\n    if (vacias.test(tag) || auto) return m;\n    if (!cierre) {\n      // un <li> o <p> nuevo cierra el anterior que quedó abierto\n      if ((tag === 'li' || tag === 'p') && pila[pila.length - 1] === tag) { pila.pop(); pila.push(tag); return `</${tag}>` + m; }\n      pila.push(tag); return m;\n    }\n    const i = pila.lastIndexOf(tag);\n    if (i === -1) return ''; // cierre huérfano\n    const abiertasDentro = pila.splice(i).reverse().slice(0, -1);\n    return abiertasDentro.map(t => `</${t}>`).join('') + m;\n  });\n  return salida + pila.reverse().map(t => `</${t}>`).join('');\n}\nfunction limpiarHTML(html) {\n  let h = String(html || '');\n  h = h.replace(/```(?:html|json)?/gi, '');\n  h = h.replace(/\\\\n/g, ' ').replace(/\\\\\"/g, '\"');\n  h = h.replace(/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F​-‍﻿�]/g, '');\n  h = h.replace(/<!DOCTYPE[^>]*>/gi, '').replace(/<\\/?(html|head|body|meta|title)\\b[^>]*>/gi, '');\n  h = h.replace(/<style[\\s\\S]*?<\\/style>/gi, '');\n  h = h.replace(/<script(?![^>]*application\\/ld\\+json)[^>]*>[\\s\\S]*?<\\/script>/gi, '');\n  h = h.replace(/<h1\\b([^>]*)>([\\s\\S]*?)<\\/h1>/gi, '<h2$1>$2</h2>');\n  h = h.replace(/\\*\\*([^*<>]+)\\*\\*/g, '<strong>$1</strong>');\n  h = h.replace(/(^|>)\\s*#{2,4}\\s+([^<]+)/g, '$1<h3>$2</h3>');\n  h = h.replace(/&amp;(nbsp|amp|quot|lt|gt|#\\d+);/g, '&$1;');\n  h = h.replace(/<[^>]+>/g, tag => tag.replace(/[“”„″]/g, '\"').replace(/[‘’]/g, \"'\"));\n  h = h.replace(/<p\\b[^>]*>\\s*(&nbsp;|<br\\s*\\/?>)?\\s*<\\/p>/gi, '');\n  h = cerrarEtiquetas(h);\n  return h.replace(/\\s+/g, ' ').trim();\n}\n// ============================================================\n// Une el HTML ya limpio (Code VALIDATE) con las preguntas frecuentes que añada el validador\n// ============================================================\nconst item = $input.first().json;\nconst base = $('Code VALIDATE').first().json;\nlet raw = item.text || item.output || '';\nif (typeof raw !== 'string') raw = JSON.stringify(raw || {});\nraw = raw.replace(/```json/gi, '').replace(/```/g, '').trim();\nconst first = raw.indexOf('{');\nconst last = raw.lastIndexOf('}');\nif (first !== -1 && last > first) raw = raw.substring(first, last + 1);\n\nlet parsed;\ntry {\n  parsed = JSON.parse(raw);\n} catch (e) {\n  parsed = { faqHTML: '', errorsFound: ['No se pudo parsear el JSON del validador: ' + e.message], correctionsMade: [] };\n}\nparsed.errorsFound = parsed.errorsFound || [];\nparsed.correctionsMade = parsed.correctionsMade || [];\n\nlet html = base.html || '';\nconst faq = limpiarHTML(parsed.faqHTML || '');\nif (!base.tieneFAQ && faq.length > 50) {\n  // Las FAQ van antes de las referencias o del JSON-LD; si no hay, al final\n  const m = html.match(/<h[23]\\b[^>]*>\\s*Referencias/i) || html.match(/<script[^>]*application\\/ld\\+json/i);\n  html = m ? html.slice(0, m.index) + faq + html.slice(m.index) : html + faq;\n  parsed.correctionsMade.push('Añadida sección de Preguntas Frecuentes');\n}\n\nif (!html || html.trim().length < 100) {\n  html = `<p>🐾 Artículo en proceso de generación para el blog HuronExpert.</p><p><strong>Tema:</strong> ${item.emailSubject || 'Hurones'}</p>`;\n  parsed.errorsFound.push('⚠️ Fallback de emergencia: Se usó contenido predeterminado.');\n}\n\nparsed.correctedHTML = html;\nreturn [{ json: { ...item, parsedOutput: parsed } }];"
+          },
+          "id": "696a8da4-598f-4ed6-a7d9-2a475d4410a8",
+          "name": "🩹 Parsear JSON Basic LLM Chain",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            2496,
+            -400
+          ]
+        },
+        {
+          "parameters": {
+            "person": "iTLJ1_YKit",
+            "text": "={{ $json.summary }}\\n\\n🔗 Lee el artículo completo aquí: {{ $json.url }}",
+            "shareMediaCategory": "ARTICLE",
+            "additionalFields": {
+              "originalUrl": "={{ $json.url }}",
+              "title": "={{ $('Create a post').item.json.title }}"
+            }
+          },
+          "type": "n8n-nodes-base.linkedIn",
+          "typeVersion": 1,
+          "position": [
+            6560,
+            -176
+          ],
+          "id": "8b5e8739-acf2-4f88-bb2c-8d60f49a0dcc",
+          "name": "Create a post1"
+        },
+        {
+          "parameters": {
+            "jsCode": "// Extraer título y resumen del artículo para LinkedIn\nconst items = $input.all();\nconst resultados = [];\n\nfor (let i = 0; i < items.length; i++) {\n  const item = items[i].json;\n  let content = item.content || '';\n  \n  // Eliminar etiquetas HTML para obtener texto plano\n  let plainText = content.replace(/<[^>]*>/g, ' ');\n  plainText = plainText.replace(/\\s+/g, ' ').trim();\n  \n  // Tomar los primeros 300 caracteres como resumen\n  const summary = plainText.substring(0, 300) + '...';\n  \n  resultados.push({\n    json: {\n      title: item.title || '',\n      url: item.url || '',\n      summary: summary\n    }\n  });\n}\n\nreturn resultados;"
+          },
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            6336,
+            -176
+          ],
+          "id": "78a10526-93b2-4365-a995-d68812c68f37",
+          "name": "RESUMEN PARA LINKEN"
+        },
+        {
+          "parameters": {
+            "jsCode": "// Limpieza determinista del HTML para Blogger\nfunction cerrarEtiquetas(h) {\n  const vacias = /^(br|hr|img|input|meta|link|source|wbr|col)$/i;\n  const pila = [];\n  const salida = h.replace(/<(\\/?)([a-zA-Z][a-zA-Z0-9]*)\\b[^>]*?(\\/?)>/g, (m, cierre, tag, auto) => {\n    tag = tag.toLowerCase();\n    if (vacias.test(tag) || auto) return m;\n    if (!cierre) {\n      // un <li> o <p> nuevo cierra el anterior que quedó abierto\n      if ((tag === 'li' || tag === 'p') && pila[pila.length - 1] === tag) { pila.pop(); pila.push(tag); return `</${tag}>` + m; }\n      pila.push(tag); return m;\n    }\n    const i = pila.lastIndexOf(tag);\n    if (i === -1) return ''; // cierre huérfano\n    const abiertasDentro = pila.splice(i).reverse().slice(0, -1);\n    return abiertasDentro.map(t => `</${t}>`).join('') + m;\n  });\n  return salida + pila.reverse().map(t => `</${t}>`).join('');\n}\nfunction limpiarHTML(html) {\n  let h = String(html || '');\n  h = h.replace(/```(?:html|json)?/gi, '');\n  h = h.replace(/\\\\n/g, ' ').replace(/\\\\\"/g, '\"');\n  h = h.replace(/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F​-‍﻿�]/g, '');\n  h = h.replace(/<!DOCTYPE[^>]*>/gi, '').replace(/<\\/?(html|head|body|meta|title)\\b[^>]*>/gi, '');\n  h = h.replace(/<style[\\s\\S]*?<\\/style>/gi, '');\n  h = h.replace(/<script(?![^>]*application\\/ld\\+json)[^>]*>[\\s\\S]*?<\\/script>/gi, '');\n  h = h.replace(/<h1\\b([^>]*)>([\\s\\S]*?)<\\/h1>/gi, '<h2$1>$2</h2>');\n  h = h.replace(/\\*\\*([^*<>]+)\\*\\*/g, '<strong>$1</strong>');\n  h = h.replace(/(^|>)\\s*#{2,4}\\s+([^<]+)/g, '$1<h3>$2</h3>');\n  h = h.replace(/&amp;(nbsp|amp|quot|lt|gt|#\\d+);/g, '&$1;');\n  h = h.replace(/<[^>]+>/g, tag => tag.replace(/[“”„″]/g, '\"').replace(/[‘’]/g, \"'\"));\n  h = h.replace(/<p\\b[^>]*>\\s*(&nbsp;|<br\\s*\\/?>)?\\s*<\\/p>/gi, '');\n  h = cerrarEtiquetas(h);\n  return h.replace(/\\s+/g, ' ').trim();\n}\nconst WA = 'https://chat.whatsapp.com/CrANuqK9kpq3LtxR6sBuai';\nconst IMG = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhlfCVxbySjvntxm4n0GJLfUHd8qYktRg4jO98lbmm-dPxxtPXPY9N7DlMFuQTJ1QgqoVD3dgRzerHUNHwR_eCEeWIXWFuMMEorDRxC965aE9IK6Lb1ur8msuWg2ExMDuD5c0sknpGnCkVDoqmqp5pYLF6Ilu9qpwzeSmOi2jzimo6w88mZRuJ3L2Qvth4/s1536/club%20de%20hurones.png';\n\nconst BANNER = `\n<div class=\"cta-club-huroneros\" style=\"margin:28px 0;padding:0;border-radius:16px;overflow:hidden;border:2px solid #1B4F9C;background:#ffffff;box-shadow:0 8px 24px rgba(27,79,156,.18);text-align:center;\">\n  <a href=\"${WA}\" target=\"_blank\" rel=\"noopener\" style=\"display:block;text-decoration:none;\">\n    <img src=\"${IMG}\" alt=\"Únete al Club de Huroneros en WhatsApp — Dr. Luis García Vet\" style=\"width:100%;max-width:100%;height:auto;display:block;border:0;\" />\n  </a>\n  <div style=\"padding:16px 18px 22px 18px;background:#0F2F5B;\">\n    <p style=\"margin:0 0 12px 0;font-family:Arial,sans-serif;font-size:16px;line-height:1.4;color:#ffffff;\">\n      Club de Huroneros — comunidad de WhatsApp del Dr. Luis García\n    </p>\n    <a href=\"${WA}\" target=\"_blank\" rel=\"noopener\" style=\"display:inline-block;background:#25D366;color:#ffffff;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;text-decoration:none;padding:12px 26px;border-radius:28px;\">\n      Únete ahora al grupo de WhatsApp\n    </a>\n  </div>\n</div>\n`.trim();\n\nfunction insertAfterFirst(html, marker, block) {\n  const i = html.indexOf(marker);\n  if (i === -1) return html;\n  return html.slice(0, i + marker.length) + block + html.slice(i + marker.length);\n}\n\nfunction insertBefore(html, regex, block) {\n  const m = html.match(regex);\n  if (!m) return html;\n  return html.slice(0, m.index) + block + html.slice(m.index);\n}\n\nconst items = $input.all();\nreturn items.map((item) => {\n  const json = { ...item.json };\n  let html = json.emailBody || json.CONTENIDO || json.validatedHTML || '';\n\n  html = html.replace(/https:\\/\\/chat\\.whatsapp\\.com\\/[A-Za-z0-9]+/g, WA);\n\n  const yaEsta = html.includes('cta-club-huroneros') || html.includes('club%20de%20hurones.png');\n  if (!yaEsta && html) {\n    const mid = insertAfterFirst(html, '</h2>', BANNER);\n    html = mid !== html ? mid : html;\n\n    const beforeFaq = insertBefore(\n      html,\n      /<h2[^>]*>\\s*Preguntas\\s+Frecuentes/i,\n      BANNER\n    );\n    html = beforeFaq !== html ? beforeFaq : html + BANNER;\n  }\n\n  html = limpiarHTML(html);\n  json.emailBody = html;\n  json.CONTENIDO = html;\n  json.bannerWhatsAppInsertado = !yaEsta;\n  return { json };\n});"
+          },
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            5440,
+            -272
+          ],
+          "id": "8ed45a0a-910a-4dbd-a46e-20d9077a6bed",
+          "name": "📲 Banner Club WhatsApp"
+        },
+        {
+          "parameters": {
+            "promptType": "define",
+            "text": "=Eres el editor del blog hurones.online. NO reescribas el artículo: solo revisas su estructura.\n\nTÍTULO: {{ $('Edit Fields').first().json.TEMA_ARTICULO }}\nENCABEZADOS (h2/h3): {{ $json.titulos.join(' | ') }}\nPALABRAS: {{ $json.palabras }}\nTIENE SECCIÓN DE PREGUNTAS FRECUENTES: {{ $json.tieneFAQ ? 'SI' : 'NO' }}\n\n1. Si NO tiene preguntas frecuentes, escribe en faqHTML: <h2>Preguntas Frecuentes</h2> y 5 preguntas cortas del MISMO tema, cada una en <h3> con su respuesta en un <p> de máximo 2 frases. Sin enlaces, marcas ni precios. Usa comillas dobles rectas en los atributos. Si ya tiene, faqHTML = \"\".\n2. En errorsFound anota (máximo 5) problemas de estructura que veas en los encabezados: temas que no sean de hurones, encabezados repetidos o fuera de orden.\n\nDevuelve SOLO este JSON válido, sin texto antes ni después:\n{\"faqHTML\":\"\",\"errorsFound\":[],\"correctionsMade\":[]}",
+            "options": {}
+          },
+          "type": "@n8n/n8n-nodes-langchain.agent",
+          "typeVersion": 3.1,
+          "position": [
+            2144,
+            -400
+          ],
+          "id": "76a4c0d7-e0fa-40c3-9e01-c75e0a901a42",
+          "name": "VALIDAR HTML"
+        },
+        {
+          "parameters": {
+            "model": "deepseek-flash",
+            "options": {
+              "maxTokens": 4000,
+              "responseFormat": "json_object",
+              "temperature": 0.3,
+              "timeout": 360000,
+              "maxRetries": 2
+            }
+          },
+          "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+          "typeVersion": 1,
+          "position": [
+            2224,
+            -176
+          ],
+          "id": "c87b5280-5678-4742-a5e5-93e78a89cf16",
+          "name": "DeepSeek Chat Model4"
+        }
+      ],
+      "connections": {
+        "Workflow Configuration": {
+          "main": [
+            [
+              {
+                "node": "Read Articles from Sheet",
+                "type": "main",
+                "index": 0
+              },
+              {
+                "node": "📋 Leer Casos Clínicos",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Read Articles from Sheet": {
+          "main": [
+            [
+              {
+                "node": "Filter",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Prepare Update Data": {
+          "main": [
+            [
+              {
+                "node": "Mark as Published",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Prepare Validated Content": {
+          "main": [
+            [
+              {
+                "node": "Prepare Blogger Content",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "AI Agent": {
+          "main": [
+            [
+              {
+                "node": "Code VALIDATE",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Edit Fields": {
+          "main": [
+            [
+              {
+                "node": "AI Agent",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Lock Row": {
+          "main": [
+            [
+              {
+                "node": "Edit Fields",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Filter": {
+          "main": [
+            [
+              {
+                "node": "Limit",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Limit": {
+          "main": [
+            [
+              {
+                "node": "Lock Row",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Code VALIDATE": {
+          "main": [
+            [
+              {
+                "node": "VALIDAR HTML",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Prepare Blogger Content": {
+          "main": [
+            [
+              {
+                "node": "📋 Leer Afiliados Hurones",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Create a post": {
+          "main": [
+            [
+              {
+                "node": "Prepare Update Data",
+                "type": "main",
+                "index": 0
+              },
+              {
+                "node": "RESUMEN PARA LINKEN",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🖼️ Image Injector (Pexels)": {
+          "main": [
+            [
+              {
+                "node": "Merge2",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "📋 Leer Casos Clínicos": {
+          "main": [
+            [
+              {
+                "node": "Merge2",
+                "type": "main",
+                "index": 1
+              }
+            ]
+          ]
+        },
+        "Merge2": {
+          "main": [
+            [
+              {
+                "node": "🔧 Preparar casos para IA",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🔧 Preparar casos para IA": {
+          "main": [
+            [
+              {
+                "node": "Seleccionar y Adaptar Caso",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🔗 Fusionar Datos del Caso": {
+          "main": [
+            [
+              {
+                "node": "📌 Insertar Caso en Artículo",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "📌 Insertar Caso en Artículo": {
+          "main": [
+            [
+              {
+                "node": "📲 Banner Club WhatsApp",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "⏱️ Wait (casos)": {
+          "main": [
+            [
+              {
+                "node": "Create a post",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Schedule Trigger": {
+          "main": [
+            [
+              {
+                "node": "Workflow Configuration",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Get a document in Google Docs": {
+          "ai_tool": [
+            [
+              {
+                "node": "AI Agent",
+                "type": "ai_tool",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "DeepSeek Chat Model": {
+          "ai_languageModel": [
+            [
+              {
+                "node": "Agente Catálogo Afiliados Hurones",
+                "type": "ai_languageModel",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "DeepSeek Chat Model1": {
+          "ai_languageModel": [
+            [
+              {
+                "node": "AI Agent",
+                "type": "ai_languageModel",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "DeepSeek Chat Model2": {
+          "ai_languageModel": [
+            [
+              {
+                "node": "Seleccionar y Adaptar Caso",
+                "type": "ai_languageModel",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "PROGRAMAR 2 ARTICULOS POR SEMANA A DISTINTA HORA": {
+          "main": [
+            [
+              {
+                "node": "⏱️ Wait (casos)",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "📋 Leer Afiliados Hurones": {
+          "main": [
+            [
+              {
+                "node": "🔍 Filtrar Afiliados Hurones",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🔍 Filtrar Afiliados Hurones": {
+          "main": [
+            [
+              {
+                "node": "Agente Catálogo Afiliados Hurones",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Agente Catálogo Afiliados Hurones": {
+          "main": [
+            [
+              {
+                "node": "🖼️ Image Injector (Pexels)",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Seleccionar y Adaptar Caso": {
+          "main": [
+            [
+              {
+                "node": "🔗 Fusionar Datos del Caso",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🩹 Parsear JSON Basic LLM Chain": {
+          "main": [
+            [
+              {
+                "node": "Prepare Validated Content",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "RESUMEN PARA LINKEN": {
+          "main": [
+            [
+              {
+                "node": "Create a post1",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "📲 Banner Club WhatsApp": {
+          "main": [
+            [
+              {
+                "node": "PROGRAMAR 2 ARTICULOS POR SEMANA A DISTINTA HORA",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "DeepSeek Chat Model4": {
+          "ai_languageModel": [
+            [
+              {
+                "node": "VALIDAR HTML",
+                "type": "ai_languageModel",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "VALIDAR HTML": {
+          "main": [
+            [
+              {
+                "node": "🩹 Parsear JSON Basic LLM Chain",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      }
+    },
+    "tags": [],
+    "meta": {
+      "aiBuilderAssisted": true,
+      "builderVariant": "mcp",
+      "templateCredsSetupCompleted": true
+    },
+    "parentFolderId": null,
+    "description": "",
+    "scopes": [
+      "workflow:create",
+      "workflow:delete",
+      "workflow:execute",
+      "workflow:execute-chat",
+      "workflow:list",
+      "workflow:move",
+      "workflow:publish",
+      "workflow:read",
+      "workflow:share",
+      "workflow:unpublish",
+      "workflow:unshare",
+      "workflow:update",
+      "workflow:updateRedactionSetting"
+    ],
+    "canExecute": true
+  },
+  "triggerInfo": "This workflow has the following trigger(s):\n\n\nSchedule trigger(s):\n\n\n\t\t\t\t<trigger 1>\n\t\t\t\t\t - Node name: Schedule Trigger\n\t\t\t\t</trigger 1>\n\nScheduled workflows can be executed directly through MCP clients and do not require external inputs."
+}

@@ -1,0 +1,3565 @@
+{
+  "workflow": {
+    "id": "gMY8wWNuXGvW4DnB",
+    "name": "🦦 FÁBRICA HURONES (hurones.online) 2 cortos + 1 largo al día",
+    "active": true,
+    "isArchived": false,
+    "versionId": "12707337-5463-474f-9cc1-007e3fb7baad",
+    "activeVersionId": "12707337-5463-474f-9cc1-007e3fb7baad",
+    "triggerCount": 1,
+    "createdAt": "2026-10-31T19:35:39.316Z",
+    "updatedAt": "2026-10-31T21:39:44.336Z",
+    "settings": {
+      "executionOrder": "v1",
+      "availableInMCP": true
+    },
+    "connections": {
+      "▶ Iniciar manual": {
+        "main": [
+          [
+            {
+              "node": "⚙️ Config",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "⚙️ Config": {
+        "main": [
+          [
+            {
+              "node": "📁 Leer VIDEOS",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📁 Leer VIDEOS": {
+        "main": [
+          [
+            {
+              "node": "🗓️ Planificar (tema + horario)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🗓️ Planificar (tema + horario)": {
+        "main": [
+          [
+            {
+              "node": "❓ ¿Faltan temas?",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "❓ ¿Hay tema y cupo?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "❓ ¿Faltan temas?": {
+        "main": [
+          [
+            {
+              "node": "📊 Vistas en YouTube",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📊 Vistas en YouTube": {
+        "main": [
+          [
+            {
+              "node": "🏆 Temas que mejor funcionan",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🏆 Temas que mejor funcionan": {
+        "main": [
+          [
+            {
+              "node": "💡 Generar 25 temas nuevos",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "💡 Generar 25 temas nuevos": {
+        "main": [
+          [
+            {
+              "node": "🧹 Quitar repetidos",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🧠 DeepSeek temas": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "💡 Generar 25 temas nuevos",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🧹 Quitar repetidos": {
+        "main": [
+          [
+            {
+              "node": "➕ Agregar temas a VIDEOS",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "❓ ¿Hay tema y cupo?": {
+        "main": [
+          [
+            {
+              "node": "❓ ¿Ya renderizado?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "❓ ¿Ya renderizado?": {
+        "main": [
+          [
+            {
+              "node": "📤 Preparar subida",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "⏳ Marcar procesando",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📤 Preparar subida": {
+        "main": [
+          [
+            {
+              "node": "⬇️ Descargar MP4",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "⬇️ Descargar MP4": {
+        "main": [
+          [
+            {
+              "node": "🎞️ Marcar como video/mp4",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🎞️ Marcar como video/mp4": {
+        "main": [
+          [
+            {
+              "node": "📺 Programar en YouTube",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📺 Programar en YouTube": {
+        "main": [
+          [
+            {
+              "node": "🚦 Resultado de subida",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🚦 Resultado de subida": {
+        "main": [
+          [
+            {
+              "node": "🚦 Ruta de subida",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🚦 Ruta de subida": {
+        "main": [
+          [
+            {
+              "node": "🗓️ Guardar programado",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [],
+          [
+            {
+              "node": "❌ Devolver a la cola",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "⏳ Marcar procesando": {
+        "main": [
+          [
+            {
+              "node": "❓ ¿Masterclass?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "❓ ¿Masterclass?": {
+        "main": [
+          [
+            {
+              "node": "🤖 Plan masterclass",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "🤖 Guion Short Dr. García",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🤖 Plan masterclass": {
+        "main": [
+          [
+            {
+              "node": "🧹 Parsear plan MC",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🧠 DeepSeek master": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "🤖 Plan masterclass",
+              "type": "ai_languageModel",
+              "index": 0
+            },
+            {
+              "node": "🤖 Desarrollar módulo",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🧹 Parsear plan MC": {
+        "main": [
+          [
+            {
+              "node": "🤖 Desarrollar módulo",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🤖 Desarrollar módulo": {
+        "main": [
+          [
+            {
+              "node": "🧩 Unir masterclass",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🧩 Unir masterclass": {
+        "main": [
+          [
+            {
+              "node": "📝 Validar guion",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📝 Validar guion": {
+        "main": [
+          [
+            {
+              "node": "✂️ Separar escenas",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "✂️ Separar escenas": {
+        "main": [
+          [
+            {
+              "node": "🖼️ Imagen Pexels",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🖼️ Imagen Pexels": {
+        "main": [
+          [
+            {
+              "node": "📦 Armar trabajo de video",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "📦 Armar trabajo de video": {
+        "main": [
+          [
+            {
+              "node": "🎥 Renderizar en GitHub (gratis)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🎥 Renderizar en GitHub (gratis)": {
+        "main": [
+          [
+            {
+              "node": "⏳ Esperar 45s",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "⏳ Esperar 45s": {
+        "main": [
+          [
+            {
+              "node": "🔍 ¿Video listo?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🔍 ¿Video listo?": {
+        "main": [
+          [
+            {
+              "node": "🚦 ¿Listo?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🚦 ¿Listo?": {
+        "main": [
+          [
+            {
+              "node": "✅ Video renderizado",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "⚠️ Render tardó demasiado",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "⏳ Esperar 45s",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "✅ Video renderizado": {
+        "main": [
+          [
+            {
+              "node": "💾 Guardar renderizado",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "💾 Guardar renderizado": {
+        "main": [
+          [
+            {
+              "node": "📤 Preparar subida",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "⚠️ Render tardó demasiado": {
+        "main": [
+          [
+            {
+              "node": "❌ Devolver a la cola",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🤖 Guion Short Dr. García": {
+        "main": [
+          [
+            {
+              "node": "📝 Validar guion",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "🧠 DeepSeek guion": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "🤖 Guion Short Dr. García",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "⏰ Cada 17 minutos": {
+        "main": [
+          [
+            {
+              "node": "⚙️ Config",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "nodes": [
+      {
+        "id": "0037da97-3327-4857-908a-173fbba66368",
+        "name": "▶ Iniciar manual",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          304
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "715f65bf-ac99-4c2f-bd69-d92203ba8723",
+        "name": "⚙️ Config",
+        "type": "n8n-nodes-base.set",
+        "typeVersion": 3.4,
+        "position": [
+          224,
+          400
+        ],
+        "parameters": {
+          "mode": "manual",
+          "includeOtherFields": false,
+          "assignments": {
+            "assignments": [
+              {
+                "id": "c1",
+                "name": "GH_TOKEN",
+                "type": "string",
+                "value": "***ENMASCARADO***"
+              },
+              {
+                "id": "c2",
+                "name": "GH_OWNER",
+                "type": "string",
+                "value": "luisarturo88"
+              },
+              {
+                "id": "c3",
+                "name": "GH_REPO",
+                "type": "string",
+                "value": "dr-garcia-videos"
+              },
+              {
+                "id": "c4",
+                "name": "BLOG_URL",
+                "type": "string",
+                "value": "hurones.online"
+              },
+              {
+                "id": "c5",
+                "name": "HORAS_SHORT_UTC",
+                "type": "string",
+                "value": "13,24"
+              },
+              {
+                "id": "c6",
+                "name": "MAX_COLA",
+                "type": "number",
+                "value": 1095
+              },
+              {
+                "id": "c7",
+                "name": "HORAS_LARGO_UTC",
+                "type": "string",
+                "value": "18"
+              },
+              {
+                "id": "c8",
+                "name": "MAX_SUBIDAS_DIA",
+                "type": "number",
+                "value": 4
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "87794788-3e72-49b3-9d59-eccf3f458500",
+        "name": "📁 Leer VIDEOS",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          448,
+          400
+        ],
+        "parameters": {
+          "resource": "sheet",
+          "operation": "read",
+          "documentId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "1ZHee97fgMi4uEK1Y7hS8XxCIWLGOAmR0QaVZIgR-xxI"
+          },
+          "sheetName": {
+            "__rl": true,
+            "mode": "name",
+            "value": "Hoja 1"
+          },
+          "options": {}
+        },
+        "executeOnce": true
+      },
+      {
+        "id": "ae40f984-6de5-42a4-a544-7ec1eafd26c9",
+        "name": "🗓️ Planificar (tema + horario)",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          672,
+          400
+        ],
+        "parameters": {
+          "jsCode": "// Programa por FORMATO: cortos en HORAS_SHORT_UTC (2 al día) y largos en HORAS_LARGO_UTC (1 al día).\n// Ecuador UTC-5: 13 = 08:00, 18 = 13:00, 24 = 19:00. Tope de SUBIDAS por día (YouTube cuenta subidas, no publicaciones).\nconst cfg = $('⚙️ Config').first().json;\nconst HS = String(cfg.HORAS_SHORT_UTC || '13,24').split(',').map(Number);\nconst HL = String(cfg.HORAS_LARGO_UTC || '18').split(',').map(Number);\nconst MAX_SUB = Number(cfg.MAX_SUBIDAS_DIA || 4);\nconst rows = $input.all().map(i => i.json);\nconst est = r => { const e = String(r.ESTADO_CORTO || '').toLowerCase().trim(); return e === 'pendiente_youtube' ? 'renderizado' : e; };\nconst ahora = new Date();\nconst hoy = ahora.toISOString().slice(0, 10);\nconst subidasHoy = rows.filter(r => String(r.SUBIDO_EL || '').slice(0, 10) === hoy).length;\nconst fechas = rows.map(r => new Date(r.PUBLICAR_EL || '')).filter(d => !isNaN(d));\nconst programados = fechas.filter(d => d > ahora).length;\nconst ocupado = c => fechas.some(f => Math.abs(f.getTime() - c.getTime()) < 2 * 3600 * 1000);\nconst slotPara = horas => {\n  for (let dia = 0; dia < 1200; dia++) for (const h of horas) {\n    const c = new Date(Date.UTC(ahora.getUTCFullYear(), ahora.getUTCMonth(), ahora.getUTCDate() + dia, h));\n    if (c.getTime() - ahora.getTime() < 3 * 3600 * 1000 || ocupado(c)) continue;\n    return c;\n  }\n  return null;\n};\nconst formatoDe = r => {\n  let formato = 'short', subtema = String((r && r.SUBTEMAS) || '');\n  const fCol = String((r && r.FORMATO) || '').toLowerCase().trim();\n  if (['short', 'medio', 'masterclass'].includes(fCol)) {\n    formato = fCol;\n    if (subtema.includes('::')) subtema = subtema.split('::').slice(1).join('::').trim();\n  } else if (subtema.includes('::')) {\n    const f = subtema.split('::')[0].trim().toLowerCase();\n    if (['short', 'medio', 'masterclass'].includes(f)) { formato = f; subtema = subtema.split('::').slice(1).join('::').trim(); }\n  }\n  return { formato, subtema };\n};\nconst disponibles = rows.filter(r => ['pendiente', 'procesando', 'renderizado'].includes(est(r)) && String(r.KEYWORD_PRINCIPAL || '').trim());\nlet elegido = null;\nif (programados < Number(cfg.MAX_COLA)) {\n  const listoParaSubir = r => { const t = new Date(r.YT_REINTENTO || 0).getTime(); return isNaN(t) || ahora.getTime() - t > 4 * 3600 * 1000; };\n  const fechaDe = r => { const t = new Date(r.PUBLICAR_EL || '').getTime(); return isNaN(t) ? 9e15 : t; };\n  const renderizados = disponibles.filter(r => est(r) === 'renderizado' && r.VIDEO_URL_CORTO).sort((a, b) => fechaDe(a) - fechaDe(b));\n  // Sube a YouTube solo hasta el tope diario; el resto del tiempo SIGUE FABRICANDO sin parar (cada video ya nace con su fecha)\n  const paraSubir = subidasHoy < MAX_SUB ? renderizados.find(listoParaSubir) : null;\n  elegido = paraSubir || disponibles.find(r => est(r) !== 'renderizado') || null;\n}\nconst { formato, subtema } = formatoDe(elegido);\nconst fFija = elegido && est(elegido) === 'renderizado' ? new Date(elegido.PUBLICAR_EL || '') : null;\nconst slot = !elegido ? null\n  : (fFija && !isNaN(fFija)) ? (fFija.getTime() - ahora.getTime() > 3600 * 1000 ? fFija : new Date(ahora.getTime() + 3600 * 1000))\n  : slotPara(formato === 'short' ? HS : HL);\nconst maxId = Math.max(0, ...rows.map(r => parseInt(String(r.ID || '').replace(/\\D/g, ''), 10) || 0));\nconst publicados = rows.filter(r => r.YOUTUBE_ID).map(r => ({ id: r.YOUTUBE_ID, tema: r.KEYWORD_PRINCIPAL }));\nreturn [{ json: {\n  headers: Object.keys(rows[0] || {}).filter(k => !/^row[_]/i.test(k)),\n  hay_tema: !!elegido,\n  ya_renderizado: !!(elegido && est(elegido) === 'renderizado' && elegido.VIDEO_URL_CORTO),\n  necesita_temas: disponibles.filter(r => est(r) === 'pendiente').length < 50,\n  ID: elegido ? elegido.ID : '',\n  _keyword: elegido ? String(elegido.KEYWORD_PRINCIPAL).trim() : '',\n  _subtema: subtema,\n  _formato: formato,\n  VIDEO_URL_CORTO: elegido ? (elegido.VIDEO_URL_CORTO || '') : '',\n  TITULO_CORTO: elegido ? (elegido.TITULO_CORTO || '') : '',\n  DESC_CORTO: elegido ? (elegido.DESC_CORTO || '') : '',\n  TAGS_CORTO: elegido ? (elegido.TAGS_CORTO || '') : '',\n  HASHTAGS_CORTO: elegido ? (elegido.HASHTAGS_CORTO || '') : '',\n  existentes: rows.map(r => String(r.KEYWORD_PRINCIPAL || '').trim()).filter(Boolean),\n  publicados_ids: publicados.map(p => p.id).slice(-50).join(','),\n  publicados,\n  next_id: maxId + 1,\n  slot_iso: slot ? slot.toISOString() : '',\n  programados,\n  subidas_hoy: subidasHoy\n}}];\n"
+        }
+      },
+      {
+        "id": "43fbff70-7821-4505-9dcb-e99ccf04350c",
+        "name": "❓ ¿Faltan temas?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          896,
+          112
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "leftValue": "={{ $json.necesita_temas }}",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        }
+      },
+      {
+        "id": "8f8f765a-c2d4-4abd-a151-e9e8ad9b6384",
+        "name": "📊 Vistas en YouTube",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          1120,
+          112
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://www.googleapis.com/youtube/v3/videos",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "youTubeOAuth2Api",
+          "sendQuery": true,
+          "specifyQuery": "keypair",
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "part",
+                "value": "statistics"
+              },
+              {
+                "name": "id",
+                "value": "={{ $json.publicados_ids || 'x' }}"
+              }
+            ]
+          },
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true,
+                "responseFormat": "json"
+              }
+            }
+          }
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "id": "d4fde4f5-74a4-48c6-b9d8-8e84e18b1c92",
+        "name": "🏆 Temas que mejor funcionan",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1344,
+          112
+        ],
+        "parameters": {
+          "jsCode": "const plan = $('🗓️ Planificar (tema + horario)').first().json;\nconst items = ($input.first().json.items || []);\nconst pts = {};\nfor (const it of items) { const s = it.statistics || {}; pts[it.id] = Number(s.viewCount || 0) + 3 * Number(s.likeCount || 0) + 5 * Number(s.commentCount || 0); }\nconst top = plan.publicados.filter(p => pts[p.id] !== undefined).sort((a, b) => pts[b.id] - pts[a.id]).slice(0, 5).map(p => p.tema + ' (' + pts[p.id] + ' pts)');\nreturn [{ json: { top: top.length ? top.join(' | ') : 'todavía no hay datos suficientes' } }];"
+        }
+      },
+      {
+        "id": "e659e78d-17df-43e5-9a58-5ad8828f76b0",
+        "name": "💡 Generar 25 temas nuevos",
+        "type": "@n8n/n8n-nodes-langchain.chainLlm",
+        "typeVersion": 1.9,
+        "position": [
+          1568,
+          112
+        ],
+        "parameters": {
+          "promptType": "define",
+          "text": "=Temas que MEJOR han funcionado en mi canal de hurones (haz más del mismo estilo e intención de búsqueda, sin repetirlos): {{ $json.top }}. NO repitas ni parafrasees ninguno de estos temas ya usados: {{ $('🗓️ Planificar (tema + horario)').first().json.existentes.slice(-400).join(' | ') }}. Genera 45 temas nuevos SOLO de hurones en formato json.",
+          "messages": {
+            "messageValues": [
+              {
+                "type": "SystemMessagePromptTemplate",
+                "message": "Eres el Dr. Luis Arturo García, médico veterinario en Ecuador, y planificas el contenido de tu canal de HURONES (ferrets) para YouTube, Shorts, Reels y TikTok, dirigido a dueños de hurones de habla hispana. SOLO hurones, ninguna otra especie. El blog del canal es hurones.online.\n\nTemas de SÍNTOMAS, ENFERMEDADES y CUIDADOS del hurón: insulinoma e hipoglucemia (tiembla, babea, se queda mirando al vacío), enfermedad adrenal (caída de pelo, cola pelada, vulva inflamada, próstata), cuerpos extraños y obstrucción intestinal, enteritis epizoótica (ECE, diarrea verde), moquillo y vacunación, influenza, linfoma, cardiomiopatía, dientes y sarro, golpe de calor, parásitos y pulgas, alimentación carnívora y alimentos prohibidos, comportamiento (muerde, mal olor, arenero, juego), hurón cachorro, hurón senior, primeros auxilios y cuándo es emergencia. El SÍNTOMA y la ENFERMEDAD deben VARIAR de tema en tema.\n\nGenera una lista de 45 objetos. Cada objeto con estas claves:\n- formato: los PRIMEROS 18 con \"short\" (video vertical de 3 minutos), los SIGUIENTES 22 con \"medio\" (video horizontal de 12 a 15 minutos), los ÚLTIMOS 5 con \"masterclass\" (clase magistral horizontal de 30 minutos sobre un tema amplio: guía total de una enfermedad o de una etapa de vida).\n- keyword: frase de búsqueda natural en español como la escribiría un dueño preocupado, máximo 75 caracteres, que incluya la palabra hurón (ej: \"Mi hurón tiembla y babea: hipoglucemia, qué hacer ya\").\n- subtemas: de 3 a 6 puntos clave separados por coma que el video debe cubrir.\n- especie: huron.\n\nReglas anti-canibalización: cada tema responde una búsqueda DISTINTA; no repitas síntoma con la misma enfermedad salvo que el enfoque (causas/ tratamiento/ prevención/ emergencia) sea diferente.\n\nResponde ÚNICAMENTE con un objeto json con la clave temas: la lista de 45 objetos."
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "b0729771-2764-4bfd-880c-be62fc1f7e38",
+        "name": "🧠 DeepSeek temas",
+        "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+        "typeVersion": 1,
+        "position": [
+          1648,
+          336
+        ],
+        "parameters": {
+          "model": "deepseek-chat",
+          "options": {
+            "maxTokens": 4000,
+            "temperature": 0.9,
+            "responseFormat": "json_object"
+          }
+        }
+      },
+      {
+        "id": "6ff7fc73-3cd6-4af6-93e3-11b692c4299b",
+        "name": "🧹 Quitar repetidos",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1920,
+          112
+        ],
+        "parameters": {
+          "jsCode": "const plan = $('🗓️ Planificar (tema + horario)').first().json;\nconst d = $input.first().json;\nlet lista = d.temas || (typeof d.text === 'string' ? (JSON.parse(d.text).temas || []) : ((d.text && d.text.temas) || []));\nconst norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim();\nconst STOP = new Set(['mi','tu','el','la','los','las','de','del','en','y','que','por','para','con','un','una','se','es','a','como','cuando','huron','hurones','hacer','sintomas','causas']);\nconst tokens = s => new Set(norm(s).split(' ').filter(w => w.length > 2 && !STOP.has(w)));\nconst parecido = (a, b) => { const A = tokens(a), B = tokens(b); if (!A.size || !B.size) return 0; let i = 0; for (const x of A) if (B.has(x)) i++; return i / Math.min(A.size, B.size); };\nconst usados = [...plan.existentes];\nconst headers = Array.isArray(plan.headers) && plan.headers.length ? plan.headers : ['ID','ESTADO','KEYWORD_PRINCIPAL','CIUDAD','SUBTEMAS','ESTADO_CORTO','FORMATO'];\nconst out = [];\nlet id = plan.next_id;\nfor (const t of lista) {\n  const kw = String(t.keyword || '').trim();\n  const fmt = ['short','medio','masterclass'].includes(String(t.formato || '').toLowerCase().trim()) ? String(t.formato).toLowerCase().trim() : 'short';\n  if (!kw) continue;\n  if (usados.some(u => norm(u) === norm(kw) || parecido(u, kw) >= 0.8)) continue;\n  usados.push(kw);\n  const fila = { ID: 'H' + String(id++).padStart(3, '0'), ESTADO: 'pendiente', KEYWORD_PRINCIPAL: kw, CIUDAD: 'Ventanas, Los Ríos', SUBTEMAS: fmt + ' :: ' + String(t.subtemas || ''), FORMATO: fmt, ESTADO_CORTO: 'pendiente' };\n  out.push({ json: Object.fromEntries(Object.entries(fila).filter(([k]) => headers.includes(k))) });\n}\nreturn out;"
+        }
+      },
+      {
+        "id": "e4280935-7e23-481e-a7cc-d7b5e11aa741",
+        "name": "➕ Agregar temas a VIDEOS",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          2144,
+          112
+        ],
+        "parameters": {
+          "resource": "sheet",
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "1ZHee97fgMi4uEK1Y7hS8XxCIWLGOAmR0QaVZIgR-xxI"
+          },
+          "sheetName": {
+            "__rl": true,
+            "mode": "name",
+            "value": "Hoja 1"
+          },
+          "columns": {
+            "mappingMode": "autoMapInputData",
+            "matchingColumns": [],
+            "schema": []
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "02b71286-3fe3-41f1-a443-aca353de306e",
+        "name": "❓ ¿Hay tema y cupo?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          896,
+          528
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "leftValue": "={{ $json.hay_tema && !!$json.slot_iso }}",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        }
+      },
+      {
+        "id": "93aac1c2-6fcf-4bdc-a7ef-0d46501c8164",
+        "name": "❓ ¿Ya renderizado?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          1120,
+          528
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "leftValue": "={{ $json.ya_renderizado }}",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        }
+      },
+      {
+        "id": "65cc3389-6249-4f41-9403-b3484d19e6bd",
+        "name": "📤 Preparar subida",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          4160,
+          432
+        ],
+        "parameters": {
+          "jsCode": "const plan = $('🗓️ Planificar (tema + horario)').first().json;\nconst cfg = $('⚙️ Config').first().json;\nconst src = plan.ya_renderizado ? plan : $('✅ Video renderizado').first().json;\nconst blog = 'https://' + cfg.BLOG_URL;\nconst esShort = String(plan._formato || 'short') === 'short';\nconst limpiar = s => String(s || '').replace(/[<>]/g, '');\nconst titulo = limpiar(String(src.TITULO_CORTO || plan._keyword).slice(0, 85)) + (esShort ? ' #Shorts' : ' | Guía completa');\nconst cta = esShort\n  ? '🔔 SUSCRÍBETE para más guías sobre hurones'\n  : '🔔 SUSCRÍBETE y activa la campanita para no perderte las próximas masterclasses sobre hurones';\nconst DESCRIPCION = ('📖 Guía completa: ' + blog + '\\n\\n' + limpiar(src.DESC_CORTO) + '\\n\\n' + cta + '\\n💬 Comunidad de WhatsApp del Dr. García: https://chat.whatsapp.com/IkpYnlrPyE8Y2NTyaFB6P\\n👨‍⚕️ Dr. Luis Arturo García · Médico Veterinario · Ventanas, Los Ríos, Ecuador\\n\\n' + limpiar(src.HASHTAGS_CORTO)).slice(0, 4800);\nconst tags = [];\nlet total = 0;\nfor (const t0 of String(src.TAGS_CORTO || '').split(',')) {\n  const t = limpiar(t0).trim().slice(0, 60);\n  if (!t) continue;\n  const costo = t.length + (t.includes(' ') ? 2 : 0) + 1;\n  if (total + costo > 380) break;\n  tags.push(t); total += costo;\n}\nreturn [{ json: { ID: plan.ID, VIDEO_URL_CORTO: src.VIDEO_URL_CORTO, TITULO: titulo, DESCRIPCION, TAGS: tags.join(','), PUBLICAR_EL: plan.slot_iso } }];"
+        }
+      },
+      {
+        "id": "dc151a1d-ff86-4a3a-a0a8-285ceb3a1803",
+        "name": "⬇️ Descargar MP4",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          4384,
+          432
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "={{ $json.VIDEO_URL_CORTO }}",
+          "options": {
+            "response": {
+              "response": {
+                "responseFormat": "file"
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "749dae5c-6eee-4837-ae22-cae7e971f84e",
+        "name": "🎞️ Marcar como video/mp4",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          4496,
+          600
+        ],
+        "parameters": {
+          "jsCode": "const item = $input.first();\nif (item.binary && item.binary.data) {\n  item.binary.data.mimeType = 'video/mp4';\n  item.binary.data.fileName = String(item.json.ID || 'video') + '.mp4';\n  item.binary.data.fileExtension = 'mp4';\n}\nreturn [item];"
+        }
+      },
+      {
+        "id": "f8c34314-d39d-4da0-bd9b-89578d7bfcf5",
+        "name": "📺 Programar en YouTube",
+        "type": "n8n-nodes-base.youTube",
+        "typeVersion": 1,
+        "position": [
+          4608,
+          432
+        ],
+        "parameters": {
+          "resource": "video",
+          "operation": "upload",
+          "binaryProperty": "data",
+          "regionCode": "EC",
+          "categoryId": "27",
+          "title": "={{ $('📤 Preparar subida').first().json.TITULO }}",
+          "options": {
+            "defaultLanguage": "es",
+            "embeddable": true,
+            "license": "youtube",
+            "notifySubscribers": true,
+            "privacyStatus": "private",
+            "publicStatsViewable": true,
+            "selfDeclaredMadeForKids": false,
+            "publishAt": "={{ $('📤 Preparar subida').first().json.PUBLICAR_EL }}",
+            "description": "={{ $('📤 Preparar subida').first().json.DESCRIPCION }}",
+            "tags": "={{ $('📤 Preparar subida').first().json.TAGS }}"
+          }
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "id": "43170e74-87d8-4428-8179-1b46d7873a79",
+        "name": "🚦 Resultado de subida",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          4832,
+          432
+        ],
+        "parameters": {
+          "jsCode": "const it = $input.first().json;\nconst prep = $('📤 Preparar subida').first().json;\nconst e = it.error || {};\nconst msgAll = (typeof e === 'string' ? e : [e.message, e.description, typeof e.error === 'object' ? (e.error && e.error.message) : e.error].map(x => String(x || '')).join(' | '));\nconst videoId = it.id || it.uploadId || '';\nif (videoId && !it.error) return [{ json: { ruta: 'ok', ID: prep.ID, uploadId: videoId } }];\nreturn [{ json: { ruta: 'error', ID: prep.ID, ESTADO_CORTO: 'renderizado', YT_REINTENTO: new Date().toISOString(), motivo: msgAll.slice(0, 180) } }];"
+        }
+      },
+      {
+        "id": "731d92e4-0a06-428d-bbaa-6ab47fc81317",
+        "name": "🚦 Ruta de subida",
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.2,
+        "position": [
+          5056,
+          432
+        ],
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "outputKey": "ok",
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "loose"
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.ruta === 'ok' }}",
+                      "operator": {
+                        "type": "boolean",
+                        "operation": "true",
+                        "singleValue": true
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "outputKey": "reintentar",
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "loose"
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.ruta === 'reintentar' }}",
+                      "operator": {
+                        "type": "boolean",
+                        "operation": "true",
+                        "singleValue": true
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              }
+            ]
+          },
+          "options": {
+            "fallbackOutput": "extra",
+            "renameFallbackOutput": "error"
+          }
+        }
+      },
+      {
+        "id": "2b686a90-75fa-465d-8585-678a8177e0d6",
+        "name": "🗓️ Guardar programado",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          5280,
+          432
+        ],
+        "parameters": {
+          "resource": "sheet",
+          "operation": "update",
+          "documentId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "1ZHee97fgMi4uEK1Y7hS8XxCIWLGOAmR0QaVZIgR-xxI"
+          },
+          "sheetName": {
+            "__rl": true,
+            "mode": "name",
+            "value": "Hoja 1"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "ID"
+            ],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "ID",
+                "id": "ID",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": false,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "ESTADO_CORTO",
+                "id": "ESTADO_CORTO",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": false,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "PUBLICAR_EL",
+                "id": "PUBLICAR_EL",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": false,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "YOUTUBE_ID",
+                "id": "YOUTUBE_ID",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": false,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "SUBIDO_EL",
+                "id": "SUBIDO_EL",
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "ESTADO_CORTO": "programado",
+              "ID": "={{ $('📤 Preparar subida').first().json.ID }}",
+              "PUBLICAR_EL": "={{ $('📤 Preparar subida').first().json.PUBLICAR_EL }}",
+              "SUBIDO_EL": "={{ $now.toUTC().toISO() }}",
+              "YOUTUBE_ID": "={{ $json.uploadId || $json.id }}"
+            }
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "ac449dd4-95c3-49de-81ea-eb9e01300787",
+        "name": "❌ Devolver a la cola",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          3936,
+          736
+        ],
+        "parameters": {
+          "resource": "sheet",
+          "operation": "update",
+          "documentId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "1ZHee97fgMi4uEK1Y7hS8XxCIWLGOAmR0QaVZIgR-xxI"
+          },
+          "sheetName": {
+            "__rl": true,
+            "mode": "name",
+            "value": "Hoja 1"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "ID"
+            ],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "ID",
+                "id": "ID",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": false,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "ESTADO_CORTO",
+                "id": "ESTADO_CORTO",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": false,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "YT_REINTENTO",
+                "id": "YT_REINTENTO",
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "ESTADO_CORTO": "={{ $json.ESTADO_CORTO }}",
+              "ID": "={{ $json.ID }}",
+              "YT_REINTENTO": "={{ $json.YT_REINTENTO || '' }}"
+            }
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "6e2200f3-d81f-498e-9eec-413326a05d42",
+        "name": "⏳ Marcar procesando",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          1344,
+          640
+        ],
+        "parameters": {
+          "resource": "sheet",
+          "operation": "update",
+          "documentId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "1ZHee97fgMi4uEK1Y7hS8XxCIWLGOAmR0QaVZIgR-xxI"
+          },
+          "sheetName": {
+            "__rl": true,
+            "mode": "name",
+            "value": "Hoja 1"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "ID"
+            ],
+            "value": {
+              "ID": "={{ $json.ID }}",
+              "ESTADO_CORTO": "procesando"
+            },
+            "schema": [
+              {
+                "id": "ID",
+                "displayName": "ID",
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "display": true,
+                "required": false,
+                "defaultMatch": false
+              },
+              {
+                "id": "ESTADO_CORTO",
+                "displayName": "ESTADO_CORTO",
+                "type": "string",
+                "canBeUsedToMatch": false,
+                "display": true,
+                "required": false,
+                "defaultMatch": false
+              }
+            ]
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "9140232c-8da2-4225-ba29-409e3dd6ff27",
+        "name": "❓ ¿Masterclass?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          1568,
+          900
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose"
+            },
+            "conditions": [
+              {
+                "leftValue": "={{ $('🗓️ Planificar (tema + horario)').first().json._formato === 'masterclass' }}",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "759d312e-e4ce-41f4-bad2-3501feee0644",
+        "name": "🤖 Plan masterclass",
+        "type": "@n8n/n8n-nodes-langchain.chainLlm",
+        "typeVersion": 1.9,
+        "position": [
+          1792,
+          900
+        ],
+        "parameters": {
+          "promptType": "define",
+          "text": "=Genera el PLAN de mi masterclass sobre HURONES en formato json. Tema: {{ $('🗓️ Planificar (tema + horario)').first().json._keyword }}. Subtemas a enfatizar: {{ $('🗓️ Planificar (tema + horario)').first().json._subtema }}.",
+          "messages": {
+            "messageValues": [
+              {
+                "type": "SystemMessagePromptTemplate",
+                "message": "Eres el Dr. Luis Arturo García, Médico Veterinario Zootecnista (MVZ) en Ventanas, Los Ríos, Ecuador. Creas la estructura de una MASTERCLASS de 30 minutos (video horizontal) sobre HURONES (ferrets) para YouTube. Primera persona, tono cercano y profesional, sin emojis, sin markdown.\n\nResponde ÚNICAMENTE con un objeto json válido con estas claves:\n- titulo_video (máximo 80 caracteres, SEO: empieza con la palabra clave principal con la palabra hurón e incluye 'Masterclass' o 'Guía completa')\n- descripcion_seo (100 a 150 palabras en primera persona: qué aprenderá módulo a módulo, invita a leer la guía completa en hurones.online, a unirse a mi Comunidad de WhatsApp y a SUSCRIBIRSE)\n- palabras_clave (12 a 15 búsquedas relacionadas con hurones separadas por coma)\n- hashtags (8 a 10 hashtags: #hurones #huron #ferret #saludhuron y específicos)\n- modulos (lista de EXACTAMENTE 7 objetos con: nombre (título corto, sin numeración), busqueda_imagen (frase corta EN INGLÉS para foto de stock de un ferret en esa situación), puntos (lista de 5 puntos concretos))\n\nOrden: 1) el problema y por qué importa (abre con los síntomas de alarma), 2) causas y factores de riesgo, 3) síntomas completos, 4) diagnóstico veterinario, 5) tratamiento, 6) cuidados en casa y alimentación, 7) prevención y errores comunes (cierra invitando a hurones.online)."
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "f098011f-7619-4228-b251-71535bcc1c75",
+        "name": "🧠 DeepSeek master",
+        "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+        "typeVersion": 1,
+        "position": [
+          2344,
+          664
+        ],
+        "parameters": {
+          "model": "deepseek-chat",
+          "options": {
+            "maxTokens": 8000,
+            "temperature": 0.7,
+            "responseFormat": "json_object",
+            "timeout": 300000
+          }
+        }
+      },
+      {
+        "id": "4721e706-97f4-4cb5-8982-e7475b0d1070",
+        "name": "🧹 Parsear plan MC",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2016,
+          900
+        ],
+        "parameters": {
+          "jsCode": "const d = $input.first().json;\nlet m = d;\nif (!m || !m.modulos) { let raw = d.text || d.output || ''; m = typeof raw === 'object' ? raw : JSON.parse(String(raw).replace(/^```json\\s*/i,'').replace(/```\\s*$/,'').trim()); }\nif (!m.modulos || !m.modulos.length) throw new Error('Plan de masterclass sin módulos');\nreturn m.modulos.map((mo, i) => ({ json: { indice: i + 1, modulo: mo } }));"
+        }
+      },
+      {
+        "id": "d35abead-f5a8-44a4-9d41-8d41d7fb8b18",
+        "name": "🤖 Desarrollar módulo",
+        "type": "@n8n/n8n-nodes-langchain.chainLlm",
+        "typeVersion": 1.9,
+        "position": [
+          2240,
+          900
+        ],
+        "parameters": {
+          "promptType": "define",
+          "text": "=Escribe las escenas del módulo '{{ $json.modulo.nombre }}' de mi masterclass sobre hurones: {{ $('🗓️ Planificar (tema + horario)').first().json._keyword }}. Puntos a desarrollar en orden: {{ JSON.stringify($json.modulo.puntos) }}. Este es el módulo {{ $json.indice }} de 7. Si es el módulo 1, la primera escena es EL GANCHO: enumera los síntomas concretos del problema antes de presentarte. Si es el módulo 7, la última escena cierra invitando a leer la guía completa en hurones.online y a suscribirse.",
+          "messages": {
+            "messageValues": [
+              {
+                "message": "Eres el Dr. Luis Arturo García, Médico Veterinario Zootecnista (MVZ) en Ventanas, Los Ríos, Ecuador, narrando una masterclass de 30 minutos sobre HURONES. Primera persona SIEMPRE. Frases cortas, tono directo, urgente y cálido. Sin emojis, sin markdown, sin acotaciones. Números con letras. NO inventes estadísticas, estudios ni dosis. Ortografía perfecta. No saludes salvo el gancho del módulo 1.\n\nResponde ÚNICAMENTE con un objeto json válido: {\"escenas\":[{\"narracion\":\"...\",\"busqueda_imagen\":\"...\"}]}\n- EXACTAMENTE 6 escenas.\n- Cada narracion de 105 a 130 palabras.\n- Desarrolla los puntos en orden, conectando con el módulo anterior.\n- busqueda_imagen: frase corta EN INGLÉS de foto de stock de un ferret en la situación; búsquedas distintas entre escenas. REGLA JSON: dentro de los textos NUNCA uses comillas dobles; si necesitas citar, usa comillas simples. No uses saltos de línea dentro de los textos.",
+                "type": "SystemMessagePromptTemplate"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "203f8fa3-646b-47a9-94bd-26fae1a9c52c",
+        "name": "🧩 Unir masterclass",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2464,
+          900
+        ],
+        "parameters": {
+          "jsCode": "const plan = $('🗓️ Planificar (tema + horario)').first().json;\nconst metaRaw = $('🤖 Plan masterclass').first().json;\nlet m = metaRaw;\nif (!m || !m.modulos) { let raw = metaRaw.text || metaRaw.output || ''; m = typeof raw === 'object' ? raw : JSON.parse(String(raw).replace(/^```json\\s*/i,'').replace(/```\\s*$/,'').trim()); }\nconst escenas = [];\nfor (const it of $input.all()) {\n  let d = it.json;\n  if (!d || !d.escenas) { let raw = d.text || d.output || ''; d = typeof raw === 'object' ? raw : JSON.parse(String(raw).replace(/^```json\\s*/i,'').replace(/```\\s*$/,'').trim()); }\n  for (const e of (d.escenas || [])) if (e && e.narracion) escenas.push(e);\n}\nif (escenas.length < 28) throw new Error('Masterclass incompleta: solo ' + escenas.length + ' escenas');\nreturn [{ json: { titulo_video: String(m.titulo_video || plan._keyword).slice(0, 90), descripcion_seo: m.descripcion_seo || '', palabras_clave: m.palabras_clave || '', hashtags: m.hashtags || '', escenas } }];"
+        }
+      },
+      {
+        "id": "0a0f29fb-f3e4-4ce2-9f17-e637414795f1",
+        "name": "📝 Validar guion",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1920,
+          640
+        ],
+        "parameters": {
+          "jsCode": "const d = $input.first().json;\nlet g = Array.isArray(d.escenas) ? d : null;\nif (!g) { let raw = d.text || d.output || ''; g = typeof raw === 'object' ? raw : JSON.parse(String(raw).replace(/^```json\\s*/i,'').replace(/```\\s*$/,'').trim()); }\nlet escenas = (g.escenas || []).filter(e => e && e.narracion);\nconst contar = arr => arr.reduce((n, e) => n + e.narracion.split(/\\s+/).length, 0);\nconst palabras = contar(escenas);\nconst plan = $('🗓️ Planificar (tema + horario)').first().json;\nconst formato = String(plan._formato || 'short');\nconst RANGOS = { short: [330, 700], medio: [1400, 2400], masterclass: [3200, 5600] };\nconst r = RANGOS[formato] || RANGOS.short;\nif (palabras < r[0] || palabras > r[1]) throw new Error('Guion fuera de rango (' + formato + '): ' + palabras + ' palabras en ' + escenas.length + ' escenas');\nreturn [{ json: { ID: plan.ID, keyword: plan._keyword, formato, titulo_video: String(g.titulo_video || plan._keyword).slice(0, 90),\n  descripcion_seo: g.descripcion_seo || '', palabras_clave: g.palabras_clave || '', hashtags: g.hashtags || '', total_palabras: palabras, escenas } }];"
+        }
+      },
+      {
+        "id": "5f5fec2c-e0ca-45a3-8b5b-1913bb23b37d",
+        "name": "✂️ Separar escenas",
+        "type": "n8n-nodes-base.splitOut",
+        "typeVersion": 1,
+        "position": [
+          2144,
+          640
+        ],
+        "parameters": {
+          "fieldToSplitOut": "escenas",
+          "include": "noOtherFields",
+          "options": {
+            "destinationFieldName": "escena"
+          }
+        }
+      },
+      {
+        "id": "44fd9491-77ae-4343-abab-cfd7d7470be0",
+        "name": "🖼️ Imagen Pexels",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          2368,
+          640
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://api.pexels.com/v1/search",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "***ENMASCARADO***"
+              }
+            ]
+          },
+          "sendQuery": true,
+          "specifyQuery": "keypair",
+          "queryParameters": {
+            "parameters": [
+              {
+                "name": "query",
+                "value": "={{ $json.escena.busqueda_imagen }}"
+              },
+              {
+                "name": "per_page",
+                "value": "5"
+              },
+              {
+                "name": "orientation",
+                "value": "={{ $('🗓️ Planificar (tema + horario)').first().json._formato === 'short' ? 'portrait' : 'landscape' }}"
+              }
+            ]
+          },
+          "options": {
+            "batching": {
+              "batch": {
+                "batchSize": 5,
+                "batchInterval": 1000
+              }
+            },
+            "response": {
+              "response": {
+                "neverError": true,
+                "responseFormat": "json"
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "e658e2c0-3343-4dcc-91ae-7e8ace55715d",
+        "name": "📦 Armar trabajo de video",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          2592,
+          640
+        ],
+        "parameters": {
+          "jsCode": "const fotos = $input.all();\nconst escenas = $('✂️ Separar escenas').all();\nconst plan = $('🗓️ Planificar (tema + horario)').first().json;\nconst formato = String(plan._formato || 'short');\nconst vertical = formato === 'short';\nconst usadas = new Set();\nconst out = [];\nlet conFoto = 0;\nfor (let i = 0; i < escenas.length; i++) {\n  const esc = escenas[i].json.escena;\n  const photos = (fotos[i] && fotos[i].json && fotos[i].json.photos) || [];\n  const p = photos.find(x => !usadas.has(x.id)) || photos[0];\n  let url = null;\n  if (p) {\n    usadas.add(p.id);\n    url = vertical\n      ? p.src.original + '?auto=compress&cs=tinysrgb&fit=crop&w=1080&h=1920'\n      : p.src.original + '?auto=compress&cs=tinysrgb&fit=crop&w=1920&h=1080';\n    conFoto++;\n  }\n  else if (out.length) url = out[out.length - 1].image_url;\n  out.push({ text: esc.narracion, image_url: url });\n}\nif (conFoto === 0) throw new Error('PEXELS no devolvió imágenes (revisa la clave de Pexels)');\nfor (let i = 0; i < out.length; i++) if (!out[i].image_url) out[i].image_url = out.find(e => e.image_url).image_url;\nconst g = $('📝 Validar guion').first().json;\nconst cfg = $('⚙️ Config').first().json;\nconst tag = g.ID + '-' + Date.now();\nconst job = { id: g.ID, orientation: vertical ? 'vertical' : 'horizontal', formato, voice: 'es-EC-LuisNeural', blog_url: cfg.BLOG_URL, scenes: out };\nreturn [{ json: { ...g, tag, job_str: JSON.stringify(job) } }];"
+        }
+      },
+      {
+        "id": "2bb4a393-0bd7-4bae-a2b6-b8f7b9a235f4",
+        "name": "🎥 Renderizar en GitHub (gratis)",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          2816,
+          640
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "=https://api.github.com/repos/{{ $('⚙️ Config').first().json.GH_OWNER }}/{{ $('⚙️ Config').first().json.GH_REPO }}/actions/workflows/render.yml/dispatches",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $('⚙️ Config').first().json.GH_TOKEN }}"
+              },
+              {
+                "name": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "name": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              }
+            ]
+          },
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ ref: 'main', inputs: { job_id: $json.tag, job: $json.job_str } }) }}",
+          "options": {}
+        }
+      },
+      {
+        "id": "5fe37fb5-136b-4b16-b288-d015059bf466",
+        "name": "⏳ Esperar 45s",
+        "type": "n8n-nodes-base.wait",
+        "typeVersion": 1.1,
+        "position": [
+          3040,
+          640
+        ],
+        "parameters": {
+          "resume": "timeInterval",
+          "amount": 45,
+          "unit": "seconds"
+        },
+        "webhookId": "20796fd8-dc4b-41e6-9006-c35b5de7517c"
+      },
+      {
+        "id": "91acb981-039d-42f7-a490-badee76956f9",
+        "name": "🔍 ¿Video listo?",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.4,
+        "position": [
+          3264,
+          544
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "=https://api.github.com/repos/{{ $('⚙️ Config').first().json.GH_OWNER }}/{{ $('⚙️ Config').first().json.GH_REPO }}/releases/tags/{{ $('📦 Armar trabajo de video').first().json.tag }}",
+          "sendHeaders": true,
+          "headerParameters": {
+            "parameters": [
+              {
+                "name": "Authorization",
+                "value": "=Bearer {{ $('⚙️ Config').first().json.GH_TOKEN }}"
+              },
+              {
+                "name": "Accept",
+                "value": "application/vnd.github+json"
+              },
+              {
+                "name": "X-GitHub-Api-Version",
+                "value": "2022-11-28"
+              }
+            ]
+          },
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true,
+                "neverError": true,
+                "responseFormat": "json"
+              }
+            }
+          }
+        }
+      },
+      {
+        "id": "17e7cba5-8129-44e5-bbae-67a2b9148656",
+        "name": "🚦 ¿Listo?",
+        "type": "n8n-nodes-base.switch",
+        "typeVersion": 3.2,
+        "position": [
+          3488,
+          624
+        ],
+        "parameters": {
+          "rules": {
+            "values": [
+              {
+                "outputKey": "listo",
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "loose"
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $json.statusCode == 200 && ($json.body.assets || []).length > 0 }}",
+                      "operator": {
+                        "type": "boolean",
+                        "operation": "true",
+                        "singleValue": true
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              },
+              {
+                "outputKey": "demasiado",
+                "conditions": {
+                  "options": {
+                    "caseSensitive": true,
+                    "leftValue": "",
+                    "typeValidation": "loose"
+                  },
+                  "conditions": [
+                    {
+                      "leftValue": "={{ $runIndex >= ($('🗓️ Planificar (tema + horario)').first().json._formato === 'masterclass' ? 110 : $('🗓️ Planificar (tema + horario)').first().json._formato === 'medio' ? 60 : 30) }}",
+                      "operator": {
+                        "type": "boolean",
+                        "operation": "true",
+                        "singleValue": true
+                      }
+                    }
+                  ],
+                  "combinator": "and"
+                }
+              }
+            ]
+          },
+          "options": {
+            "fallbackOutput": "extra",
+            "renameFallbackOutput": "procesando"
+          }
+        }
+      },
+      {
+        "id": "6eccefc8-4a36-4a16-a917-04d614e54128",
+        "name": "✅ Video renderizado",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          3712,
+          544
+        ],
+        "parameters": {
+          "jsCode": "const rel = $input.first().json.body;\nconst d = $('📦 Armar trabajo de video').first().json;\nconst url = rel.assets[0].browser_download_url;\nreturn [{ json: { ID: d.ID, ESTADO_CORTO: 'renderizado', VIDEO_URL_CORTO: url, TITULO_CORTO: d.titulo_video, DESC_CORTO: d.descripcion_seo, TAGS_CORTO: d.palabras_clave, HASHTAGS_CORTO: d.hashtags, FECHA_CORTO: new Date().toISOString().split('T')[0] } }];"
+        }
+      },
+      {
+        "id": "ab14afc4-6668-4130-95c2-10aa6a8f7e81",
+        "name": "💾 Guardar renderizado",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          3936,
+          544
+        ],
+        "parameters": {
+          "resource": "sheet",
+          "operation": "update",
+          "documentId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "1ZHee97fgMi4uEK1Y7hS8XxCIWLGOAmR0QaVZIgR-xxI"
+          },
+          "sheetName": {
+            "__rl": true,
+            "mode": "name",
+            "value": "Hoja 1"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "matchingColumns": [
+              "ID"
+            ],
+            "schema": [
+              {
+                "canBeUsedToMatch": true,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "ID",
+                "id": "ID",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": false,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "ESTADO_CORTO",
+                "id": "ESTADO_CORTO",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": false,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "VIDEO_URL_CORTO",
+                "id": "VIDEO_URL_CORTO",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": false,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "TITULO_CORTO",
+                "id": "TITULO_CORTO",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": false,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "DESC_CORTO",
+                "id": "DESC_CORTO",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": false,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "TAGS_CORTO",
+                "id": "TAGS_CORTO",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": false,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "HASHTAGS_CORTO",
+                "id": "HASHTAGS_CORTO",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": false,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "FECHA_CORTO",
+                "id": "FECHA_CORTO",
+                "required": false,
+                "type": "string"
+              },
+              {
+                "canBeUsedToMatch": false,
+                "defaultMatch": false,
+                "display": true,
+                "displayName": "PUBLICAR_EL",
+                "id": "PUBLICAR_EL",
+                "required": false,
+                "type": "string"
+              }
+            ],
+            "value": {
+              "DESC_CORTO": "={{ $json.DESC_CORTO }}",
+              "ESTADO_CORTO": "={{ $json.ESTADO_CORTO }}",
+              "FECHA_CORTO": "={{ $json.FECHA_CORTO }}",
+              "HASHTAGS_CORTO": "={{ $json.HASHTAGS_CORTO }}",
+              "ID": "={{ $json.ID }}",
+              "PUBLICAR_EL": "={{ $('🗓️ Planificar (tema + horario)').first().json.slot_iso }}",
+              "TAGS_CORTO": "={{ $json.TAGS_CORTO }}",
+              "TITULO_CORTO": "={{ $json.TITULO_CORTO }}",
+              "VIDEO_URL_CORTO": "={{ $json.VIDEO_URL_CORTO }}"
+            }
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "17a61dcb-7d91-4630-9ba2-7feebeddce4b",
+        "name": "⚠️ Render tardó demasiado",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          3712,
+          736
+        ],
+        "parameters": {
+          "jsCode": "return [{ json: { ID: $('📦 Armar trabajo de video').first().json.ID, ESTADO_CORTO: 'pendiente' } }];"
+        }
+      },
+      {
+        "id": "eec78ba4-e09d-4adf-af7b-c61e6aacd626",
+        "name": "🤖 Guion Short Dr. García",
+        "type": "@n8n/n8n-nodes-langchain.chainLlm",
+        "typeVersion": 1.9,
+        "position": [
+          1568,
+          640
+        ],
+        "parameters": {
+          "promptType": "define",
+          "text": "=Genera el guion completo, en formato json, para mi video sobre HURONES: {{ $('🗓️ Planificar (tema + horario)').first().json._keyword }}. Formato del video: {{ $('🗓️ Planificar (tema + horario)').first().json._formato }} ('short' = video vertical de 3 minutos; 'medio' = video horizontal de 12 a 15 minutos). Subtemas a enfatizar: {{ $('🗓️ Planificar (tema + horario)').first().json._subtema }}.",
+          "messages": {
+            "messageValues": [
+              {
+                "type": "SystemMessagePromptTemplate",
+                "message": "Eres el Dr. Luis Arturo García, Médico Veterinario Zootecnista (MVZ) en Ventanas, Los Ríos, Ecuador. Escribes el guion que TÚ MISMO vas a narrar en un video sobre HURONES (ferrets). El video funciona como una carta de venta educativa: atrapa desde el segundo uno, enseña con valor real y lleva al espectador a leer la guía completa en mi blog hurones.online y a SUSCRIBIRSE al canal.\n\nAPERTURA OBLIGATORIA (escena 1) - EL GANCHO: el video NUNCA empieza saludando. La primera frase enumera los SÍNTOMAS o señales REALES del problema, por ejemplo: 'Si tu hurón tiembla, babea, se queda mirando al vacío y está muy débil, cuidado: podría ser una hipoglucemia por insulinoma.' Usa solo síntomas que correspondan a ese problema. SOLO DESPUÉS, en la escena 2, te presentas en una frase ('Soy el médico veterinario Luis Arturo García.') y explicas por qué es grave.\n\nREGLAS DE VOZ: primera persona SIEMPRE. Tono directo, urgente y cálido. Frases cortas. Sin emojis, sin markdown, sin acotaciones entre corchetes. Números con letras. NO inventes estadísticas, estudios ni dosis; ante dosis di que las define el veterinario. Ortografía perfecta.\n\nFORMATO DE RESPUESTA: responde ÚNICAMENTE con un objeto json válido con estas claves: titulo_video (máximo 80 caracteres, SEO: empieza con la palabra clave principal con la palabra hurón y añade urgencia o curiosidad), descripcion_seo (100 a 150 palabras en primera persona: la primera frase repite la búsqueda principal, responde la pregunta del dueño en 1-2 frases claras (AEO), explica qué aprenderá, e invita a leer la guía completa en hurones.online, a unirse a mi Comunidad de WhatsApp y a SUSCRIBIRSE), palabras_clave (12 a 15 búsquedas relacionadas con hurones separadas por coma), hashtags (8 a 10 hashtags con # separados por espacio: #hurones #huron #ferret #saludhuron #veterinario y específicos del tema) y escenas (lista de objetos con las claves narracion y busqueda_imagen).\n\nSI EL FORMATO ES 'short': EXACTAMENTE 8 escenas de 55 a 75 palabras (unas 500 palabras). Estructura: 1 gancho de síntomas, 2 presentación y por qué es grave, 3 causas, 4 cómo se diagnostica y qué hacer ya, 5 tratamiento veterinario, 6 cuidados en casa y qué NO hacer, 7 señales de alarma, 8 cierre: 'Te dejo la guía completa en mi blog hurones.online', invita a suscribirse y compartir.\n\nSI EL FORMATO ES 'medio': EXACTAMENTE 16 escenas de 105 a 130 palabras (1800 a 2000 palabras). Estructura: 1 gancho, 2 presentación y promesa, 3-4 qué es y causas, 5-7 síntomas y evolución, 8-9 diagnóstico, 10-11 tratamiento, 12-13 cuidados en casa y alimentación, 14 errores comunes, 15 prevención y emergencias, 16 cierre con la guía completa en hurones.online y suscripción.\n\nbusqueda_imagen: frase corta EN INGLÉS para buscar foto de stock de un ferret en la situación de esa escena (ej: 'sick ferret at vet', 'ferret eating raw meat'); para la escena 1 elige una imagen impactante. Nunca repitas la misma frase."
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "6d32e38a-2683-4dde-b438-e63fbd4fc7a4",
+        "name": "🧠 DeepSeek guion",
+        "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+        "typeVersion": 1,
+        "position": [
+          1648,
+          864
+        ],
+        "parameters": {
+          "model": "deepseek-chat",
+          "options": {
+            "maxTokens": 8000,
+            "temperature": 0.7,
+            "responseFormat": "json_object",
+            "timeout": 300000
+          }
+        }
+      },
+      {
+        "id": "77b8a73d-e0af-4d3f-b0c4-6b6ce8e335ee",
+        "name": "⏰ Cada 17 minutos",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          0,
+          496
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "minutes",
+                "minutesInterval": 17
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "activeVersion": {
+      "nodes": [
+        {
+          "id": "0037da97-3327-4857-908a-173fbba66368",
+          "name": "▶ Iniciar manual",
+          "type": "n8n-nodes-base.manualTrigger",
+          "typeVersion": 1,
+          "position": [
+            0,
+            304
+          ],
+          "parameters": {}
+        },
+        {
+          "id": "715f65bf-ac99-4c2f-bd69-d92203ba8723",
+          "name": "⚙️ Config",
+          "type": "n8n-nodes-base.set",
+          "typeVersion": 3.4,
+          "position": [
+            224,
+            400
+          ],
+          "parameters": {
+            "mode": "manual",
+            "includeOtherFields": false,
+            "assignments": {
+              "assignments": [
+                {
+                  "id": "c1",
+                  "name": "GH_TOKEN",
+                  "type": "string",
+                  "value": "***ENMASCARADO***"
+                },
+                {
+                  "id": "c2",
+                  "name": "GH_OWNER",
+                  "type": "string",
+                  "value": "luisarturo88"
+                },
+                {
+                  "id": "c3",
+                  "name": "GH_REPO",
+                  "type": "string",
+                  "value": "dr-garcia-videos"
+                },
+                {
+                  "id": "c4",
+                  "name": "BLOG_URL",
+                  "type": "string",
+                  "value": "hurones.online"
+                },
+                {
+                  "id": "c5",
+                  "name": "HORAS_SHORT_UTC",
+                  "type": "string",
+                  "value": "13,24"
+                },
+                {
+                  "id": "c6",
+                  "name": "MAX_COLA",
+                  "type": "number",
+                  "value": 1095
+                },
+                {
+                  "id": "c7",
+                  "name": "HORAS_LARGO_UTC",
+                  "type": "string",
+                  "value": "18"
+                },
+                {
+                  "id": "c8",
+                  "name": "MAX_SUBIDAS_DIA",
+                  "type": "number",
+                  "value": 4
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "87794788-3e72-49b3-9d59-eccf3f458500",
+          "name": "📁 Leer VIDEOS",
+          "type": "n8n-nodes-base.googleSheets",
+          "typeVersion": 4.7,
+          "position": [
+            448,
+            400
+          ],
+          "parameters": {
+            "resource": "sheet",
+            "operation": "read",
+            "documentId": {
+              "__rl": true,
+              "mode": "id",
+              "value": "1ZHee97fgMi4uEK1Y7hS8XxCIWLGOAmR0QaVZIgR-xxI"
+            },
+            "sheetName": {
+              "__rl": true,
+              "mode": "name",
+              "value": "Hoja 1"
+            },
+            "options": {}
+          },
+          "executeOnce": true
+        },
+        {
+          "id": "ae40f984-6de5-42a4-a544-7ec1eafd26c9",
+          "name": "🗓️ Planificar (tema + horario)",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            672,
+            400
+          ],
+          "parameters": {
+            "jsCode": "// Programa por FORMATO: cortos en HORAS_SHORT_UTC (2 al día) y largos en HORAS_LARGO_UTC (1 al día).\n// Ecuador UTC-5: 13 = 08:00, 18 = 13:00, 24 = 19:00. Tope de SUBIDAS por día (YouTube cuenta subidas, no publicaciones).\nconst cfg = $('⚙️ Config').first().json;\nconst HS = String(cfg.HORAS_SHORT_UTC || '13,24').split(',').map(Number);\nconst HL = String(cfg.HORAS_LARGO_UTC || '18').split(',').map(Number);\nconst MAX_SUB = Number(cfg.MAX_SUBIDAS_DIA || 4);\nconst rows = $input.all().map(i => i.json);\nconst est = r => { const e = String(r.ESTADO_CORTO || '').toLowerCase().trim(); return e === 'pendiente_youtube' ? 'renderizado' : e; };\nconst ahora = new Date();\nconst hoy = ahora.toISOString().slice(0, 10);\nconst subidasHoy = rows.filter(r => String(r.SUBIDO_EL || '').slice(0, 10) === hoy).length;\nconst fechas = rows.map(r => new Date(r.PUBLICAR_EL || '')).filter(d => !isNaN(d));\nconst programados = fechas.filter(d => d > ahora).length;\nconst ocupado = c => fechas.some(f => Math.abs(f.getTime() - c.getTime()) < 2 * 3600 * 1000);\nconst slotPara = horas => {\n  for (let dia = 0; dia < 1200; dia++) for (const h of horas) {\n    const c = new Date(Date.UTC(ahora.getUTCFullYear(), ahora.getUTCMonth(), ahora.getUTCDate() + dia, h));\n    if (c.getTime() - ahora.getTime() < 3 * 3600 * 1000 || ocupado(c)) continue;\n    return c;\n  }\n  return null;\n};\nconst formatoDe = r => {\n  let formato = 'short', subtema = String((r && r.SUBTEMAS) || '');\n  const fCol = String((r && r.FORMATO) || '').toLowerCase().trim();\n  if (['short', 'medio', 'masterclass'].includes(fCol)) {\n    formato = fCol;\n    if (subtema.includes('::')) subtema = subtema.split('::').slice(1).join('::').trim();\n  } else if (subtema.includes('::')) {\n    const f = subtema.split('::')[0].trim().toLowerCase();\n    if (['short', 'medio', 'masterclass'].includes(f)) { formato = f; subtema = subtema.split('::').slice(1).join('::').trim(); }\n  }\n  return { formato, subtema };\n};\nconst disponibles = rows.filter(r => ['pendiente', 'procesando', 'renderizado'].includes(est(r)) && String(r.KEYWORD_PRINCIPAL || '').trim());\nlet elegido = null;\nif (programados < Number(cfg.MAX_COLA)) {\n  const listoParaSubir = r => { const t = new Date(r.YT_REINTENTO || 0).getTime(); return isNaN(t) || ahora.getTime() - t > 4 * 3600 * 1000; };\n  const fechaDe = r => { const t = new Date(r.PUBLICAR_EL || '').getTime(); return isNaN(t) ? 9e15 : t; };\n  const renderizados = disponibles.filter(r => est(r) === 'renderizado' && r.VIDEO_URL_CORTO).sort((a, b) => fechaDe(a) - fechaDe(b));\n  // Sube a YouTube solo hasta el tope diario; el resto del tiempo SIGUE FABRICANDO sin parar (cada video ya nace con su fecha)\n  const paraSubir = subidasHoy < MAX_SUB ? renderizados.find(listoParaSubir) : null;\n  elegido = paraSubir || disponibles.find(r => est(r) !== 'renderizado') || null;\n}\nconst { formato, subtema } = formatoDe(elegido);\nconst fFija = elegido && est(elegido) === 'renderizado' ? new Date(elegido.PUBLICAR_EL || '') : null;\nconst slot = !elegido ? null\n  : (fFija && !isNaN(fFija)) ? (fFija.getTime() - ahora.getTime() > 3600 * 1000 ? fFija : new Date(ahora.getTime() + 3600 * 1000))\n  : slotPara(formato === 'short' ? HS : HL);\nconst maxId = Math.max(0, ...rows.map(r => parseInt(String(r.ID || '').replace(/\\D/g, ''), 10) || 0));\nconst publicados = rows.filter(r => r.YOUTUBE_ID).map(r => ({ id: r.YOUTUBE_ID, tema: r.KEYWORD_PRINCIPAL }));\nreturn [{ json: {\n  headers: Object.keys(rows[0] || {}).filter(k => !/^row[_]/i.test(k)),\n  hay_tema: !!elegido,\n  ya_renderizado: !!(elegido && est(elegido) === 'renderizado' && elegido.VIDEO_URL_CORTO),\n  necesita_temas: disponibles.filter(r => est(r) === 'pendiente').length < 50,\n  ID: elegido ? elegido.ID : '',\n  _keyword: elegido ? String(elegido.KEYWORD_PRINCIPAL).trim() : '',\n  _subtema: subtema,\n  _formato: formato,\n  VIDEO_URL_CORTO: elegido ? (elegido.VIDEO_URL_CORTO || '') : '',\n  TITULO_CORTO: elegido ? (elegido.TITULO_CORTO || '') : '',\n  DESC_CORTO: elegido ? (elegido.DESC_CORTO || '') : '',\n  TAGS_CORTO: elegido ? (elegido.TAGS_CORTO || '') : '',\n  HASHTAGS_CORTO: elegido ? (elegido.HASHTAGS_CORTO || '') : '',\n  existentes: rows.map(r => String(r.KEYWORD_PRINCIPAL || '').trim()).filter(Boolean),\n  publicados_ids: publicados.map(p => p.id).slice(-50).join(','),\n  publicados,\n  next_id: maxId + 1,\n  slot_iso: slot ? slot.toISOString() : '',\n  programados,\n  subidas_hoy: subidasHoy\n}}];\n"
+          }
+        },
+        {
+          "id": "43fbff70-7821-4505-9dcb-e99ccf04350c",
+          "name": "❓ ¿Faltan temas?",
+          "type": "n8n-nodes-base.if",
+          "typeVersion": 2.2,
+          "position": [
+            896,
+            112
+          ],
+          "parameters": {
+            "conditions": {
+              "options": {
+                "caseSensitive": true,
+                "leftValue": "",
+                "typeValidation": "loose"
+              },
+              "conditions": [
+                {
+                  "leftValue": "={{ $json.necesita_temas }}",
+                  "operator": {
+                    "type": "boolean",
+                    "operation": "true",
+                    "singleValue": true
+                  }
+                }
+              ],
+              "combinator": "and"
+            }
+          }
+        },
+        {
+          "id": "8f8f765a-c2d4-4abd-a151-e9e8ad9b6384",
+          "name": "📊 Vistas en YouTube",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.4,
+          "position": [
+            1120,
+            112
+          ],
+          "parameters": {
+            "method": "GET",
+            "url": "https://www.googleapis.com/youtube/v3/videos",
+            "authentication": "predefinedCredentialType",
+            "nodeCredentialType": "youTubeOAuth2Api",
+            "sendQuery": true,
+            "specifyQuery": "keypair",
+            "queryParameters": {
+              "parameters": [
+                {
+                  "name": "part",
+                  "value": "statistics"
+                },
+                {
+                  "name": "id",
+                  "value": "={{ $json.publicados_ids || 'x' }}"
+                }
+              ]
+            },
+            "options": {
+              "response": {
+                "response": {
+                  "neverError": true,
+                  "responseFormat": "json"
+                }
+              }
+            }
+          },
+          "onError": "continueRegularOutput"
+        },
+        {
+          "id": "d4fde4f5-74a4-48c6-b9d8-8e84e18b1c92",
+          "name": "🏆 Temas que mejor funcionan",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            1344,
+            112
+          ],
+          "parameters": {
+            "jsCode": "const plan = $('🗓️ Planificar (tema + horario)').first().json;\nconst items = ($input.first().json.items || []);\nconst pts = {};\nfor (const it of items) { const s = it.statistics || {}; pts[it.id] = Number(s.viewCount || 0) + 3 * Number(s.likeCount || 0) + 5 * Number(s.commentCount || 0); }\nconst top = plan.publicados.filter(p => pts[p.id] !== undefined).sort((a, b) => pts[b.id] - pts[a.id]).slice(0, 5).map(p => p.tema + ' (' + pts[p.id] + ' pts)');\nreturn [{ json: { top: top.length ? top.join(' | ') : 'todavía no hay datos suficientes' } }];"
+          }
+        },
+        {
+          "id": "e659e78d-17df-43e5-9a58-5ad8828f76b0",
+          "name": "💡 Generar 25 temas nuevos",
+          "type": "@n8n/n8n-nodes-langchain.chainLlm",
+          "typeVersion": 1.9,
+          "position": [
+            1568,
+            112
+          ],
+          "parameters": {
+            "promptType": "define",
+            "text": "=Temas que MEJOR han funcionado en mi canal de hurones (haz más del mismo estilo e intención de búsqueda, sin repetirlos): {{ $json.top }}. NO repitas ni parafrasees ninguno de estos temas ya usados: {{ $('🗓️ Planificar (tema + horario)').first().json.existentes.slice(-400).join(' | ') }}. Genera 45 temas nuevos SOLO de hurones en formato json.",
+            "messages": {
+              "messageValues": [
+                {
+                  "type": "SystemMessagePromptTemplate",
+                  "message": "Eres el Dr. Luis Arturo García, médico veterinario en Ecuador, y planificas el contenido de tu canal de HURONES (ferrets) para YouTube, Shorts, Reels y TikTok, dirigido a dueños de hurones de habla hispana. SOLO hurones, ninguna otra especie. El blog del canal es hurones.online.\n\nTemas de SÍNTOMAS, ENFERMEDADES y CUIDADOS del hurón: insulinoma e hipoglucemia (tiembla, babea, se queda mirando al vacío), enfermedad adrenal (caída de pelo, cola pelada, vulva inflamada, próstata), cuerpos extraños y obstrucción intestinal, enteritis epizoótica (ECE, diarrea verde), moquillo y vacunación, influenza, linfoma, cardiomiopatía, dientes y sarro, golpe de calor, parásitos y pulgas, alimentación carnívora y alimentos prohibidos, comportamiento (muerde, mal olor, arenero, juego), hurón cachorro, hurón senior, primeros auxilios y cuándo es emergencia. El SÍNTOMA y la ENFERMEDAD deben VARIAR de tema en tema.\n\nGenera una lista de 45 objetos. Cada objeto con estas claves:\n- formato: los PRIMEROS 18 con \"short\" (video vertical de 3 minutos), los SIGUIENTES 22 con \"medio\" (video horizontal de 12 a 15 minutos), los ÚLTIMOS 5 con \"masterclass\" (clase magistral horizontal de 30 minutos sobre un tema amplio: guía total de una enfermedad o de una etapa de vida).\n- keyword: frase de búsqueda natural en español como la escribiría un dueño preocupado, máximo 75 caracteres, que incluya la palabra hurón (ej: \"Mi hurón tiembla y babea: hipoglucemia, qué hacer ya\").\n- subtemas: de 3 a 6 puntos clave separados por coma que el video debe cubrir.\n- especie: huron.\n\nReglas anti-canibalización: cada tema responde una búsqueda DISTINTA; no repitas síntoma con la misma enfermedad salvo que el enfoque (causas/ tratamiento/ prevención/ emergencia) sea diferente.\n\nResponde ÚNICAMENTE con un objeto json con la clave temas: la lista de 45 objetos."
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "b0729771-2764-4bfd-880c-be62fc1f7e38",
+          "name": "🧠 DeepSeek temas",
+          "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+          "typeVersion": 1,
+          "position": [
+            1648,
+            336
+          ],
+          "parameters": {
+            "model": "deepseek-chat",
+            "options": {
+              "maxTokens": 4000,
+              "temperature": 0.9,
+              "responseFormat": "json_object"
+            }
+          }
+        },
+        {
+          "id": "6ff7fc73-3cd6-4af6-93e3-11b692c4299b",
+          "name": "🧹 Quitar repetidos",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            1920,
+            112
+          ],
+          "parameters": {
+            "jsCode": "const plan = $('🗓️ Planificar (tema + horario)').first().json;\nconst d = $input.first().json;\nlet lista = d.temas || (typeof d.text === 'string' ? (JSON.parse(d.text).temas || []) : ((d.text && d.text.temas) || []));\nconst norm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\\s+/g, ' ').trim();\nconst STOP = new Set(['mi','tu','el','la','los','las','de','del','en','y','que','por','para','con','un','una','se','es','a','como','cuando','huron','hurones','hacer','sintomas','causas']);\nconst tokens = s => new Set(norm(s).split(' ').filter(w => w.length > 2 && !STOP.has(w)));\nconst parecido = (a, b) => { const A = tokens(a), B = tokens(b); if (!A.size || !B.size) return 0; let i = 0; for (const x of A) if (B.has(x)) i++; return i / Math.min(A.size, B.size); };\nconst usados = [...plan.existentes];\nconst headers = Array.isArray(plan.headers) && plan.headers.length ? plan.headers : ['ID','ESTADO','KEYWORD_PRINCIPAL','CIUDAD','SUBTEMAS','ESTADO_CORTO','FORMATO'];\nconst out = [];\nlet id = plan.next_id;\nfor (const t of lista) {\n  const kw = String(t.keyword || '').trim();\n  const fmt = ['short','medio','masterclass'].includes(String(t.formato || '').toLowerCase().trim()) ? String(t.formato).toLowerCase().trim() : 'short';\n  if (!kw) continue;\n  if (usados.some(u => norm(u) === norm(kw) || parecido(u, kw) >= 0.8)) continue;\n  usados.push(kw);\n  const fila = { ID: 'H' + String(id++).padStart(3, '0'), ESTADO: 'pendiente', KEYWORD_PRINCIPAL: kw, CIUDAD: 'Ventanas, Los Ríos', SUBTEMAS: fmt + ' :: ' + String(t.subtemas || ''), FORMATO: fmt, ESTADO_CORTO: 'pendiente' };\n  out.push({ json: Object.fromEntries(Object.entries(fila).filter(([k]) => headers.includes(k))) });\n}\nreturn out;"
+          }
+        },
+        {
+          "id": "e4280935-7e23-481e-a7cc-d7b5e11aa741",
+          "name": "➕ Agregar temas a VIDEOS",
+          "type": "n8n-nodes-base.googleSheets",
+          "typeVersion": 4.7,
+          "position": [
+            2144,
+            112
+          ],
+          "parameters": {
+            "resource": "sheet",
+            "operation": "append",
+            "documentId": {
+              "__rl": true,
+              "mode": "id",
+              "value": "1ZHee97fgMi4uEK1Y7hS8XxCIWLGOAmR0QaVZIgR-xxI"
+            },
+            "sheetName": {
+              "__rl": true,
+              "mode": "name",
+              "value": "Hoja 1"
+            },
+            "columns": {
+              "mappingMode": "autoMapInputData",
+              "matchingColumns": [],
+              "schema": []
+            },
+            "options": {}
+          }
+        },
+        {
+          "id": "02b71286-3fe3-41f1-a443-aca353de306e",
+          "name": "❓ ¿Hay tema y cupo?",
+          "type": "n8n-nodes-base.if",
+          "typeVersion": 2.2,
+          "position": [
+            896,
+            528
+          ],
+          "parameters": {
+            "conditions": {
+              "options": {
+                "caseSensitive": true,
+                "leftValue": "",
+                "typeValidation": "loose"
+              },
+              "conditions": [
+                {
+                  "leftValue": "={{ $json.hay_tema && !!$json.slot_iso }}",
+                  "operator": {
+                    "type": "boolean",
+                    "operation": "true",
+                    "singleValue": true
+                  }
+                }
+              ],
+              "combinator": "and"
+            }
+          }
+        },
+        {
+          "id": "93aac1c2-6fcf-4bdc-a7ef-0d46501c8164",
+          "name": "❓ ¿Ya renderizado?",
+          "type": "n8n-nodes-base.if",
+          "typeVersion": 2.2,
+          "position": [
+            1120,
+            528
+          ],
+          "parameters": {
+            "conditions": {
+              "options": {
+                "caseSensitive": true,
+                "leftValue": "",
+                "typeValidation": "loose"
+              },
+              "conditions": [
+                {
+                  "leftValue": "={{ $json.ya_renderizado }}",
+                  "operator": {
+                    "type": "boolean",
+                    "operation": "true",
+                    "singleValue": true
+                  }
+                }
+              ],
+              "combinator": "and"
+            }
+          }
+        },
+        {
+          "id": "65cc3389-6249-4f41-9403-b3484d19e6bd",
+          "name": "📤 Preparar subida",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            4160,
+            432
+          ],
+          "parameters": {
+            "jsCode": "const plan = $('🗓️ Planificar (tema + horario)').first().json;\nconst cfg = $('⚙️ Config').first().json;\nconst src = plan.ya_renderizado ? plan : $('✅ Video renderizado').first().json;\nconst blog = 'https://' + cfg.BLOG_URL;\nconst esShort = String(plan._formato || 'short') === 'short';\nconst limpiar = s => String(s || '').replace(/[<>]/g, '');\nconst titulo = limpiar(String(src.TITULO_CORTO || plan._keyword).slice(0, 85)) + (esShort ? ' #Shorts' : ' | Guía completa');\nconst cta = esShort\n  ? '🔔 SUSCRÍBETE para más guías sobre hurones'\n  : '🔔 SUSCRÍBETE y activa la campanita para no perderte las próximas masterclasses sobre hurones';\nconst DESCRIPCION = ('📖 Guía completa: ' + blog + '\\n\\n' + limpiar(src.DESC_CORTO) + '\\n\\n' + cta + '\\n💬 Comunidad de WhatsApp del Dr. García: https://chat.whatsapp.com/IkpYnlrPyE8Y2NTyaFB6P\\n👨‍⚕️ Dr. Luis Arturo García · Médico Veterinario · Ventanas, Los Ríos, Ecuador\\n\\n' + limpiar(src.HASHTAGS_CORTO)).slice(0, 4800);\nconst tags = [];\nlet total = 0;\nfor (const t0 of String(src.TAGS_CORTO || '').split(',')) {\n  const t = limpiar(t0).trim().slice(0, 60);\n  if (!t) continue;\n  const costo = t.length + (t.includes(' ') ? 2 : 0) + 1;\n  if (total + costo > 380) break;\n  tags.push(t); total += costo;\n}\nreturn [{ json: { ID: plan.ID, VIDEO_URL_CORTO: src.VIDEO_URL_CORTO, TITULO: titulo, DESCRIPCION, TAGS: tags.join(','), PUBLICAR_EL: plan.slot_iso } }];"
+          }
+        },
+        {
+          "id": "dc151a1d-ff86-4a3a-a0a8-285ceb3a1803",
+          "name": "⬇️ Descargar MP4",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.4,
+          "position": [
+            4384,
+            432
+          ],
+          "parameters": {
+            "method": "GET",
+            "url": "={{ $json.VIDEO_URL_CORTO }}",
+            "options": {
+              "response": {
+                "response": {
+                  "responseFormat": "file"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "749dae5c-6eee-4837-ae22-cae7e971f84e",
+          "name": "🎞️ Marcar como video/mp4",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            4496,
+            600
+          ],
+          "parameters": {
+            "jsCode": "const item = $input.first();\nif (item.binary && item.binary.data) {\n  item.binary.data.mimeType = 'video/mp4';\n  item.binary.data.fileName = String(item.json.ID || 'video') + '.mp4';\n  item.binary.data.fileExtension = 'mp4';\n}\nreturn [item];"
+          }
+        },
+        {
+          "id": "f8c34314-d39d-4da0-bd9b-89578d7bfcf5",
+          "name": "📺 Programar en YouTube",
+          "type": "n8n-nodes-base.youTube",
+          "typeVersion": 1,
+          "position": [
+            4608,
+            432
+          ],
+          "parameters": {
+            "resource": "video",
+            "operation": "upload",
+            "binaryProperty": "data",
+            "regionCode": "EC",
+            "categoryId": "27",
+            "title": "={{ $('📤 Preparar subida').first().json.TITULO }}",
+            "options": {
+              "defaultLanguage": "es",
+              "embeddable": true,
+              "license": "youtube",
+              "notifySubscribers": true,
+              "privacyStatus": "private",
+              "publicStatsViewable": true,
+              "selfDeclaredMadeForKids": false,
+              "publishAt": "={{ $('📤 Preparar subida').first().json.PUBLICAR_EL }}",
+              "description": "={{ $('📤 Preparar subida').first().json.DESCRIPCION }}",
+              "tags": "={{ $('📤 Preparar subida').first().json.TAGS }}"
+            }
+          },
+          "onError": "continueRegularOutput"
+        },
+        {
+          "id": "43170e74-87d8-4428-8179-1b46d7873a79",
+          "name": "🚦 Resultado de subida",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            4832,
+            432
+          ],
+          "parameters": {
+            "jsCode": "const it = $input.first().json;\nconst prep = $('📤 Preparar subida').first().json;\nconst e = it.error || {};\nconst msgAll = (typeof e === 'string' ? e : [e.message, e.description, typeof e.error === 'object' ? (e.error && e.error.message) : e.error].map(x => String(x || '')).join(' | '));\nconst videoId = it.id || it.uploadId || '';\nif (videoId && !it.error) return [{ json: { ruta: 'ok', ID: prep.ID, uploadId: videoId } }];\nreturn [{ json: { ruta: 'error', ID: prep.ID, ESTADO_CORTO: 'renderizado', YT_REINTENTO: new Date().toISOString(), motivo: msgAll.slice(0, 180) } }];"
+          }
+        },
+        {
+          "id": "731d92e4-0a06-428d-bbaa-6ab47fc81317",
+          "name": "🚦 Ruta de subida",
+          "type": "n8n-nodes-base.switch",
+          "typeVersion": 3.2,
+          "position": [
+            5056,
+            432
+          ],
+          "parameters": {
+            "rules": {
+              "values": [
+                {
+                  "outputKey": "ok",
+                  "conditions": {
+                    "options": {
+                      "caseSensitive": true,
+                      "leftValue": "",
+                      "typeValidation": "loose"
+                    },
+                    "conditions": [
+                      {
+                        "leftValue": "={{ $json.ruta === 'ok' }}",
+                        "operator": {
+                          "type": "boolean",
+                          "operation": "true",
+                          "singleValue": true
+                        }
+                      }
+                    ],
+                    "combinator": "and"
+                  }
+                },
+                {
+                  "outputKey": "reintentar",
+                  "conditions": {
+                    "options": {
+                      "caseSensitive": true,
+                      "leftValue": "",
+                      "typeValidation": "loose"
+                    },
+                    "conditions": [
+                      {
+                        "leftValue": "={{ $json.ruta === 'reintentar' }}",
+                        "operator": {
+                          "type": "boolean",
+                          "operation": "true",
+                          "singleValue": true
+                        }
+                      }
+                    ],
+                    "combinator": "and"
+                  }
+                }
+              ]
+            },
+            "options": {
+              "fallbackOutput": "extra",
+              "renameFallbackOutput": "error"
+            }
+          }
+        },
+        {
+          "id": "2b686a90-75fa-465d-8585-678a8177e0d6",
+          "name": "🗓️ Guardar programado",
+          "type": "n8n-nodes-base.googleSheets",
+          "typeVersion": 4.7,
+          "position": [
+            5280,
+            432
+          ],
+          "parameters": {
+            "resource": "sheet",
+            "operation": "update",
+            "documentId": {
+              "__rl": true,
+              "mode": "id",
+              "value": "1ZHee97fgMi4uEK1Y7hS8XxCIWLGOAmR0QaVZIgR-xxI"
+            },
+            "sheetName": {
+              "__rl": true,
+              "mode": "name",
+              "value": "Hoja 1"
+            },
+            "columns": {
+              "mappingMode": "defineBelow",
+              "matchingColumns": [
+                "ID"
+              ],
+              "schema": [
+                {
+                  "canBeUsedToMatch": true,
+                  "defaultMatch": false,
+                  "display": true,
+                  "displayName": "ID",
+                  "id": "ID",
+                  "required": false,
+                  "type": "string"
+                },
+                {
+                  "canBeUsedToMatch": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "displayName": "ESTADO_CORTO",
+                  "id": "ESTADO_CORTO",
+                  "required": false,
+                  "type": "string"
+                },
+                {
+                  "canBeUsedToMatch": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "displayName": "PUBLICAR_EL",
+                  "id": "PUBLICAR_EL",
+                  "required": false,
+                  "type": "string"
+                },
+                {
+                  "canBeUsedToMatch": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "displayName": "YOUTUBE_ID",
+                  "id": "YOUTUBE_ID",
+                  "required": false,
+                  "type": "string"
+                },
+                {
+                  "canBeUsedToMatch": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "displayName": "SUBIDO_EL",
+                  "id": "SUBIDO_EL",
+                  "required": false,
+                  "type": "string"
+                }
+              ],
+              "value": {
+                "ESTADO_CORTO": "programado",
+                "ID": "={{ $('📤 Preparar subida').first().json.ID }}",
+                "PUBLICAR_EL": "={{ $('📤 Preparar subida').first().json.PUBLICAR_EL }}",
+                "SUBIDO_EL": "={{ $now.toUTC().toISO() }}",
+                "YOUTUBE_ID": "={{ $json.uploadId || $json.id }}"
+              }
+            },
+            "options": {}
+          }
+        },
+        {
+          "id": "ac449dd4-95c3-49de-81ea-eb9e01300787",
+          "name": "❌ Devolver a la cola",
+          "type": "n8n-nodes-base.googleSheets",
+          "typeVersion": 4.7,
+          "position": [
+            3936,
+            736
+          ],
+          "parameters": {
+            "resource": "sheet",
+            "operation": "update",
+            "documentId": {
+              "__rl": true,
+              "mode": "id",
+              "value": "1ZHee97fgMi4uEK1Y7hS8XxCIWLGOAmR0QaVZIgR-xxI"
+            },
+            "sheetName": {
+              "__rl": true,
+              "mode": "name",
+              "value": "Hoja 1"
+            },
+            "columns": {
+              "mappingMode": "defineBelow",
+              "matchingColumns": [
+                "ID"
+              ],
+              "schema": [
+                {
+                  "canBeUsedToMatch": true,
+                  "defaultMatch": false,
+                  "display": true,
+                  "displayName": "ID",
+                  "id": "ID",
+                  "required": false,
+                  "type": "string"
+                },
+                {
+                  "canBeUsedToMatch": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "displayName": "ESTADO_CORTO",
+                  "id": "ESTADO_CORTO",
+                  "required": false,
+                  "type": "string"
+                },
+                {
+                  "canBeUsedToMatch": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "displayName": "YT_REINTENTO",
+                  "id": "YT_REINTENTO",
+                  "required": false,
+                  "type": "string"
+                }
+              ],
+              "value": {
+                "ESTADO_CORTO": "={{ $json.ESTADO_CORTO }}",
+                "ID": "={{ $json.ID }}",
+                "YT_REINTENTO": "={{ $json.YT_REINTENTO || '' }}"
+              }
+            },
+            "options": {}
+          }
+        },
+        {
+          "id": "6e2200f3-d81f-498e-9eec-413326a05d42",
+          "name": "⏳ Marcar procesando",
+          "type": "n8n-nodes-base.googleSheets",
+          "typeVersion": 4.7,
+          "position": [
+            1344,
+            640
+          ],
+          "parameters": {
+            "resource": "sheet",
+            "operation": "update",
+            "documentId": {
+              "__rl": true,
+              "mode": "id",
+              "value": "1ZHee97fgMi4uEK1Y7hS8XxCIWLGOAmR0QaVZIgR-xxI"
+            },
+            "sheetName": {
+              "__rl": true,
+              "mode": "name",
+              "value": "Hoja 1"
+            },
+            "columns": {
+              "mappingMode": "defineBelow",
+              "matchingColumns": [
+                "ID"
+              ],
+              "value": {
+                "ID": "={{ $json.ID }}",
+                "ESTADO_CORTO": "procesando"
+              },
+              "schema": [
+                {
+                  "id": "ID",
+                  "displayName": "ID",
+                  "type": "string",
+                  "canBeUsedToMatch": true,
+                  "display": true,
+                  "required": false,
+                  "defaultMatch": false
+                },
+                {
+                  "id": "ESTADO_CORTO",
+                  "displayName": "ESTADO_CORTO",
+                  "type": "string",
+                  "canBeUsedToMatch": false,
+                  "display": true,
+                  "required": false,
+                  "defaultMatch": false
+                }
+              ]
+            },
+            "options": {}
+          }
+        },
+        {
+          "id": "9140232c-8da2-4225-ba29-409e3dd6ff27",
+          "name": "❓ ¿Masterclass?",
+          "type": "n8n-nodes-base.if",
+          "typeVersion": 2.2,
+          "position": [
+            1568,
+            900
+          ],
+          "parameters": {
+            "conditions": {
+              "options": {
+                "caseSensitive": true,
+                "leftValue": "",
+                "typeValidation": "loose"
+              },
+              "conditions": [
+                {
+                  "leftValue": "={{ $('🗓️ Planificar (tema + horario)').first().json._formato === 'masterclass' }}",
+                  "operator": {
+                    "type": "boolean",
+                    "operation": "true",
+                    "singleValue": true
+                  }
+                }
+              ],
+              "combinator": "and"
+            },
+            "options": {}
+          }
+        },
+        {
+          "id": "759d312e-e4ce-41f4-bad2-3501feee0644",
+          "name": "🤖 Plan masterclass",
+          "type": "@n8n/n8n-nodes-langchain.chainLlm",
+          "typeVersion": 1.9,
+          "position": [
+            1792,
+            900
+          ],
+          "parameters": {
+            "promptType": "define",
+            "text": "=Genera el PLAN de mi masterclass sobre HURONES en formato json. Tema: {{ $('🗓️ Planificar (tema + horario)').first().json._keyword }}. Subtemas a enfatizar: {{ $('🗓️ Planificar (tema + horario)').first().json._subtema }}.",
+            "messages": {
+              "messageValues": [
+                {
+                  "type": "SystemMessagePromptTemplate",
+                  "message": "Eres el Dr. Luis Arturo García, Médico Veterinario Zootecnista (MVZ) en Ventanas, Los Ríos, Ecuador. Creas la estructura de una MASTERCLASS de 30 minutos (video horizontal) sobre HURONES (ferrets) para YouTube. Primera persona, tono cercano y profesional, sin emojis, sin markdown.\n\nResponde ÚNICAMENTE con un objeto json válido con estas claves:\n- titulo_video (máximo 80 caracteres, SEO: empieza con la palabra clave principal con la palabra hurón e incluye 'Masterclass' o 'Guía completa')\n- descripcion_seo (100 a 150 palabras en primera persona: qué aprenderá módulo a módulo, invita a leer la guía completa en hurones.online, a unirse a mi Comunidad de WhatsApp y a SUSCRIBIRSE)\n- palabras_clave (12 a 15 búsquedas relacionadas con hurones separadas por coma)\n- hashtags (8 a 10 hashtags: #hurones #huron #ferret #saludhuron y específicos)\n- modulos (lista de EXACTAMENTE 7 objetos con: nombre (título corto, sin numeración), busqueda_imagen (frase corta EN INGLÉS para foto de stock de un ferret en esa situación), puntos (lista de 5 puntos concretos))\n\nOrden: 1) el problema y por qué importa (abre con los síntomas de alarma), 2) causas y factores de riesgo, 3) síntomas completos, 4) diagnóstico veterinario, 5) tratamiento, 6) cuidados en casa y alimentación, 7) prevención y errores comunes (cierra invitando a hurones.online)."
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "f098011f-7619-4228-b251-71535bcc1c75",
+          "name": "🧠 DeepSeek master",
+          "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+          "typeVersion": 1,
+          "position": [
+            2344,
+            664
+          ],
+          "parameters": {
+            "model": "deepseek-chat",
+            "options": {
+              "maxTokens": 8000,
+              "temperature": 0.7,
+              "responseFormat": "json_object",
+              "timeout": 300000
+            }
+          }
+        },
+        {
+          "id": "4721e706-97f4-4cb5-8982-e7475b0d1070",
+          "name": "🧹 Parsear plan MC",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            2016,
+            900
+          ],
+          "parameters": {
+            "jsCode": "const d = $input.first().json;\nlet m = d;\nif (!m || !m.modulos) { let raw = d.text || d.output || ''; m = typeof raw === 'object' ? raw : JSON.parse(String(raw).replace(/^```json\\s*/i,'').replace(/```\\s*$/,'').trim()); }\nif (!m.modulos || !m.modulos.length) throw new Error('Plan de masterclass sin módulos');\nreturn m.modulos.map((mo, i) => ({ json: { indice: i + 1, modulo: mo } }));"
+          }
+        },
+        {
+          "id": "d35abead-f5a8-44a4-9d41-8d41d7fb8b18",
+          "name": "🤖 Desarrollar módulo",
+          "type": "@n8n/n8n-nodes-langchain.chainLlm",
+          "typeVersion": 1.9,
+          "position": [
+            2240,
+            900
+          ],
+          "parameters": {
+            "promptType": "define",
+            "text": "=Escribe las escenas del módulo '{{ $json.modulo.nombre }}' de mi masterclass sobre hurones: {{ $('🗓️ Planificar (tema + horario)').first().json._keyword }}. Puntos a desarrollar en orden: {{ JSON.stringify($json.modulo.puntos) }}. Este es el módulo {{ $json.indice }} de 7. Si es el módulo 1, la primera escena es EL GANCHO: enumera los síntomas concretos del problema antes de presentarte. Si es el módulo 7, la última escena cierra invitando a leer la guía completa en hurones.online y a suscribirse.",
+            "messages": {
+              "messageValues": [
+                {
+                  "message": "Eres el Dr. Luis Arturo García, Médico Veterinario Zootecnista (MVZ) en Ventanas, Los Ríos, Ecuador, narrando una masterclass de 30 minutos sobre HURONES. Primera persona SIEMPRE. Frases cortas, tono directo, urgente y cálido. Sin emojis, sin markdown, sin acotaciones. Números con letras. NO inventes estadísticas, estudios ni dosis. Ortografía perfecta. No saludes salvo el gancho del módulo 1.\n\nResponde ÚNICAMENTE con un objeto json válido: {\"escenas\":[{\"narracion\":\"...\",\"busqueda_imagen\":\"...\"}]}\n- EXACTAMENTE 6 escenas.\n- Cada narracion de 105 a 130 palabras.\n- Desarrolla los puntos en orden, conectando con el módulo anterior.\n- busqueda_imagen: frase corta EN INGLÉS de foto de stock de un ferret en la situación; búsquedas distintas entre escenas. REGLA JSON: dentro de los textos NUNCA uses comillas dobles; si necesitas citar, usa comillas simples. No uses saltos de línea dentro de los textos.",
+                  "type": "SystemMessagePromptTemplate"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "203f8fa3-646b-47a9-94bd-26fae1a9c52c",
+          "name": "🧩 Unir masterclass",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            2464,
+            900
+          ],
+          "parameters": {
+            "jsCode": "const plan = $('🗓️ Planificar (tema + horario)').first().json;\nconst metaRaw = $('🤖 Plan masterclass').first().json;\nlet m = metaRaw;\nif (!m || !m.modulos) { let raw = metaRaw.text || metaRaw.output || ''; m = typeof raw === 'object' ? raw : JSON.parse(String(raw).replace(/^```json\\s*/i,'').replace(/```\\s*$/,'').trim()); }\nconst escenas = [];\nfor (const it of $input.all()) {\n  let d = it.json;\n  if (!d || !d.escenas) { let raw = d.text || d.output || ''; d = typeof raw === 'object' ? raw : JSON.parse(String(raw).replace(/^```json\\s*/i,'').replace(/```\\s*$/,'').trim()); }\n  for (const e of (d.escenas || [])) if (e && e.narracion) escenas.push(e);\n}\nif (escenas.length < 28) throw new Error('Masterclass incompleta: solo ' + escenas.length + ' escenas');\nreturn [{ json: { titulo_video: String(m.titulo_video || plan._keyword).slice(0, 90), descripcion_seo: m.descripcion_seo || '', palabras_clave: m.palabras_clave || '', hashtags: m.hashtags || '', escenas } }];"
+          }
+        },
+        {
+          "id": "0a0f29fb-f3e4-4ce2-9f17-e637414795f1",
+          "name": "📝 Validar guion",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            1920,
+            640
+          ],
+          "parameters": {
+            "jsCode": "const d = $input.first().json;\nlet g = Array.isArray(d.escenas) ? d : null;\nif (!g) { let raw = d.text || d.output || ''; g = typeof raw === 'object' ? raw : JSON.parse(String(raw).replace(/^```json\\s*/i,'').replace(/```\\s*$/,'').trim()); }\nlet escenas = (g.escenas || []).filter(e => e && e.narracion);\nconst contar = arr => arr.reduce((n, e) => n + e.narracion.split(/\\s+/).length, 0);\nconst palabras = contar(escenas);\nconst plan = $('🗓️ Planificar (tema + horario)').first().json;\nconst formato = String(plan._formato || 'short');\nconst RANGOS = { short: [330, 700], medio: [1400, 2400], masterclass: [3200, 5600] };\nconst r = RANGOS[formato] || RANGOS.short;\nif (palabras < r[0] || palabras > r[1]) throw new Error('Guion fuera de rango (' + formato + '): ' + palabras + ' palabras en ' + escenas.length + ' escenas');\nreturn [{ json: { ID: plan.ID, keyword: plan._keyword, formato, titulo_video: String(g.titulo_video || plan._keyword).slice(0, 90),\n  descripcion_seo: g.descripcion_seo || '', palabras_clave: g.palabras_clave || '', hashtags: g.hashtags || '', total_palabras: palabras, escenas } }];"
+          }
+        },
+        {
+          "id": "5f5fec2c-e0ca-45a3-8b5b-1913bb23b37d",
+          "name": "✂️ Separar escenas",
+          "type": "n8n-nodes-base.splitOut",
+          "typeVersion": 1,
+          "position": [
+            2144,
+            640
+          ],
+          "parameters": {
+            "fieldToSplitOut": "escenas",
+            "include": "noOtherFields",
+            "options": {
+              "destinationFieldName": "escena"
+            }
+          }
+        },
+        {
+          "id": "44fd9491-77ae-4343-abab-cfd7d7470be0",
+          "name": "🖼️ Imagen Pexels",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.4,
+          "position": [
+            2368,
+            640
+          ],
+          "parameters": {
+            "method": "GET",
+            "url": "https://api.pexels.com/v1/search",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "Authorization",
+                  "value": "***ENMASCARADO***"
+                }
+              ]
+            },
+            "sendQuery": true,
+            "specifyQuery": "keypair",
+            "queryParameters": {
+              "parameters": [
+                {
+                  "name": "query",
+                  "value": "={{ $json.escena.busqueda_imagen }}"
+                },
+                {
+                  "name": "per_page",
+                  "value": "5"
+                },
+                {
+                  "name": "orientation",
+                  "value": "={{ $('🗓️ Planificar (tema + horario)').first().json._formato === 'short' ? 'portrait' : 'landscape' }}"
+                }
+              ]
+            },
+            "options": {
+              "batching": {
+                "batch": {
+                  "batchSize": 5,
+                  "batchInterval": 1000
+                }
+              },
+              "response": {
+                "response": {
+                  "neverError": true,
+                  "responseFormat": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "e658e2c0-3343-4dcc-91ae-7e8ace55715d",
+          "name": "📦 Armar trabajo de video",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            2592,
+            640
+          ],
+          "parameters": {
+            "jsCode": "const fotos = $input.all();\nconst escenas = $('✂️ Separar escenas').all();\nconst plan = $('🗓️ Planificar (tema + horario)').first().json;\nconst formato = String(plan._formato || 'short');\nconst vertical = formato === 'short';\nconst usadas = new Set();\nconst out = [];\nlet conFoto = 0;\nfor (let i = 0; i < escenas.length; i++) {\n  const esc = escenas[i].json.escena;\n  const photos = (fotos[i] && fotos[i].json && fotos[i].json.photos) || [];\n  const p = photos.find(x => !usadas.has(x.id)) || photos[0];\n  let url = null;\n  if (p) {\n    usadas.add(p.id);\n    url = vertical\n      ? p.src.original + '?auto=compress&cs=tinysrgb&fit=crop&w=1080&h=1920'\n      : p.src.original + '?auto=compress&cs=tinysrgb&fit=crop&w=1920&h=1080';\n    conFoto++;\n  }\n  else if (out.length) url = out[out.length - 1].image_url;\n  out.push({ text: esc.narracion, image_url: url });\n}\nif (conFoto === 0) throw new Error('PEXELS no devolvió imágenes (revisa la clave de Pexels)');\nfor (let i = 0; i < out.length; i++) if (!out[i].image_url) out[i].image_url = out.find(e => e.image_url).image_url;\nconst g = $('📝 Validar guion').first().json;\nconst cfg = $('⚙️ Config').first().json;\nconst tag = g.ID + '-' + Date.now();\nconst job = { id: g.ID, orientation: vertical ? 'vertical' : 'horizontal', formato, voice: 'es-EC-LuisNeural', blog_url: cfg.BLOG_URL, scenes: out };\nreturn [{ json: { ...g, tag, job_str: JSON.stringify(job) } }];"
+          }
+        },
+        {
+          "id": "2bb4a393-0bd7-4bae-a2b6-b8f7b9a235f4",
+          "name": "🎥 Renderizar en GitHub (gratis)",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.4,
+          "position": [
+            2816,
+            640
+          ],
+          "parameters": {
+            "method": "POST",
+            "url": "=https://api.github.com/repos/{{ $('⚙️ Config').first().json.GH_OWNER }}/{{ $('⚙️ Config').first().json.GH_REPO }}/actions/workflows/render.yml/dispatches",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "Authorization",
+                  "value": "=Bearer {{ $('⚙️ Config').first().json.GH_TOKEN }}"
+                },
+                {
+                  "name": "Accept",
+                  "value": "application/vnd.github+json"
+                },
+                {
+                  "name": "X-GitHub-Api-Version",
+                  "value": "2022-11-28"
+                }
+              ]
+            },
+            "sendBody": true,
+            "specifyBody": "json",
+            "jsonBody": "={{ JSON.stringify({ ref: 'main', inputs: { job_id: $json.tag, job: $json.job_str } }) }}",
+            "options": {}
+          }
+        },
+        {
+          "id": "5fe37fb5-136b-4b16-b288-d015059bf466",
+          "name": "⏳ Esperar 45s",
+          "type": "n8n-nodes-base.wait",
+          "typeVersion": 1.1,
+          "position": [
+            3040,
+            640
+          ],
+          "parameters": {
+            "resume": "timeInterval",
+            "amount": 45,
+            "unit": "seconds"
+          },
+          "webhookId": "20796fd8-dc4b-41e6-9006-c35b5de7517c"
+        },
+        {
+          "id": "91acb981-039d-42f7-a490-badee76956f9",
+          "name": "🔍 ¿Video listo?",
+          "type": "n8n-nodes-base.httpRequest",
+          "typeVersion": 4.4,
+          "position": [
+            3264,
+            544
+          ],
+          "parameters": {
+            "method": "GET",
+            "url": "=https://api.github.com/repos/{{ $('⚙️ Config').first().json.GH_OWNER }}/{{ $('⚙️ Config').first().json.GH_REPO }}/releases/tags/{{ $('📦 Armar trabajo de video').first().json.tag }}",
+            "sendHeaders": true,
+            "headerParameters": {
+              "parameters": [
+                {
+                  "name": "Authorization",
+                  "value": "=Bearer {{ $('⚙️ Config').first().json.GH_TOKEN }}"
+                },
+                {
+                  "name": "Accept",
+                  "value": "application/vnd.github+json"
+                },
+                {
+                  "name": "X-GitHub-Api-Version",
+                  "value": "2022-11-28"
+                }
+              ]
+            },
+            "options": {
+              "response": {
+                "response": {
+                  "fullResponse": true,
+                  "neverError": true,
+                  "responseFormat": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "17e7cba5-8129-44e5-bbae-67a2b9148656",
+          "name": "🚦 ¿Listo?",
+          "type": "n8n-nodes-base.switch",
+          "typeVersion": 3.2,
+          "position": [
+            3488,
+            624
+          ],
+          "parameters": {
+            "rules": {
+              "values": [
+                {
+                  "outputKey": "listo",
+                  "conditions": {
+                    "options": {
+                      "caseSensitive": true,
+                      "leftValue": "",
+                      "typeValidation": "loose"
+                    },
+                    "conditions": [
+                      {
+                        "leftValue": "={{ $json.statusCode == 200 && ($json.body.assets || []).length > 0 }}",
+                        "operator": {
+                          "type": "boolean",
+                          "operation": "true",
+                          "singleValue": true
+                        }
+                      }
+                    ],
+                    "combinator": "and"
+                  }
+                },
+                {
+                  "outputKey": "demasiado",
+                  "conditions": {
+                    "options": {
+                      "caseSensitive": true,
+                      "leftValue": "",
+                      "typeValidation": "loose"
+                    },
+                    "conditions": [
+                      {
+                        "leftValue": "={{ $runIndex >= ($('🗓️ Planificar (tema + horario)').first().json._formato === 'masterclass' ? 110 : $('🗓️ Planificar (tema + horario)').first().json._formato === 'medio' ? 60 : 30) }}",
+                        "operator": {
+                          "type": "boolean",
+                          "operation": "true",
+                          "singleValue": true
+                        }
+                      }
+                    ],
+                    "combinator": "and"
+                  }
+                }
+              ]
+            },
+            "options": {
+              "fallbackOutput": "extra",
+              "renameFallbackOutput": "procesando"
+            }
+          }
+        },
+        {
+          "id": "6eccefc8-4a36-4a16-a917-04d614e54128",
+          "name": "✅ Video renderizado",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            3712,
+            544
+          ],
+          "parameters": {
+            "jsCode": "const rel = $input.first().json.body;\nconst d = $('📦 Armar trabajo de video').first().json;\nconst url = rel.assets[0].browser_download_url;\nreturn [{ json: { ID: d.ID, ESTADO_CORTO: 'renderizado', VIDEO_URL_CORTO: url, TITULO_CORTO: d.titulo_video, DESC_CORTO: d.descripcion_seo, TAGS_CORTO: d.palabras_clave, HASHTAGS_CORTO: d.hashtags, FECHA_CORTO: new Date().toISOString().split('T')[0] } }];"
+          }
+        },
+        {
+          "id": "ab14afc4-6668-4130-95c2-10aa6a8f7e81",
+          "name": "💾 Guardar renderizado",
+          "type": "n8n-nodes-base.googleSheets",
+          "typeVersion": 4.7,
+          "position": [
+            3936,
+            544
+          ],
+          "parameters": {
+            "resource": "sheet",
+            "operation": "update",
+            "documentId": {
+              "__rl": true,
+              "mode": "id",
+              "value": "1ZHee97fgMi4uEK1Y7hS8XxCIWLGOAmR0QaVZIgR-xxI"
+            },
+            "sheetName": {
+              "__rl": true,
+              "mode": "name",
+              "value": "Hoja 1"
+            },
+            "columns": {
+              "mappingMode": "defineBelow",
+              "matchingColumns": [
+                "ID"
+              ],
+              "schema": [
+                {
+                  "canBeUsedToMatch": true,
+                  "defaultMatch": false,
+                  "display": true,
+                  "displayName": "ID",
+                  "id": "ID",
+                  "required": false,
+                  "type": "string"
+                },
+                {
+                  "canBeUsedToMatch": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "displayName": "ESTADO_CORTO",
+                  "id": "ESTADO_CORTO",
+                  "required": false,
+                  "type": "string"
+                },
+                {
+                  "canBeUsedToMatch": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "displayName": "VIDEO_URL_CORTO",
+                  "id": "VIDEO_URL_CORTO",
+                  "required": false,
+                  "type": "string"
+                },
+                {
+                  "canBeUsedToMatch": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "displayName": "TITULO_CORTO",
+                  "id": "TITULO_CORTO",
+                  "required": false,
+                  "type": "string"
+                },
+                {
+                  "canBeUsedToMatch": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "displayName": "DESC_CORTO",
+                  "id": "DESC_CORTO",
+                  "required": false,
+                  "type": "string"
+                },
+                {
+                  "canBeUsedToMatch": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "displayName": "TAGS_CORTO",
+                  "id": "TAGS_CORTO",
+                  "required": false,
+                  "type": "string"
+                },
+                {
+                  "canBeUsedToMatch": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "displayName": "HASHTAGS_CORTO",
+                  "id": "HASHTAGS_CORTO",
+                  "required": false,
+                  "type": "string"
+                },
+                {
+                  "canBeUsedToMatch": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "displayName": "FECHA_CORTO",
+                  "id": "FECHA_CORTO",
+                  "required": false,
+                  "type": "string"
+                },
+                {
+                  "canBeUsedToMatch": false,
+                  "defaultMatch": false,
+                  "display": true,
+                  "displayName": "PUBLICAR_EL",
+                  "id": "PUBLICAR_EL",
+                  "required": false,
+                  "type": "string"
+                }
+              ],
+              "value": {
+                "DESC_CORTO": "={{ $json.DESC_CORTO }}",
+                "ESTADO_CORTO": "={{ $json.ESTADO_CORTO }}",
+                "FECHA_CORTO": "={{ $json.FECHA_CORTO }}",
+                "HASHTAGS_CORTO": "={{ $json.HASHTAGS_CORTO }}",
+                "ID": "={{ $json.ID }}",
+                "PUBLICAR_EL": "={{ $('🗓️ Planificar (tema + horario)').first().json.slot_iso }}",
+                "TAGS_CORTO": "={{ $json.TAGS_CORTO }}",
+                "TITULO_CORTO": "={{ $json.TITULO_CORTO }}",
+                "VIDEO_URL_CORTO": "={{ $json.VIDEO_URL_CORTO }}"
+              }
+            },
+            "options": {}
+          }
+        },
+        {
+          "id": "17a61dcb-7d91-4630-9ba2-7feebeddce4b",
+          "name": "⚠️ Render tardó demasiado",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            3712,
+            736
+          ],
+          "parameters": {
+            "jsCode": "return [{ json: { ID: $('📦 Armar trabajo de video').first().json.ID, ESTADO_CORTO: 'pendiente' } }];"
+          }
+        },
+        {
+          "id": "eec78ba4-e09d-4adf-af7b-c61e6aacd626",
+          "name": "🤖 Guion Short Dr. García",
+          "type": "@n8n/n8n-nodes-langchain.chainLlm",
+          "typeVersion": 1.9,
+          "position": [
+            1568,
+            640
+          ],
+          "parameters": {
+            "promptType": "define",
+            "text": "=Genera el guion completo, en formato json, para mi video sobre HURONES: {{ $('🗓️ Planificar (tema + horario)').first().json._keyword }}. Formato del video: {{ $('🗓️ Planificar (tema + horario)').first().json._formato }} ('short' = video vertical de 3 minutos; 'medio' = video horizontal de 12 a 15 minutos). Subtemas a enfatizar: {{ $('🗓️ Planificar (tema + horario)').first().json._subtema }}.",
+            "messages": {
+              "messageValues": [
+                {
+                  "type": "SystemMessagePromptTemplate",
+                  "message": "Eres el Dr. Luis Arturo García, Médico Veterinario Zootecnista (MVZ) en Ventanas, Los Ríos, Ecuador. Escribes el guion que TÚ MISMO vas a narrar en un video sobre HURONES (ferrets). El video funciona como una carta de venta educativa: atrapa desde el segundo uno, enseña con valor real y lleva al espectador a leer la guía completa en mi blog hurones.online y a SUSCRIBIRSE al canal.\n\nAPERTURA OBLIGATORIA (escena 1) - EL GANCHO: el video NUNCA empieza saludando. La primera frase enumera los SÍNTOMAS o señales REALES del problema, por ejemplo: 'Si tu hurón tiembla, babea, se queda mirando al vacío y está muy débil, cuidado: podría ser una hipoglucemia por insulinoma.' Usa solo síntomas que correspondan a ese problema. SOLO DESPUÉS, en la escena 2, te presentas en una frase ('Soy el médico veterinario Luis Arturo García.') y explicas por qué es grave.\n\nREGLAS DE VOZ: primera persona SIEMPRE. Tono directo, urgente y cálido. Frases cortas. Sin emojis, sin markdown, sin acotaciones entre corchetes. Números con letras. NO inventes estadísticas, estudios ni dosis; ante dosis di que las define el veterinario. Ortografía perfecta.\n\nFORMATO DE RESPUESTA: responde ÚNICAMENTE con un objeto json válido con estas claves: titulo_video (máximo 80 caracteres, SEO: empieza con la palabra clave principal con la palabra hurón y añade urgencia o curiosidad), descripcion_seo (100 a 150 palabras en primera persona: la primera frase repite la búsqueda principal, responde la pregunta del dueño en 1-2 frases claras (AEO), explica qué aprenderá, e invita a leer la guía completa en hurones.online, a unirse a mi Comunidad de WhatsApp y a SUSCRIBIRSE), palabras_clave (12 a 15 búsquedas relacionadas con hurones separadas por coma), hashtags (8 a 10 hashtags con # separados por espacio: #hurones #huron #ferret #saludhuron #veterinario y específicos del tema) y escenas (lista de objetos con las claves narracion y busqueda_imagen).\n\nSI EL FORMATO ES 'short': EXACTAMENTE 8 escenas de 55 a 75 palabras (unas 500 palabras). Estructura: 1 gancho de síntomas, 2 presentación y por qué es grave, 3 causas, 4 cómo se diagnostica y qué hacer ya, 5 tratamiento veterinario, 6 cuidados en casa y qué NO hacer, 7 señales de alarma, 8 cierre: 'Te dejo la guía completa en mi blog hurones.online', invita a suscribirse y compartir.\n\nSI EL FORMATO ES 'medio': EXACTAMENTE 16 escenas de 105 a 130 palabras (1800 a 2000 palabras). Estructura: 1 gancho, 2 presentación y promesa, 3-4 qué es y causas, 5-7 síntomas y evolución, 8-9 diagnóstico, 10-11 tratamiento, 12-13 cuidados en casa y alimentación, 14 errores comunes, 15 prevención y emergencias, 16 cierre con la guía completa en hurones.online y suscripción.\n\nbusqueda_imagen: frase corta EN INGLÉS para buscar foto de stock de un ferret en la situación de esa escena (ej: 'sick ferret at vet', 'ferret eating raw meat'); para la escena 1 elige una imagen impactante. Nunca repitas la misma frase."
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": "6d32e38a-2683-4dde-b438-e63fbd4fc7a4",
+          "name": "🧠 DeepSeek guion",
+          "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+          "typeVersion": 1,
+          "position": [
+            1648,
+            864
+          ],
+          "parameters": {
+            "model": "deepseek-chat",
+            "options": {
+              "maxTokens": 8000,
+              "temperature": 0.7,
+              "responseFormat": "json_object",
+              "timeout": 300000
+            }
+          }
+        },
+        {
+          "id": "77b8a73d-e0af-4d3f-b0c4-6b6ce8e335ee",
+          "name": "⏰ Cada 17 minutos",
+          "type": "n8n-nodes-base.scheduleTrigger",
+          "typeVersion": 1.3,
+          "position": [
+            0,
+            496
+          ],
+          "parameters": {
+            "rule": {
+              "interval": [
+                {
+                  "field": "minutes",
+                  "minutesInterval": 17
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "connections": {
+        "▶ Iniciar manual": {
+          "main": [
+            [
+              {
+                "node": "⚙️ Config",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "⚙️ Config": {
+          "main": [
+            [
+              {
+                "node": "📁 Leer VIDEOS",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "📁 Leer VIDEOS": {
+          "main": [
+            [
+              {
+                "node": "🗓️ Planificar (tema + horario)",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🗓️ Planificar (tema + horario)": {
+          "main": [
+            [
+              {
+                "node": "❓ ¿Faltan temas?",
+                "type": "main",
+                "index": 0
+              },
+              {
+                "node": "❓ ¿Hay tema y cupo?",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "❓ ¿Faltan temas?": {
+          "main": [
+            [
+              {
+                "node": "📊 Vistas en YouTube",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "📊 Vistas en YouTube": {
+          "main": [
+            [
+              {
+                "node": "🏆 Temas que mejor funcionan",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🏆 Temas que mejor funcionan": {
+          "main": [
+            [
+              {
+                "node": "💡 Generar 25 temas nuevos",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "💡 Generar 25 temas nuevos": {
+          "main": [
+            [
+              {
+                "node": "🧹 Quitar repetidos",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🧠 DeepSeek temas": {
+          "ai_languageModel": [
+            [
+              {
+                "node": "💡 Generar 25 temas nuevos",
+                "type": "ai_languageModel",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🧹 Quitar repetidos": {
+          "main": [
+            [
+              {
+                "node": "➕ Agregar temas a VIDEOS",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "❓ ¿Hay tema y cupo?": {
+          "main": [
+            [
+              {
+                "node": "❓ ¿Ya renderizado?",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "❓ ¿Ya renderizado?": {
+          "main": [
+            [
+              {
+                "node": "📤 Preparar subida",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "⏳ Marcar procesando",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "📤 Preparar subida": {
+          "main": [
+            [
+              {
+                "node": "⬇️ Descargar MP4",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "⬇️ Descargar MP4": {
+          "main": [
+            [
+              {
+                "node": "🎞️ Marcar como video/mp4",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🎞️ Marcar como video/mp4": {
+          "main": [
+            [
+              {
+                "node": "📺 Programar en YouTube",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "📺 Programar en YouTube": {
+          "main": [
+            [
+              {
+                "node": "🚦 Resultado de subida",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🚦 Resultado de subida": {
+          "main": [
+            [
+              {
+                "node": "🚦 Ruta de subida",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🚦 Ruta de subida": {
+          "main": [
+            [
+              {
+                "node": "🗓️ Guardar programado",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [],
+            [
+              {
+                "node": "❌ Devolver a la cola",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "⏳ Marcar procesando": {
+          "main": [
+            [
+              {
+                "node": "❓ ¿Masterclass?",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "❓ ¿Masterclass?": {
+          "main": [
+            [
+              {
+                "node": "🤖 Plan masterclass",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "🤖 Guion Short Dr. García",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🤖 Plan masterclass": {
+          "main": [
+            [
+              {
+                "node": "🧹 Parsear plan MC",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🧠 DeepSeek master": {
+          "ai_languageModel": [
+            [
+              {
+                "node": "🤖 Plan masterclass",
+                "type": "ai_languageModel",
+                "index": 0
+              },
+              {
+                "node": "🤖 Desarrollar módulo",
+                "type": "ai_languageModel",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🧹 Parsear plan MC": {
+          "main": [
+            [
+              {
+                "node": "🤖 Desarrollar módulo",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🤖 Desarrollar módulo": {
+          "main": [
+            [
+              {
+                "node": "🧩 Unir masterclass",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🧩 Unir masterclass": {
+          "main": [
+            [
+              {
+                "node": "📝 Validar guion",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "📝 Validar guion": {
+          "main": [
+            [
+              {
+                "node": "✂️ Separar escenas",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "✂️ Separar escenas": {
+          "main": [
+            [
+              {
+                "node": "🖼️ Imagen Pexels",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🖼️ Imagen Pexels": {
+          "main": [
+            [
+              {
+                "node": "📦 Armar trabajo de video",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "📦 Armar trabajo de video": {
+          "main": [
+            [
+              {
+                "node": "🎥 Renderizar en GitHub (gratis)",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🎥 Renderizar en GitHub (gratis)": {
+          "main": [
+            [
+              {
+                "node": "⏳ Esperar 45s",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "⏳ Esperar 45s": {
+          "main": [
+            [
+              {
+                "node": "🔍 ¿Video listo?",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🔍 ¿Video listo?": {
+          "main": [
+            [
+              {
+                "node": "🚦 ¿Listo?",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🚦 ¿Listo?": {
+          "main": [
+            [
+              {
+                "node": "✅ Video renderizado",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "⚠️ Render tardó demasiado",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "⏳ Esperar 45s",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "✅ Video renderizado": {
+          "main": [
+            [
+              {
+                "node": "💾 Guardar renderizado",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "💾 Guardar renderizado": {
+          "main": [
+            [
+              {
+                "node": "📤 Preparar subida",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "⚠️ Render tardó demasiado": {
+          "main": [
+            [
+              {
+                "node": "❌ Devolver a la cola",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🤖 Guion Short Dr. García": {
+          "main": [
+            [
+              {
+                "node": "📝 Validar guion",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "🧠 DeepSeek guion": {
+          "ai_languageModel": [
+            [
+              {
+                "node": "🤖 Guion Short Dr. García",
+                "type": "ai_languageModel",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "⏰ Cada 17 minutos": {
+          "main": [
+            [
+              {
+                "node": "⚙️ Config",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      }
+    },
+    "tags": [],
+    "meta": {
+      "aiBuilderAssisted": true,
+      "builderVariant": "mcp"
+    },
+    "parentFolderId": null,
+    "description": "Fábrica de videos de hurones para hurones.online: cada 17 min fabrica cortos y largos con DeepSeek y render gratis en GitHub, y los deja programados (2 cortos + 1 largo al día) en YouTube hasta un año.",
+    "scopes": [
+      "workflow:create",
+      "workflow:delete",
+      "workflow:execute",
+      "workflow:execute-chat",
+      "workflow:list",
+      "workflow:move",
+      "workflow:publish",
+      "workflow:read",
+      "workflow:share",
+      "workflow:unpublish",
+      "workflow:unshare",
+      "workflow:update",
+      "workflow:updateRedactionSetting"
+    ],
+    "canExecute": true
+  },
+  "triggerInfo": "This workflow has the following trigger(s):\n\n\nSchedule trigger(s):\n\n\n\t\t\t\t<trigger 1>\n\t\t\t\t\t - Node name: ⏰ Cada 17 minutos\n\t\t\t\t</trigger 1>\n\nScheduled workflows can be executed directly through MCP clients and do not require external inputs."
+}
