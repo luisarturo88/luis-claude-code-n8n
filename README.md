@@ -11,3 +11,9 @@ Configuración de Claude Code para los flujos n8n de veterinarioluis.com.
 Pendientes (nombre/repo por confirmar): Agent Reach, rea-video, motion-maxxing, Higgsfield MCP, hypit, Remotion, Content Strategy, Frontend Design, Sellbird, Omnirote, Codebase Memory.
 
 Para /watch hacen falta `ffmpeg` y `yt-dlp` en la máquina (Contabo).
+
+## Prompts
+- `prompts/claude-luisn8n-adsense.md` — tarea para Claude Code: SEO y aprobación de AdSense del blog luisn8n.online (seguros de mascotas).
+
+## Agent Reach (YouTube, Reddit, X…)
+Repo: `Panniantong/Agent-Reach`. Se instala en la máquina donde se use (no en n8n): seguir `docs/install.md` del repo.
