@@ -1,0 +1,40 @@
+# OpenShorts aislado: no toca n8n ni ningun puerto publico.
+# Uso: ver README.md (./instalar.sh)
+name: openshorts            # proyecto propio: red y volumenes separados de n8n
+services:
+  backend:
+    build: ./src            # codigo de mutonby/openshorts fijado a un commit
+    container_name: openshorts-backend
+    ports:
+      - "127.0.0.1:${OPENSHORTS_PORT:-8100}:8000"   # SOLO localhost (la API self-host no tiene login)
+    volumes:
+      - ./output:/app/output
+    env_file:
+      - path: ./.env
+        required: false
+    environment:
+      - WHISPER_MODEL=${WHISPER_MODEL:-small}
+      - WHISPER_DEVICE=cpu
+      - WHISPER_COMPUTE=int8
+    deploy:
+      resources:
+        limits:             # tope para que NUNCA le quite recursos a n8n
+          cpus: "${OPENSHORTS_CPUS:-2}"
+          memory: ${OPENSHORTS_MEM:-6g}
+    restart: unless-stopped
+  renderer:
+    build:
+      context: ./src
+      dockerfile: render-service/Dockerfile
+    container_name: openshorts-renderer
+    volumes:
+      - ./output:/output
+    environment:
+      - REMOTION_BUNDLE_PATH=/app/remotion
+      - OUTPUT_DIR=/output
+      - PORT=3100
+    deploy:
+      resources:
+        limits: { cpus: "1", memory: 2g }
+    restart: unless-stopped
+    depends_on: [backend]
