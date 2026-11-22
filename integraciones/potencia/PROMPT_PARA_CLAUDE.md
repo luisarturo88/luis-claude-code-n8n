@@ -11,7 +11,7 @@ Soy Luis Arturo García, médico veterinario (NO programador). Mi n8n está en p
 |---|---|---|
 | `dr-garcia-videos` | `render.py` + `covers.py` (ffmpeg, edge-tts voz es-EC-LuisNeural, Pillow), GitHub Action `render.yml`, `assets/luis.png`. Secreto: `PEXELS_API_KEY` | **Fábrica de videos gratis.** n8n le manda un JSON de escenas, GitHub renderiza el MP4 + portadas y lo deja en un Release. Lo usan mis fábricas de shorts/videos. Cuesta $0. |
 | `luisarturo88-n8n-agentes-comunicacion` | Carpetas `ordenes/ propuestas/ asignaciones/ resultados/ errores/ contexto/`, locks `.lock`, `optimize_blogger_colab.py` | **Enjambre de IAs** (Z.ai, Qwen, DeepSeek, Claude) que coordinan trabajo por GitHub y reparan flujos; flujos n8n SWARM Mensajero/Trabajador. El script de Colab optimiza entradas de Blogger (JSON-LD, meta, H2). |
-| `luis-claude-code-n8n` | `.mcp.json` (servidor `ruflo`), `.claude/settings.json`, y `integraciones/openshorts/` + skill `.claude/skills/openshorts/` | **Mi base para Claude Code.** Aquí vive el kit de OpenShorts (clips verticales) aislado del n8n. |
+| `luis-claude-code-n8n` | `.mcp.json` (servidor `ruflo`), `.claude/settings.json`, y `integraciones/potencia/` (scripts de solo lectura del VPS) | **Mi base para Claude Code.** Aquí viven estos scripts y este prompt. |
 
 ### n8n: 143 flujos, **39 ACTIVOS** (104 inactivos). Los activos (INTOCABLES), por grupo
 - **Blogs/SEO:** Veterinario Guayaquil Luis, FLUJO VETERINARIO LUIS BLOGGER, Veterinario ECUADOR Y MUNDO, HURONES Blog Automático, HURONES temas embudo, SEO/AEO enriquecer entradas, AUTOMATIZA IA (publicación+aviso, ideas, silos, completar imágenes, v2), banco de imágenes (Canva→Drive), imágenes para artículo, reponer TUTORIALES.
@@ -24,14 +24,16 @@ Soy Luis Arturo García, médico veterinario (NO programador). Mi n8n está en p
 
 ### Mi VPS (inventario real, 22-nov-2026)
 Contabo, Ubuntu 24.04, **4 CPU, 7.8 GB RAM (≈3 GB libres, SIN swap)**, 70 GB de disco libres. Docker: n8n (≈0.8 GB) + Caddy (80/443) en `/opt/n8n`; Evolution API (WhatsApp) + Postgres + Redis en `/opt/evolution` (puerto 8080 abierto al público); servicios `n8n-tts` y `n8n-stt` (puertos 8001/8002) en `/opt/voice-services`. LibreChat está apagado desde hace 2 semanas. Tiene ffmpeg, python3, node 24; no tiene yt-dlp. Pendiente: reinicio del sistema y 31 actualizaciones (NO reiniciar sin avisarme: tumba n8n).
-**Conclusión: este VPS NO aguanta correr OpenShorts localmente** (necesita 6+ GB RAM). Con 3 GB libres y sin swap, el sistema mataría n8n. No instalar aquí salvo que suba la RAM.
+**Conclusión: este VPS va justo de RAM. No instalar nada pesado aquí** (el sistema mataría n8n). Todo lo nuevo debe ser GRATIS y ligero (flujos de n8n, GitHub Actions, APIs con plan gratis).
+
+**REGLA DE COSTO: todo debe ser gratis. Nada de planes de pago ni servicios con tarjeta.**
 
 ## 2. REGLAS INNEGOCIABLES ("la camioneta funciona")
 1. **Cero cambios a los 39 flujos activos y sus sub-flujos:** no editar, renombrar, desactivar, ejecutar manualmente, borrar, ni cambiar sus horarios, hojas, credenciales o datos. Antes de empezar, guarda la lista (id+nombre+activo) y al terminar compárala: debe ser idéntica.
-2. **Todo lo nuevo es ADITIVO:** flujos nuevos con prefijo `POTENCIA - ` u `OPENSHORTS - `, credenciales/hojas/carpetas nuevas con ese mismo prefijo. Para usar algo existente, **llámalo** (Execute Workflow a los sub-flujos de publicación/IA gratis), no lo copies ni lo modifiques.
+2. **Todo lo nuevo es ADITIVO:** flujos nuevos con prefijo `POTENCIA - `, credenciales/hojas/carpetas nuevas con ese mismo prefijo. Para usar algo existente, **llámalo** (Execute Workflow a los sub-flujos de publicación/IA gratis), no lo copies ni lo modifiques.
 3. **No escribir en hojas, colas ni carpetas que usan los flujos activos.** Usa hojas/colas propias `POTENCIA - ...`. Solo LEER lo existente.
 4. **No tocar el servidor de n8n** (ni su Docker, ni sus puertos, ni su base de datos). Todo lo nuevo corre en contenedores aparte con tope de CPU/RAM y **fuera del horario pico** (mis flujos corren cada 5–20 min). Si el VPS va justo, reduce lo nuevo, nunca lo existente.
-5. **Interruptor de seguridad:** cada flujo nuevo debe poder apagarse sin afectar nada más. Revertir = desactivar/borrar los `POTENCIA - `/`OPENSHORTS - ` y `docker compose down`.
+5. **Interruptor de seguridad:** cada flujo nuevo debe poder apagarse sin afectar nada más. Revertir = desactivar/borrar los `POTENCIA - `.
 6. **Antes de crear algo nuevo, revisa que no exista ya** (tengo 143 flujos). Nada de "mil flujos": solo lo que de verdad suma ingresos. Máximo los 3 de la sección 3.
 7. **Secretos:** nunca imprimas ni guardes claves en repos. En `luisarturo88-n8n-agentes-comunicacion/contexto/` hay una API key de n8n en un repo PÚBLICO: no la uses, avísame que la revoque y trabaja con el MCP de n8n o una key nueva.
 8. **Contenido:** solo mis videos/textos o con licencia (CC/permiso). Sin consejos médicos peligrosos. Respeta límites diarios por plataforma y varía títulos/portadas (las plataformas penalizan contenido repetitivo y pueden desmonetizar).
@@ -39,11 +41,11 @@ Contabo, Ubuntu 24.04, **4 CPU, 7.8 GB RAM (≈3 GB libres, SIN swap)**, 70 GB d
 
 ## 3. Potenciadores (en este orden; lo demás NO)
 1. **`POTENCIA - Vigilante`** (solo lectura sobre lo existente): cada 30 min revisa las ejecuciones de los 39 activos vía API de n8n; si uno falla o deja de correr, me avisa por Telegram (@DrLuisArturoGarciaBot) con nombre y causa, y un resumen diario corto. **No reintenta ni arregla** flujos activos (un reintento puede duplicar publicaciones).
-2. **`OPENSHORTS - Recortar largos`**: toma los videos largos que ya producen VIDEO LARGO 10 MIN, TUTORIALES CASA y CASOS CLÍNICOS (averigua dónde quedan con `get_workflow_details`, solo lectura), los pasa por OpenShorts **sin instalarlo en el VPS**: usando OpenShorts hospedado (openshorts.app, API con clave `osk_`, plan gratis para probar, desde $12/mes) o un runner gratis de GitHub Actions; en horario nocturno, 1 video a la vez, y publica los clips **automáticamente, sin pedirme aprobación**, reutilizando los sub-flujos existentes de publicación y una cola `POTENCIA - COLA`. Con tope diario, anti-duplicados y alerta al fallar.
+2. **`POTENCIA - Clips gratis`** (solo si es 100% gratis): sacar shorts de los videos largos que ya producen VIDEO LARGO 10 MIN, TUTORIALES CASA y CASOS CLÍNICOS usando **solo** ffmpeg en un GitHub Action gratis (repo `dr-garcia-videos`, como ya hago con `render.yml`, agregando un workflow NUEVO sin tocar `render.yml`) y Gemini gratis para elegir los momentos. Publicar con los sub-flujos existentes, con tope diario y anti-duplicados. **Prohibido cualquier servicio de pago** (si algo cuesta, no se hace y me avisas).
 3. **(Solo si 1 y 2 funcionan una semana)** `POTENCIA - Medidor`: reporte semanal en Telegram de qué videos/nichos rinden más (vistas, clics) para que lo mejor se alimente más.
 
 ## 4. Cómo trabajamos
-- Primero dame **un solo comando de SSH de solo lectura**: `bash integraciones/openshorts/inventario_vps.sh` (no instala ni cambia nada, oculta claves). Yo te pego lo que imprime. Ya lo hizo: ver "Mi VPS". Siguiente comando de solo lectura: `bash integraciones/openshorts/seguridad_vps.sh`.
+- Primero dame **un solo comando de SSH de solo lectura**: `bash integraciones/potencia/inventario_vps.sh` (no instala ni cambia nada, oculta claves). Yo te pego lo que imprime. Ya lo hizo: ver "Mi VPS". Siguiente comando de solo lectura: `bash integraciones/potencia/seguridad_vps.sh`.
 - Después, cuando necesites que yo ejecute algo, dame **un bloque listo para pegar** y espera mi respuesta. No uses jerga.
 - Al terminar cada paso, resumen en español sencillo: qué creaste, qué NO tocaste, cómo revertir.
 
