@@ -22,6 +22,10 @@ Soy Luis Arturo García, médico veterinario (NO programador). Mi n8n está en p
 - **Otros:** Pitazos Cripto (Telegram), Trading (2 sub-flujos).
 - **Credenciales existentes (solo reutilizar por ID, jamás modificar):** YouTube x2 (incl. "hurones"), TikTok x2, Facebook Graph x3 + Facebook/Instagram/Threads, LinkedIn x2, X, Telegram x3 (incl. @DrLuisArturoGarciaBot), Gmail, Drive, Sheets, Blogger, Canva, DeepSeek, Gemini x2, Cohere, OpenAI x3, HuggingFace, Supabase, Notion, WhatsApp Business, Vapi, Google TTS y otras.
 
+### Mi VPS (inventario real, 22-nov-2026)
+Contabo, Ubuntu 24.04, **4 CPU, 7.8 GB RAM (≈3 GB libres, SIN swap)**, 70 GB de disco libres. Docker: n8n (≈0.8 GB) + Caddy (80/443) en `/opt/n8n`; Evolution API (WhatsApp) + Postgres + Redis en `/opt/evolution` (puerto 8080 abierto al público); servicios `n8n-tts` y `n8n-stt` (puertos 8001/8002) en `/opt/voice-services`. LibreChat está apagado desde hace 2 semanas. Tiene ffmpeg, python3, node 24; no tiene yt-dlp. Pendiente: reinicio del sistema y 31 actualizaciones (NO reiniciar sin avisarme: tumba n8n).
+**Conclusión: este VPS NO aguanta correr OpenShorts localmente** (necesita 6+ GB RAM). Con 3 GB libres y sin swap, el sistema mataría n8n. No instalar aquí salvo que suba la RAM.
+
 ## 2. REGLAS INNEGOCIABLES ("la camioneta funciona")
 1. **Cero cambios a los 39 flujos activos y sus sub-flujos:** no editar, renombrar, desactivar, ejecutar manualmente, borrar, ni cambiar sus horarios, hojas, credenciales o datos. Antes de empezar, guarda la lista (id+nombre+activo) y al terminar compárala: debe ser idéntica.
 2. **Todo lo nuevo es ADITIVO:** flujos nuevos con prefijo `POTENCIA - ` u `OPENSHORTS - `, credenciales/hojas/carpetas nuevas con ese mismo prefijo. Para usar algo existente, **llámalo** (Execute Workflow a los sub-flujos de publicación/IA gratis), no lo copies ni lo modifiques.
@@ -35,11 +39,11 @@ Soy Luis Arturo García, médico veterinario (NO programador). Mi n8n está en p
 
 ## 3. Potenciadores (en este orden; lo demás NO)
 1. **`POTENCIA - Vigilante`** (solo lectura sobre lo existente): cada 30 min revisa las ejecuciones de los 39 activos vía API de n8n; si uno falla o deja de correr, me avisa por Telegram (@DrLuisArturoGarciaBot) con nombre y causa, y un resumen diario corto. **No reintenta ni arregla** flujos activos (un reintento puede duplicar publicaciones).
-2. **`OPENSHORTS - Recortar largos`**: toma los videos largos que ya producen VIDEO LARGO 10 MIN, TUTORIALES CASA y CASOS CLÍNICOS (averigua dónde quedan con `get_workflow_details`, solo lectura), los pasa por OpenShorts (instalado aparte en `127.0.0.1:8100`, ver `integraciones/openshorts/`) en horario nocturno, 1 video a la vez, y publica los clips **automáticamente, sin pedirme aprobación**, reutilizando los sub-flujos existentes de publicación y una cola `POTENCIA - COLA`. Con tope diario, anti-duplicados y alerta al fallar.
+2. **`OPENSHORTS - Recortar largos`**: toma los videos largos que ya producen VIDEO LARGO 10 MIN, TUTORIALES CASA y CASOS CLÍNICOS (averigua dónde quedan con `get_workflow_details`, solo lectura), los pasa por OpenShorts **sin instalarlo en el VPS**: usando OpenShorts hospedado (openshorts.app, API con clave `osk_`, plan gratis para probar, desde $12/mes) o un runner gratis de GitHub Actions; en horario nocturno, 1 video a la vez, y publica los clips **automáticamente, sin pedirme aprobación**, reutilizando los sub-flujos existentes de publicación y una cola `POTENCIA - COLA`. Con tope diario, anti-duplicados y alerta al fallar.
 3. **(Solo si 1 y 2 funcionan una semana)** `POTENCIA - Medidor`: reporte semanal en Telegram de qué videos/nichos rinden más (vistas, clics) para que lo mejor se alimente más.
 
 ## 4. Cómo trabajamos
-- Primero dame **un solo comando de SSH de solo lectura**: `bash integraciones/openshorts/inventario_vps.sh` (no instala ni cambia nada, oculta claves). Yo te pego lo que imprime. Con eso decides si el VPS aguanta OpenShorts (necesita ~6 GB RAM y ~15 GB disco libres) y cómo conectarlo con n8n.
+- Primero dame **un solo comando de SSH de solo lectura**: `bash integraciones/openshorts/inventario_vps.sh` (no instala ni cambia nada, oculta claves). Yo te pego lo que imprime. Ya lo hizo: ver "Mi VPS". Siguiente comando de solo lectura: `bash integraciones/openshorts/seguridad_vps.sh`.
 - Después, cuando necesites que yo ejecute algo, dame **un bloque listo para pegar** y espera mi respuesta. No uses jerga.
 - Al terminar cada paso, resumen en español sencillo: qué creaste, qué NO tocaste, cómo revertir.
 

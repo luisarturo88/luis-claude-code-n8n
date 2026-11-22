@@ -8,6 +8,11 @@ if [ ! -d src/.git ]; then
 fi
 git -C src fetch --depth=1 origin "$PIN" && git -C src checkout -q "$PIN"
 [ -f .env ] || cp .env.example .env
+# GUARDA DE SEGURIDAD: OpenShorts usa varios GB de RAM; si el servidor no tiene de sobra, el sistema puede matar n8n.
+DISP=$(awk '/MemAvailable/ {printf "%d", $2/1024/1024}' /proc/meminfo)
+if [ "${DISP:-0}" -lt 8 ] && [ "${FORZAR:-0}" != "1" ]; then
+  echo "ABORTADO: solo hay ${DISP} GB de RAM disponible (se necesitan 8+). Instalar aqui podria tumbar n8n."; exit 1
+fi
 echo "Disco libre:"; df -h . | tail -1; free -h | head -2
 docker compose build
 docker compose up -d
